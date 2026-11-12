@@ -1,0 +1,32 @@
+name: glowhaus_workspace
+publish_to: none
+
+environment:
+  sdk: ^3.13.5
+
+workspace:
+  - apps/glowhaus
+  - packages/glowhaus_domain
+  - packages/glowhaus_transport
+  - packages/glowhaus_ui
+  - widgetbook
+
+dev_dependencies:
+  melos: ^8.10.1
+  very_good_analysis: ^11.0.0
+
+# Melos (7+) reads its configuration from here (melos.yaml is no longer used).
+melos:
+  scripts:
+    analyze:
+      description: Static analysis for the whole workspace.
+      run: dart analyze --fatal-infos .
+    format:
+      description: Check formatting.
+      run: dart format --set-exit-if-changed .
+    test:
+      description: Run tests in every package that has a test directory.
+      run: melos exec --dir-exists=test --fail-fast -- flutter test
+    codegen:
+      description: Run build_runner where it is a dependency.
+      run: melos exec --depends-on=build_runner -- dart run build_runner build --delete-conflicting-outputs

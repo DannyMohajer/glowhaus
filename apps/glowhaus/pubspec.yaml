@@ -1,0 +1,22 @@
+name: glowhaus
+description: Glowhaus smart home demo app.
+publish_to: none
+version: 0.1.0+1
+resolution: workspace
+
+environment:
+  sdk: ^3.13.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+  glowhaus_domain: ^0.1.0
+  glowhaus_transport: ^0.1.0
+  glowhaus_ui: ^0.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: false

@@ -1,0 +1,14 @@
+name: glowhaus_transport
+description: Glowhaus Transport interface and the in-memory SimulatedTransport. Pure Dart.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.5
+
+dependencies:
+  glowhaus_domain: ^0.1.0
+
+dev_dependencies:
+  test: ^1.25.6

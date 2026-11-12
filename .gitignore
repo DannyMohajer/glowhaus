@@ -1,0 +1,9 @@
+.dart_tool/
+.idea/
+.vscode/
+*.iml
+build/
+coverage/
+.DS_Store
+.flutter-plugins-dependencies
+**/test/**/failures/
