@@ -5,11 +5,25 @@ device control with optimistic UI, a capability-based device model, a
 documented MQTT protocol, adaptive phone / tablet layouts, light and dark
 themes with a swappable accent, and English, Persian (RTL) and Turkish.
 
-> Status: milestone 1 (foundation) is in progress. See the [roadmap](docs/roadmap.md).
+> Status: milestone 1 (foundation) is done. See the [roadmap](docs/roadmap.md).
+
+**Live demo:** once GitHub Pages is enabled for this repository, CI publishes
+the app at `https://<owner>.github.io/glowhaus/` and the component catalog at
+`https://<owner>.github.io/glowhaus/widgetbook/`. Every device is simulated in
+the browser, so tap anything; Settings → Simulation adds network delay and
+failures to show optimistic updates and rollback.
 
 ## Screenshots
 
-_Coming with the first UI milestone._
+| Dashboard | Dark | Persian (RTL) | Thermostat |
+|---|---|---|---|
+| ![Dashboard](docs/screenshots/dashboard-phone-light.png) | ![Dashboard, dark](docs/screenshots/dashboard-phone-dark.png) | ![Dashboard in Persian](docs/screenshots/dashboard-phone-light-fa.png) | ![Thermostat, dark](docs/screenshots/thermostat-phone-dark.png) |
+
+Wide windows show rooms, room and device side by side:
+
+![Desktop, three panes](docs/screenshots/thermostat-desktop-light.png)
+
+![Tablet in Persian, dark](docs/screenshots/thermostat-tablet-dark-fa.png)
 
 ## Features
 
@@ -67,6 +81,42 @@ dart run melos run analyze
 ```bash
 dart run melos run test
 ```
+
+Web build (app + Widgetbook in `build/site`, with a size report):
+
+```bash
+tool/build_web.sh
+```
+
+Screenshots of a served build (headless Chrome, into `build/screenshots`):
+
+```bash
+python3 -m http.server 8100 --directory build/site
+```
+
+```bash
+node tool/screenshots.mjs
+```
+
+### Embedding
+
+The web build is made to be embedded, for example in a portfolio page:
+
+```html
+<iframe src="https://<owner>.github.io/glowhaus/" title="Glowhaus demo"
+        style="width: 390px; height: 844px; border: 0; border-radius: 28px"
+        loading="lazy"></iframe>
+```
+
+It uses hash URLs, so reloads inside the frame never 404, and it loads
+nothing from third-party hosts.
+
+## CI
+
+`.github/workflows/ci.yml`: format, analyze (zero infos), a check that
+regenerating code and translations changes nothing, all tests with goldens on
+macOS, the web build with its size table in the job summary, and a GitHub
+Pages deploy from `main`.
 
 ## Architecture
 

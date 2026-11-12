@@ -97,6 +97,7 @@ mode, accent, locale, reduce motion, simulation knobs) and `ConnectionCubit`
 ```dart
 abstract interface class Transport {
   /// disconnected, connecting, connected, reconnecting
+  TransportStatus get currentStatus;
   Stream<TransportStatus> get status;
 
   /// DeviceAnnounced | DeviceStateChanged | DeviceAvailabilityChanged | DeviceRemoved
@@ -108,6 +109,8 @@ abstract interface class Transport {
   /// Completes with acked, failed(error) or timedOut. Never throws for
   /// device-level failures.
   Future<CommandResult> send(DeviceCommand command, {Duration timeout});
+
+  Future<void> dispose();
 }
 ```
 
@@ -181,15 +184,53 @@ behave identically on every form factor.
 
 ## Web build budget
 
-The web build is embedded in a portfolio page, so size is a feature:
+The web build is embedded in a portfolio page, so size is a feature.
+`tool/build_web.sh` builds the app and Widgetbook into one static site, and
+`tool/web_size_report.sh` prints what a first visit downloads (CI writes the
+table into the job summary, so a regression shows up in review).
 
-- Fonts are bundled as variable fonts (one file per family instead of one per
-  weight). Vazirmatn is loaded on demand the first time Persian is selected,
-  not at startup.
-- One icon package (Lucide), tree-shaken to the glyphs actually used.
-- No runtime font or asset downloads from third parties.
-- Renderer choice and measured sizes are recorded in the CI step that builds
-  the web release, so a regression shows up in review.
+**Renderer: Wasm (skwasm) with JS + CanvasKit fallback** (`--wasm`). The HTML
+renderer no longer exists, so the choice is between CanvasKit (JS) and skwasm
+(Wasm). Measured at the end of milestone 1 (gzip, as GitHub Pages serves it):
+
+| First visit | Gzip |
+|---|---:|
+| Wasm + skwasm (Chrome, Edge) | ~2.5 MB |
+| Wasm + skwasm_heavy (other WasmGC browsers) | ~3.3 MB |
+| JS + CanvasKit, Chromium build (`--wasm` not used) | ~2.9 MB |
+| JS + CanvasKit, full build (fallback for older browsers) | ~3.8 MB |
+
+skwasm is the smallest path on the browsers most visitors use and it starts
+faster; browsers without WasmGC fall back to JS automatically. It runs
+single-threaded because GitHub Pages cannot send cross-origin isolation
+headers, which is fine for this UI.
+
+Other decisions:
+
+- **No third-party downloads** (`--no-web-resources-cdn`): CanvasKit, skwasm
+  and the engine's Roboto fallback font are served from the same site, not
+  from Google's CDN. Browsers partition caches per site, so the CDN would not
+  have been warm anyway.
+- **Fonts**: one variable file per family, subset to the scripts we ship
+  (`packages/glowhaus_ui/tool/subset_fonts.sh`): Manrope 87 KB (was 161 KB),
+  Vazirmatn 169 KB (was 236 KB). Vazirmatn is loaded only when Persian is
+  selected. Icons are one vendored Lucide font, tree-shaken to ~23 KB.
+- **NOTICES** (1.4 MB raw, ~110 KB gzip) is only fetched if a license page is
+  opened, which the app does not do at startup. It is left intact; trimming
+  it would mean dropping license texts we are required to ship.
+- `MaterialIcons`/`CupertinoIcons` "expected to find fonts" warning: the
+  framework references those icons in widgets we never show, and the app sets
+  `uses-material-design: false` to avoid shipping the font. Expected.
+- Hash URLs (go_router's default on web) so a reload inside the iframe or on
+  Pages never hits a 404.
+
+## Names and translation
+
+Names are data. A room, device or scene shows its `name` exactly as typed, in
+every language. Seeded defaults (the demo home, a device's factory name) also
+carry a `nameKey` (channels: `labelKey`); the app translates keys it knows and
+otherwise shows the name. Renaming clears the key, so a user-entered name is
+never translated, even if it happens to match a default.
 
 ## Testing strategy
 

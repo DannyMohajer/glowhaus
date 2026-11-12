@@ -1,6 +1,6 @@
 # Roadmap
 
-## 1. Foundation (in progress)
+## 1. Foundation (done)
 
 Monorepo, design system + Widgetbook, capability-based domain model, protocol
 spec, `SimulatedTransport` with a seeded demo home, core screens (welcome,
