@@ -2,3 +2,9 @@
 ///
 /// Pure Dart. See `docs/architecture.md`.
 library;
+
+export 'src/demo/demo_home.dart';
+export 'src/simulated/simulated_device.dart' show SimulatedDevice;
+export 'src/simulated/simulated_transport.dart';
+export 'src/simulated/simulation_config.dart';
+export 'src/transport.dart';
