@@ -10,7 +10,17 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  lucide_icons_flutter: ^4.0.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+flutter:
+  assets:
+    # Loaded on demand the first time Persian is used.
+    - assets/fonts/Vazirmatn-Variable.ttf
+  fonts:
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/Manrope-Variable.ttf
