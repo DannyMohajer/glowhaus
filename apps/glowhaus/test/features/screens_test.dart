@@ -49,6 +49,30 @@ void main() {
       expect(find.text('Movie night'), findsOneWidget);
     });
 
+    testWidgets('scrolled to the end, the last card clears the navigation', (
+      tester,
+    ) async {
+      // A phone with a system gesture bar / button bar below the app.
+      tester.view.padding = const FakeViewPadding(bottom: 48);
+      tester.view.viewPadding = const FakeViewPadding(bottom: 48);
+      await startHome();
+      await tester.pumpApp(location: Routes.home, home: home);
+
+      // Content scrolls behind the floating bar, so the list's bottom
+      // padding must cover the bar plus the system inset, plus a gap.
+      final nav = find.byType(GlowBottomNav);
+      final list = tester.widget<ListView>(find.byType(ListView).first);
+      final padding = list.padding!.resolve(TextDirection.ltr);
+      final covered = phone.height - tester.getRect(nav).top;
+      expect(padding.bottom, greaterThanOrEqualTo(covered + GlowSpace.x4));
+
+      // The pill is as wide as its items, not the whole screen.
+      final pill = find
+          .descendant(of: nav, matching: find.byType(Container))
+          .first;
+      expect(tester.getSize(pill).width, lessThan(phone.width * 0.75));
+    });
+
     testWidgets('room chips filter the cards', (tester) async {
       await startHome();
       await tester.pumpApp(location: Routes.home, home: home);

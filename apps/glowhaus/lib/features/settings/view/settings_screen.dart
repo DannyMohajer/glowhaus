@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glowhaus/features/settings/cubit/settings_cubit.dart';
 import 'package:glowhaus/features/settings/cubit/settings_state.dart';
+import 'package:glowhaus/features/shared/pane.dart';
 import 'package:glowhaus/l10n/generated/app_localizations.dart';
 import 'package:glowhaus_ui/glowhaus_ui.dart';
 
@@ -12,7 +13,6 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final cubit = context.read<SettingsCubit>();
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return SafeArea(
       bottom: false,
@@ -26,7 +26,7 @@ class SettingsScreen extends StatelessWidget {
                 GlowSpace.x5,
                 GlowSpace.x5,
                 GlowSpace.x5,
-                GlowSpace.x5 + bottomInset,
+                scrollBottomPadding(context),
               ),
               children: [
                 Semantics(

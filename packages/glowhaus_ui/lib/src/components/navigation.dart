@@ -13,6 +13,9 @@ class GlowNavItem {
 }
 
 /// Floating pill navigation for phones. The selected item shows its label.
+///
+/// The pill is as wide as its items and centred; it only reaches the screen
+/// edges when a long label needs the room (and then ellipsizes).
 class GlowBottomNav extends StatelessWidget {
   const new({
     required this.items,
@@ -35,28 +38,32 @@ class GlowBottomNav extends StatelessWidget {
         GlowSpace.x4,
         GlowSpace.x3,
       ),
-      child: Container(
-        padding: const EdgeInsets.all(GlowSpace.x2),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: GlowRadius.pillAll,
-          border: colors.isDark ? Border.all(color: colors.border) : null,
-          boxShadow: glowFloatingShadow(context),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            for (final (index, item) in items.indexed)
-              Flexible(
-                flex: index == currentIndex ? 2 : 1,
-                child: _NavPill(
-                  item: item,
-                  selected: index == currentIndex,
-                  showLabel: index == currentIndex,
-                  onTap: () => onTap(index),
+      child: Center(
+        heightFactor: 1,
+        child: Container(
+          padding: const EdgeInsets.all(GlowSpace.x2),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: GlowRadius.pillAll,
+            border: colors.isDark ? Border.all(color: colors.border) : null,
+            boxShadow: glowFloatingShadow(context),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final (index, item) in items.indexed) ...[
+                if (index > 0) const SizedBox(width: GlowSpace.x2),
+                Flexible(
+                  child: _NavPill(
+                    item: item,
+                    selected: index == currentIndex,
+                    showLabel: index == currentIndex,
+                    onTap: () => onTap(index),
+                  ),
                 ),
-              ),
-          ],
+              ],
+            ],
+          ),
         ),
       ),
     );

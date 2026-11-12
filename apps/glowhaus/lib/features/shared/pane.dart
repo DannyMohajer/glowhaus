@@ -6,8 +6,10 @@ import 'package:go_router/go_router.dart';
 /// Space kept free at the bottom of scrolling content so the floating
 /// navigation bar on phones never covers the last item.
 double scrollBottomPadding(BuildContext context) =>
-    GlowSpace.x6 +
-    (GlowWindowSize.of(context) == GlowWindowSize.compact ? 88 : 0);
+    // On phones the body extends behind the floating navigation; the
+    // Scaffold reports its height plus the system inset (gesture bar, home
+    // indicator) as bottom padding. On wide layouts this is just the inset.
+    MediaQuery.paddingOf(context).bottom + GlowSpace.x6;
 
 /// Title row of a pane, with a back button when the pane has no master pane
 /// next to it.
