@@ -7,11 +7,11 @@ themes with a swappable accent, and English, Persian (RTL) and Turkish.
 
 > Status: milestone 1 (foundation) is done. See the [roadmap](docs/roadmap.md).
 
-**Live demo:** once GitHub Pages is enabled for this repository, CI publishes
-the app at `https://<owner>.github.io/glowhaus/` and the component catalog at
-`https://<owner>.github.io/glowhaus/widgetbook/`. Every device is simulated in
-the browser, so tap anything; Settings → Simulation adds network delay and
-failures to show optimistic updates and rollback.
+**Live demo:** [dannymohajer.github.io/glowhaus](https://dannymohajer.github.io/glowhaus/)
+· component catalog: [Widgetbook](https://dannymohajer.github.io/glowhaus/widgetbook/).
+Every device is simulated in the browser, so tap anything; Settings →
+Simulation adds network delay and failures to show optimistic updates and
+rollback.
 
 ## Screenshots
 
@@ -103,7 +103,7 @@ node tool/screenshots.mjs
 The web build is made to be embedded, for example in a portfolio page:
 
 ```html
-<iframe src="https://<owner>.github.io/glowhaus/" title="Glowhaus demo"
+<iframe src="https://dannymohajer.github.io/glowhaus/" title="Glowhaus demo"
         style="width: 390px; height: 844px; border: 0; border-radius: 28px"
         loading="lazy"></iframe>
 ```
