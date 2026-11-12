@@ -53,8 +53,42 @@ void main() {
         greaterThanOrEqualTo(4.5),
       );
     }
-    // Dark theme secondary text also passes.
+    // Secondary text on cards.
+    expect(
+      _contrast(light.textMuted, light.surface),
+      greaterThanOrEqualTo(4.5),
+    );
+    expect(
+      _contrast(light.textMuted, light.surfaceAlt),
+      greaterThanOrEqualTo(4.5),
+    );
     expect(_contrast(dark.textMuted, dark.surface), greaterThanOrEqualTo(4.5));
+  });
+
+  test('small text on accent uses accentStrong at 4.5:1 or better', () {
+    expect(light.accentStrong, const Color(0xFFC2410C));
+    expect(dark.accentStrong, const Color(0xFFC2410C));
+    for (final accent in const [
+      Color(0xFF2F6BFF),
+      Color(0xFF1F9D6B),
+      Color(0xFF7A4DFF),
+      Color(0xFFE5387B),
+      Color(0xFFFFC24A),
+    ]) {
+      for (final colors in [
+        GlowhausColors.light(accent: accent),
+        GlowhausColors.dark(accent: accent),
+      ]) {
+        expect(
+          _contrast(colors.onAccent, colors.accentStrong),
+          greaterThanOrEqualTo(4.5),
+          reason: '$accent',
+        );
+      }
+    }
+    expect(_contrast(light.onAccent, light.accentStrong), greaterThan(5));
+    // Plain accent is for icons and large text only: 3:1.
+    expect(_contrast(light.onAccent, light.accent), greaterThanOrEqualTo(3));
   });
 
   test('lerp reaches both ends', () {

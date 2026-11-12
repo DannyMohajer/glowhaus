@@ -200,7 +200,8 @@ class RoomQuickControl extends StatelessWidget {
             bottom: GlowSpace.x2,
           ),
           decoration: BoxDecoration(
-            color: on ? colors.accent : colors.surfaceAlt,
+            // Small text sits on this, so it uses the strong accent.
+            color: on ? colors.accentStrong : colors.surfaceAlt,
             borderRadius: GlowRadius.pillAll,
           ),
           child: Row(

@@ -16,6 +16,7 @@ class GlowhausColors extends ThemeExtension<GlowhausColors> {
     required this.accent,
     required this.onAccent,
     required this.accentSoft,
+    required this.accentStrong,
     required this.inverse,
     required this.onInverse,
     required this.heat,
@@ -35,7 +36,7 @@ class GlowhausColors extends ThemeExtension<GlowhausColors> {
     surfaceAlt: const Color(0xFFF7F7F5),
     border: const Color(0xFFE6E6E3),
     text: const Color(0xFF111111),
-    textMuted: const Color(0xFF7A7A7A),
+    textMuted: const Color(0xFF707070),
     textFaint: const Color(0xFFB5B5B2),
     accent: accent,
     onAccent: const Color(0xFFFFFFFF),
@@ -45,6 +46,7 @@ class GlowhausColors extends ThemeExtension<GlowhausColors> {
             accent.withValues(alpha: 0.14),
             const Color(0xFFFFFFFF),
           ),
+    accentStrong: _strong(accent, defaultAccentLight),
     inverse: const Color(0xFF111111),
     onInverse: const Color(0xFFFFFFFF),
     heat: const Color(0xFFFF5A1F),
@@ -74,6 +76,7 @@ class GlowhausColors extends ThemeExtension<GlowhausColors> {
             accent.withValues(alpha: 0.20),
             const Color(0xFF1C1C1C),
           ),
+    accentStrong: _strong(accent, defaultAccentDark),
     inverse: const Color(0xFFF2F2F0),
     onInverse: const Color(0xFF111111),
     heat: const Color(0xFFFF6A2E),
@@ -88,6 +91,18 @@ class GlowhausColors extends ThemeExtension<GlowhausColors> {
 
   static const Color defaultAccentLight = Color(0xFFFF5A1F);
   static const Color defaultAccentDark = Color(0xFFFF6A2E);
+  static const Color defaultAccentStrong = Color(0xFFC2410C);
+
+  /// A darker accent on which white small text reaches 4.5:1.
+  static Color _strong(Color accent, Color defaultAccent) {
+    if (accent == defaultAccent) return defaultAccentStrong;
+    var hsl = HSLColor.fromColor(accent);
+    while (hsl.lightness > 0.05 &&
+        1.05 / (hsl.toColor().computeLuminance() + 0.05) < 4.5) {
+      hsl = hsl.withLightness(hsl.lightness - 0.02);
+    }
+    return hsl.toColor();
+  }
 
   final Brightness brightness;
   final Color bg;
@@ -102,6 +117,10 @@ class GlowhausColors extends ThemeExtension<GlowhausColors> {
   final Color accent;
   final Color onAccent;
   final Color accentSoft;
+
+  /// Background for small text on accent (white text, at least 4.5:1).
+  /// Plain [accent] is only for icons and large text.
+  final Color accentStrong;
 
   /// Black pills in light, near-white pills in dark.
   final Color inverse;
@@ -122,6 +141,7 @@ class GlowhausColors extends ThemeExtension<GlowhausColors> {
     Color? accent,
     Color? onAccent,
     Color? accentSoft,
+    Color? accentStrong,
   }) => GlowhausColors(
     brightness: brightness,
     bg: bg,
@@ -134,6 +154,7 @@ class GlowhausColors extends ThemeExtension<GlowhausColors> {
     accent: accent ?? this.accent,
     onAccent: onAccent ?? this.onAccent,
     accentSoft: accentSoft ?? this.accentSoft,
+    accentStrong: accentStrong ?? this.accentStrong,
     inverse: inverse,
     onInverse: onInverse,
     heat: heat,
@@ -162,6 +183,7 @@ class GlowhausColors extends ThemeExtension<GlowhausColors> {
       accent: mix(accent, other.accent),
       onAccent: mix(onAccent, other.onAccent),
       accentSoft: mix(accentSoft, other.accentSoft),
+      accentStrong: mix(accentStrong, other.accentStrong),
       inverse: mix(inverse, other.inverse),
       onInverse: mix(onInverse, other.onInverse),
       heat: mix(heat, other.heat),

@@ -23,6 +23,11 @@ enum GlowTone { surface, inverse, accent, ghost }
   };
 }
 
+/// Button labels are 20 px bold: large text, so white on the accent passes
+/// the 3:1 large-text contrast requirement.
+TextStyle _buttonLabel(BuildContext context, Color color) =>
+    context.type.heading.weight(700).copyWith(fontSize: 20, color: color);
+
 /// The big two-line greeting: first line in text colour, second line faint.
 class GreetingHeader extends StatelessWidget {
   const new({
@@ -218,9 +223,7 @@ class GlowButton extends StatelessWidget {
                   maxLines: 2,
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
-                  style: context.type.heading
-                      .weight(700)
-                      .copyWith(color: foreground),
+                  style: _buttonLabel(context, foreground),
                 ),
               ),
               if (icon != null) ...[
@@ -273,12 +276,7 @@ class GlowFab extends StatelessWidget {
             Icon(icon, size: GlowSize.iconLarge, color: colors.onAccent),
             if (label != null) ...[
               const SizedBox(width: GlowSpace.x2),
-              Text(
-                label!,
-                style: context.type.heading
-                    .weight(700)
-                    .copyWith(color: colors.onAccent),
-              ),
+              Text(label!, style: _buttonLabel(context, colors.onAccent)),
             ],
           ],
         ),
