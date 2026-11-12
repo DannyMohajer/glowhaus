@@ -6,9 +6,9 @@ import 'package:glowhaus_ui/glowhaus_ui.dart';
 import 'support.dart';
 
 const _nav = [
-  GlowNavItem(icon: LucideIcons.house, label: 'Home'),
-  GlowNavItem(icon: LucideIcons.layoutGrid, label: 'Rooms'),
-  GlowNavItem(icon: LucideIcons.settings, label: 'Settings'),
+  GlowNavItem(icon: GlowIcons.house, label: 'Home'),
+  GlowNavItem(icon: GlowIcons.layoutGrid, label: 'Rooms'),
+  GlowNavItem(icon: GlowIcons.settings, label: 'Settings'),
 ];
 
 void main() {
@@ -68,12 +68,12 @@ void main() {
             children: [
               GlowChip(label: 'All', onTap: () {}),
               IconButtonRound(
-                icon: LucideIcons.bell,
+                icon: GlowIcons.bell,
                 semanticLabel: 'Notifications',
                 onTap: () {},
               ),
               RoomQuickControl(
-                icon: LucideIcons.lamp,
+                icon: GlowIcons.lamp,
                 label: 'Lamp',
                 on: true,
                 onTap: () {},
@@ -102,7 +102,7 @@ void main() {
             children: [
               GlowChip(label: 'Lights', selected: true, onTap: () {}),
               IconButtonRound(
-                icon: LucideIcons.bell,
+                icon: GlowIcons.bell,
                 semanticLabel: 'Notifications',
                 onTap: () {},
               ),
@@ -303,18 +303,18 @@ void main() {
         RoomCard(
           title: 'Living Room',
           subtitle: '4 devices · 2 on',
-          icon: LucideIcons.sofa,
+          icon: GlowIcons.sofa,
           meta: '20.8°',
           onTap: () => opened++,
           controls: [
             RoomQuickControl(
-              icon: LucideIcons.lamp,
+              icon: GlowIcons.lamp,
               label: 'Floor lamp',
               on: true,
               onTap: () => toggled++,
             ),
             const RoomQuickControl(
-              icon: LucideIcons.lightbulb,
+              icon: GlowIcons.lightbulb,
               label: 'Ceiling',
               on: false,
             ),

@@ -107,7 +107,7 @@ class _Gallery extends StatelessWidget {
             line1: s.hi,
             line2: s.welcome,
             trailing: IconButtonRound(
-              icon: LucideIcons.bell,
+              icon: GlowIcons.bell,
               semanticLabel: 'bell',
               onTap: () {},
             ),
@@ -133,18 +133,18 @@ class _Gallery extends StatelessWidget {
           RoomCard(
             title: s.room,
             subtitle: s.roomSummary,
-            icon: LucideIcons.sofa,
+            icon: GlowIcons.sofa,
             meta: '20.8°',
             onTap: () {},
             controls: [
               RoomQuickControl(
-                icon: LucideIcons.lamp,
+                icon: GlowIcons.lamp,
                 label: s.lamp,
                 on: true,
                 onTap: () {},
               ),
               RoomQuickControl(
-                icon: LucideIcons.lock,
+                icon: GlowIcons.lock,
                 label: s.lock,
                 on: false,
                 onTap: () {},
@@ -157,14 +157,14 @@ class _Gallery extends StatelessWidget {
               tile(
                 title: s.lamp,
                 subtitle: s.lampOn,
-                icon: LucideIcons.lamp,
+                icon: GlowIcons.lamp,
                 on: true,
               ),
               const SizedBox(width: GlowSpace.x3),
               tile(
                 title: s.lamp,
                 subtitle: s.off,
-                icon: LucideIcons.lamp,
+                icon: GlowIcons.lamp,
                 on: false,
               ),
             ],
@@ -175,7 +175,7 @@ class _Gallery extends StatelessWidget {
               tile(
                 title: s.lock,
                 subtitle: s.locked,
-                icon: LucideIcons.lock,
+                icon: GlowIcons.lock,
                 on: true,
                 pending: true,
               ),
@@ -183,7 +183,7 @@ class _Gallery extends StatelessWidget {
               tile(
                 title: s.lamp,
                 subtitle: s.offline,
-                icon: LucideIcons.lamp,
+                icon: GlowIcons.lamp,
                 on: true,
                 offline: true,
               ),
@@ -206,7 +206,7 @@ class _Gallery extends StatelessWidget {
           ),
           gap,
           ModeRow(
-            icon: LucideIcons.flame,
+            icon: GlowIcons.flame,
             title: s.heating,
             value: true,
             color: colors.heat,
@@ -214,7 +214,7 @@ class _Gallery extends StatelessWidget {
           ),
           const SizedBox(height: GlowSpace.x2),
           ModeRow(
-            icon: LucideIcons.snowflake,
+            icon: GlowIcons.snowflake,
             title: s.cooling,
             value: false,
             color: colors.cool,
@@ -235,19 +235,15 @@ class _Gallery extends StatelessWidget {
               Expanded(
                 child: GlowBottomNav(
                   items: [
-                    GlowNavItem(icon: LucideIcons.house, label: s.nav[0]),
-                    GlowNavItem(icon: LucideIcons.layoutGrid, label: s.nav[1]),
-                    GlowNavItem(icon: LucideIcons.settings, label: s.nav[2]),
+                    GlowNavItem(icon: GlowIcons.house, label: s.nav[0]),
+                    GlowNavItem(icon: GlowIcons.layoutGrid, label: s.nav[1]),
+                    GlowNavItem(icon: GlowIcons.settings, label: s.nav[2]),
                   ],
                   currentIndex: 0,
                   onTap: (_) {},
                 ),
               ),
-              GlowFab(
-                icon: LucideIcons.plus,
-                semanticLabel: 'add',
-                onTap: () {},
-              ),
+              GlowFab(icon: GlowIcons.plus, semanticLabel: 'add', onTap: () {}),
             ],
           ),
         ],

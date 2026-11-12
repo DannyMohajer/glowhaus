@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  lucide_icons_flutter: ^4.0.3
 
 dev_dependencies:
   flutter_test:
@@ -24,3 +23,6 @@ flutter:
     - family: Manrope
       fonts:
         - asset: assets/fonts/Manrope-Variable.ttf
+    - family: Lucide
+      fonts:
+        - asset: assets/fonts/Lucide.ttf

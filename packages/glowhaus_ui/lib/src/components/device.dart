@@ -3,8 +3,8 @@ import 'package:glowhaus_ui/src/components/basics.dart';
 import 'package:glowhaus_ui/src/components/pressable.dart';
 import 'package:glowhaus_ui/src/theme/glowhaus_theme.dart';
 import 'package:glowhaus_ui/src/tokens/dimens.dart';
+import 'package:glowhaus_ui/src/tokens/icons.dart';
 import 'package:glowhaus_ui/src/tokens/typography.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class _IconDisc extends StatelessWidget {
   const new({
@@ -307,8 +307,8 @@ class RoomCard extends StatelessWidget {
                   const SizedBox(width: GlowSpace.x1),
                   Icon(
                     Directionality.of(context) == TextDirection.rtl
-                        ? LucideIcons.chevronLeft
-                        : LucideIcons.chevronRight,
+                        ? GlowIcons.chevronLeft
+                        : GlowIcons.chevronRight,
                     size: GlowSize.icon,
                     color: colors.textMuted,
                   ),

@@ -19,7 +19,7 @@ void main() {
       child: DeviceTile(
         title: 'Floor lamp',
         subtitle: on ? 'On · 55%' : 'Off',
-        icon: LucideIcons.lamp,
+        icon: GlowIcons.lamp,
         on: on,
         offline: offline,
         pending: pending,
@@ -188,7 +188,7 @@ void main() {
           child: DeviceTile(
             title: 'Front door lock with a long name',
             subtitle: 'Locked · a long status line',
-            icon: LucideIcons.lock,
+            icon: GlowIcons.lock,
             on: true,
             onToggle: (_) {},
           ),

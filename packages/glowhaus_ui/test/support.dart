@@ -16,10 +16,9 @@ Future<void> loadGlowFonts() async {
   await (FontLoader(
     'packages/glowhaus_ui/Vazirmatn',
   )..addFont(file('assets/fonts/Vazirmatn-Variable.ttf'))).load();
-  await (FontLoader('packages/lucide_icons_flutter/Lucide')..addFont(
-        rootBundle.load('packages/lucide_icons_flutter/assets/lucide.ttf'),
-      ))
-      .load();
+  await (FontLoader(
+    'packages/glowhaus_ui/Lucide',
+  )..addFont(file('assets/fonts/Lucide.ttf'))).load();
 }
 
 /// A themed host for one component.
