@@ -98,6 +98,10 @@ ThermostatState _$ThermostatStateFromJson(Map<String, dynamic> json) =>
               $enumDecodeNullable(_$ThermostatActionEnumMap, v) ??
               ThermostatAction.idle,
         ),
+        lastActiveMode: $checkedConvert(
+          'lastActiveMode',
+          (v) => $enumDecodeNullable(_$ThermostatModeEnumMap, v),
+        ),
         $type: $checkedConvert('kind', (v) => v as String?),
       );
       return val;
@@ -109,6 +113,7 @@ Map<String, dynamic> _$ThermostatStateToJson(ThermostatState instance) =>
       'mode': _$ThermostatModeEnumMap[instance.mode]!,
       'fan': ?_$FanModeEnumMap[instance.fan],
       'action': _$ThermostatActionEnumMap[instance.action]!,
+      'lastActiveMode': ?_$ThermostatModeEnumMap[instance.lastActiveMode],
       'kind': instance.$type,
     };
 

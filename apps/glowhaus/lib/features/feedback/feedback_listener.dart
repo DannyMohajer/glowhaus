@@ -9,7 +9,7 @@ import 'package:glowhaus_ui/glowhaus_ui.dart';
 
 /// Explains a rolled-back command in plain words.
 String feedbackMessage(AppLocalizations l10n, CommandFailure failure) {
-  final device = localizedName(l10n, failure.device.name);
+  final device = failure.device.displayName(l10n);
   if (failure.timedOut) return l10n.feedbackTimedOut(device);
   return failure.code == ProtocolErrorCode.busy
       ? l10n.feedbackBusy(device)

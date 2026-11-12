@@ -105,10 +105,12 @@ changes, and in response to a query.
 | `device.id` | yes | Same as `{deviceId}` in topics |
 | `device.type` | yes | `light`, `switch`, `curtain`, `thermostat`, `outlet`, `lock`, `sensor`, `camera`. A presentation hint (icon, grouping). Unknown values are shown as a generic device |
 | `device.name` | yes | Default display name; the app may let the user rename |
+| `device.nameKey` | no | Translation key for the default `name` (e.g. `demo.floorLamp`). An app that knows the key shows its translation; otherwise it shows `name`. Once the user renames the device the app drops the key and shows the new name as typed, in every language |
 | `device.capabilities` | yes | At least one. See section 9 |
 | `capabilities[].id` | yes | Key used in `state` and `set` |
 | `capabilities[].kind` | yes | What the capability is |
 | `capabilities[].label` | no | Display label, e.g. per channel on a multi-gang switch |
+| `capabilities[].labelKey` | no | Translation key for the default `label`, same rules as `nameKey` |
 | `capabilities[].config` | no | Static limits and options, per kind |
 | `manufacturer`, `model`, `firmware` | no | Informational |
 | `roomHint` | no | Suggested room id. Room assignment is owned by the app |
@@ -327,6 +329,7 @@ it arrives, followed by a final state with `moving: false`.
 | `mode` | `off` \| `heat` \| `cool` \| `auto` | W | One of `config.modes` |
 | `fan` | `auto` \| `low` \| `medium` \| `high` | W | One of `config.fanModes`. Omitted if the device has no fan control |
 | `action` | `idle` \| `heating` \| `cooling` | | What the device is doing right now |
+| `lastActiveMode` | `heat` \| `cool` \| `auto` | | Optional. The last mode other than `off`; what an app's on/off switch turns back on. The device keeps it across restarts, so every app resumes the same mode |
 
 Config: `minSetpoint`, `maxSetpoint`, `step` (number, required), `modes`
 (required), `fanModes` (optional). The measured room temperature is a separate

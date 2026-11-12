@@ -81,9 +81,9 @@ class _DeviceView extends StatelessWidget {
           ),
           children: [
             PaneHeader(
-              title: localizedName(l10n, device.name),
+              title: device.displayName(l10n),
               subtitle: [
-                if (room != null) localizedName(l10n, room.name),
+                if (room != null) room.displayName(l10n),
                 deviceStatus(readings, device),
               ].join(' · '),
               backTo: backTo,
@@ -131,14 +131,12 @@ class _DeviceView extends StatelessWidget {
       final pending = view.isPending(id);
       switch (device.state[id]) {
         case OnOffState(:final on):
-          final label = capability.label;
+          final label = capability.displayLabel(l10n);
           sections.add(
             ModeRow(
               key: ValueKey('switch-$id'),
               icon: GlowIcons.power,
-              title: switches > 1 && label != null
-                  ? localizedName(l10n, label)
-                  : l10n.detailPower,
+              title: switches > 1 && label != null ? label : l10n.detailPower,
               subtitle: on ? l10n.stateOn : l10n.stateOff,
               value: on,
               pending: pending,

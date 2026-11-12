@@ -29,6 +29,7 @@ _DeviceDescriptor _$DeviceDescriptorFromJson(Map<String, dynamic> json) =>
         model: $checkedConvert('model', (v) => v as String?),
         firmware: $checkedConvert('firmware', (v) => v as String?),
         roomHint: $checkedConvert('roomHint', (v) => v as String?),
+        nameKey: $checkedConvert('nameKey', (v) => v as String?),
       );
       return val;
     });
@@ -43,6 +44,7 @@ Map<String, dynamic> _$DeviceDescriptorToJson(_DeviceDescriptor instance) =>
       'model': ?instance.model,
       'firmware': ?instance.firmware,
       'roomHint': ?instance.roomHint,
+      'nameKey': ?instance.nameKey,
     };
 
 const _$DeviceTypeEnumMap = {

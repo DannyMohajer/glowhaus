@@ -19,6 +19,7 @@ _Capability _$CapabilityFromJson(Map<String, dynamic> json) =>
           ),
         ),
         label: $checkedConvert('label', (v) => v as String?),
+        labelKey: $checkedConvert('labelKey', (v) => v as String?),
         config: $checkedConvert(
           'config',
           (v) => v as Map<String, dynamic>? ?? const <String, dynamic>{},
@@ -32,6 +33,7 @@ Map<String, dynamic> _$CapabilityToJson(_Capability instance) =>
       'id': instance.id,
       'kind': _$CapabilityKindEnumMap[instance.kind]!,
       'label': ?instance.label,
+      'labelKey': ?instance.labelKey,
       'config': instance.config,
     };
 

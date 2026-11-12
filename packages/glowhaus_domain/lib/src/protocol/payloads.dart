@@ -43,6 +43,9 @@ abstract class DeviceDescriptor with _$DeviceDescriptor {
     String? model,
     String? firmware,
     String? roomHint,
+
+    /// Optional translation key for the factory default [name].
+    String? nameKey,
   }) = _DeviceDescriptor;
 
   factory fromJson(Map<String, dynamic> json) =>

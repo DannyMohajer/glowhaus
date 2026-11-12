@@ -175,6 +175,29 @@ void main() {
   });
 
   group('applyTo', () {
+    test('a thermostat remembers its last active mode', () {
+      const cooling = CapabilityState.thermostat(
+        setpoint: 22,
+        mode: ThermostatMode.cool,
+        lastActiveMode: ThermostatMode.cool,
+      );
+      final off =
+          const CapabilityPatch.thermostat(mode: ThermostatMode.off)
+                  .applyTo(cooling)!
+              as ThermostatState;
+      expect(off.mode, ThermostatMode.off);
+      expect(off.lastActiveMode, ThermostatMode.cool);
+      final auto =
+          const CapabilityPatch.thermostat(mode: ThermostatMode.auto)
+                  .applyTo(off)!
+              as ThermostatState;
+      expect(auto.lastActiveMode, ThermostatMode.auto);
+      final setpointOnly =
+          const CapabilityPatch.thermostat(setpoint: 20).applyTo(auto)!
+              as ThermostatState;
+      expect(setpointOnly.lastActiveMode, ThermostatMode.auto);
+    });
+
     test('sets only the given fields', () {
       const state = CapabilityState.thermostat(
         setpoint: 21,

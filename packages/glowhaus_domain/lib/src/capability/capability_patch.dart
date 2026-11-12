@@ -129,6 +129,10 @@ sealed class CapabilityPatch with _$CapabilityPatch {
       setpoint: p.setpoint ?? s.setpoint,
       mode: p.mode ?? s.mode,
       fan: p.fan ?? s.fan,
+      lastActiveMode: switch (p.mode) {
+        null || ThermostatMode.off => s.lastActiveMode,
+        final mode => mode,
+      },
     ),
     (LockPatch(:final locked), final LockState s) => s.copyWith(locked: locked),
     _ => current,

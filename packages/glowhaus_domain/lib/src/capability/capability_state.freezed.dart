@@ -223,7 +223,7 @@ return camera(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( bool on)?  onOff,TResult Function( int level)?  brightness,TResult Function( int hue,  int saturation)?  color,TResult Function( int kelvin)?  colorTemperature,TResult Function( int position,  int target,  bool moving)?  position,TResult Function( double setpoint,  ThermostatMode mode,  FanMode? fan,  ThermostatAction action)?  thermostat,TResult Function( double watts,  double? energyKwh)?  powerMeter,TResult Function( bool locked,  bool jammed)?  lock,TResult Function( double celsius)?  temperatureSensor,TResult Function( double percent)?  humiditySensor,TResult Function( bool motion,  int? lastMotionAt)?  motionSensor,TResult Function( bool open)?  contactSensor,TResult Function( bool streaming)?  camera,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( bool on)?  onOff,TResult Function( int level)?  brightness,TResult Function( int hue,  int saturation)?  color,TResult Function( int kelvin)?  colorTemperature,TResult Function( int position,  int target,  bool moving)?  position,TResult Function( double setpoint,  ThermostatMode mode,  FanMode? fan,  ThermostatAction action,  ThermostatMode? lastActiveMode)?  thermostat,TResult Function( double watts,  double? energyKwh)?  powerMeter,TResult Function( bool locked,  bool jammed)?  lock,TResult Function( double celsius)?  temperatureSensor,TResult Function( double percent)?  humiditySensor,TResult Function( bool motion,  int? lastMotionAt)?  motionSensor,TResult Function( bool open)?  contactSensor,TResult Function( bool streaming)?  camera,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case OnOffState() when onOff != null:
 return onOff(_that.on);case BrightnessState() when brightness != null:
@@ -231,7 +231,7 @@ return brightness(_that.level);case ColorState() when color != null:
 return color(_that.hue,_that.saturation);case ColorTemperatureState() when colorTemperature != null:
 return colorTemperature(_that.kelvin);case PositionState() when position != null:
 return position(_that.position,_that.target,_that.moving);case ThermostatState() when thermostat != null:
-return thermostat(_that.setpoint,_that.mode,_that.fan,_that.action);case PowerMeterState() when powerMeter != null:
+return thermostat(_that.setpoint,_that.mode,_that.fan,_that.action,_that.lastActiveMode);case PowerMeterState() when powerMeter != null:
 return powerMeter(_that.watts,_that.energyKwh);case LockState() when lock != null:
 return lock(_that.locked,_that.jammed);case TemperatureSensorState() when temperatureSensor != null:
 return temperatureSensor(_that.celsius);case HumiditySensorState() when humiditySensor != null:
@@ -256,7 +256,7 @@ return camera(_that.streaming);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( bool on)  onOff,required TResult Function( int level)  brightness,required TResult Function( int hue,  int saturation)  color,required TResult Function( int kelvin)  colorTemperature,required TResult Function( int position,  int target,  bool moving)  position,required TResult Function( double setpoint,  ThermostatMode mode,  FanMode? fan,  ThermostatAction action)  thermostat,required TResult Function( double watts,  double? energyKwh)  powerMeter,required TResult Function( bool locked,  bool jammed)  lock,required TResult Function( double celsius)  temperatureSensor,required TResult Function( double percent)  humiditySensor,required TResult Function( bool motion,  int? lastMotionAt)  motionSensor,required TResult Function( bool open)  contactSensor,required TResult Function( bool streaming)  camera,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( bool on)  onOff,required TResult Function( int level)  brightness,required TResult Function( int hue,  int saturation)  color,required TResult Function( int kelvin)  colorTemperature,required TResult Function( int position,  int target,  bool moving)  position,required TResult Function( double setpoint,  ThermostatMode mode,  FanMode? fan,  ThermostatAction action,  ThermostatMode? lastActiveMode)  thermostat,required TResult Function( double watts,  double? energyKwh)  powerMeter,required TResult Function( bool locked,  bool jammed)  lock,required TResult Function( double celsius)  temperatureSensor,required TResult Function( double percent)  humiditySensor,required TResult Function( bool motion,  int? lastMotionAt)  motionSensor,required TResult Function( bool open)  contactSensor,required TResult Function( bool streaming)  camera,}) {final _that = this;
 switch (_that) {
 case OnOffState():
 return onOff(_that.on);case BrightnessState():
@@ -264,7 +264,7 @@ return brightness(_that.level);case ColorState():
 return color(_that.hue,_that.saturation);case ColorTemperatureState():
 return colorTemperature(_that.kelvin);case PositionState():
 return position(_that.position,_that.target,_that.moving);case ThermostatState():
-return thermostat(_that.setpoint,_that.mode,_that.fan,_that.action);case PowerMeterState():
+return thermostat(_that.setpoint,_that.mode,_that.fan,_that.action,_that.lastActiveMode);case PowerMeterState():
 return powerMeter(_that.watts,_that.energyKwh);case LockState():
 return lock(_that.locked,_that.jammed);case TemperatureSensorState():
 return temperatureSensor(_that.celsius);case HumiditySensorState():
@@ -285,7 +285,7 @@ return camera(_that.streaming);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( bool on)?  onOff,TResult? Function( int level)?  brightness,TResult? Function( int hue,  int saturation)?  color,TResult? Function( int kelvin)?  colorTemperature,TResult? Function( int position,  int target,  bool moving)?  position,TResult? Function( double setpoint,  ThermostatMode mode,  FanMode? fan,  ThermostatAction action)?  thermostat,TResult? Function( double watts,  double? energyKwh)?  powerMeter,TResult? Function( bool locked,  bool jammed)?  lock,TResult? Function( double celsius)?  temperatureSensor,TResult? Function( double percent)?  humiditySensor,TResult? Function( bool motion,  int? lastMotionAt)?  motionSensor,TResult? Function( bool open)?  contactSensor,TResult? Function( bool streaming)?  camera,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( bool on)?  onOff,TResult? Function( int level)?  brightness,TResult? Function( int hue,  int saturation)?  color,TResult? Function( int kelvin)?  colorTemperature,TResult? Function( int position,  int target,  bool moving)?  position,TResult? Function( double setpoint,  ThermostatMode mode,  FanMode? fan,  ThermostatAction action,  ThermostatMode? lastActiveMode)?  thermostat,TResult? Function( double watts,  double? energyKwh)?  powerMeter,TResult? Function( bool locked,  bool jammed)?  lock,TResult? Function( double celsius)?  temperatureSensor,TResult? Function( double percent)?  humiditySensor,TResult? Function( bool motion,  int? lastMotionAt)?  motionSensor,TResult? Function( bool open)?  contactSensor,TResult? Function( bool streaming)?  camera,}) {final _that = this;
 switch (_that) {
 case OnOffState() when onOff != null:
 return onOff(_that.on);case BrightnessState() when brightness != null:
@@ -293,7 +293,7 @@ return brightness(_that.level);case ColorState() when color != null:
 return color(_that.hue,_that.saturation);case ColorTemperatureState() when colorTemperature != null:
 return colorTemperature(_that.kelvin);case PositionState() when position != null:
 return position(_that.position,_that.target,_that.moving);case ThermostatState() when thermostat != null:
-return thermostat(_that.setpoint,_that.mode,_that.fan,_that.action);case PowerMeterState() when powerMeter != null:
+return thermostat(_that.setpoint,_that.mode,_that.fan,_that.action,_that.lastActiveMode);case PowerMeterState() when powerMeter != null:
 return powerMeter(_that.watts,_that.energyKwh);case LockState() when lock != null:
 return lock(_that.locked,_that.jammed);case TemperatureSensorState() when temperatureSensor != null:
 return temperatureSensor(_that.celsius);case HumiditySensorState() when humiditySensor != null:
@@ -693,13 +693,16 @@ as bool,
 @JsonSerializable()
 
 class ThermostatState extends CapabilityState {
-  const ThermostatState({required this.setpoint, required this.mode, this.fan, this.action = ThermostatAction.idle,  String? $type}): $type = $type ?? 'thermostat',super._();
+  const ThermostatState({required this.setpoint, required this.mode, this.fan, this.action = ThermostatAction.idle, this.lastActiveMode,  String? $type}): $type = $type ?? 'thermostat',super._();
   factory ThermostatState.fromJson(Map<String, dynamic> json) => _$ThermostatStateFromJson(json);
 
  final  double setpoint;
  final  ThermostatMode mode;
  final  FanMode? fan;
 @JsonKey() final  ThermostatAction action;
+/// The mode the device resumes when switched back on: the last mode
+/// other than `off`. Reported by the device so every app agrees.
+ final  ThermostatMode? lastActiveMode;
 
 @JsonKey(name: 'kind')
 final String $type;
@@ -718,18 +721,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is ThermostatState&&(identical(other.setpoint, setpoint) || other.setpoint == setpoint)&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.fan, fan) || other.fan == fan)&&(identical(other.action, action) || other.action == action));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ThermostatState&&(identical(other.setpoint, setpoint) || other.setpoint == setpoint)&&(identical(other.mode, mode) || other.mode == mode)&&(identical(other.fan, fan) || other.fan == fan)&&(identical(other.action, action) || other.action == action)&&(identical(other.lastActiveMode, lastActiveMode) || other.lastActiveMode == lastActiveMode));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,setpoint,mode,fan,action);
+    return Object.hash(runtimeType,setpoint,mode,fan,action,lastActiveMode);
 }
 
 @override
 String toString() {
-    return 'CapabilityState.thermostat(setpoint: $setpoint, mode: $mode, fan: $fan, action: $action)';
+    return 'CapabilityState.thermostat(setpoint: $setpoint, mode: $mode, fan: $fan, action: $action, lastActiveMode: $lastActiveMode)';
 }
 
 
@@ -740,7 +743,7 @@ abstract mixin class $ThermostatStateCopyWith<$Res> implements $CapabilityStateC
   factory $ThermostatStateCopyWith(ThermostatState value, $Res Function(ThermostatState) _then) = _$ThermostatStateCopyWithImpl;
 @useResult
 $Res call({
- double setpoint, ThermostatMode mode, FanMode? fan, ThermostatAction action
+ double setpoint, ThermostatMode mode, FanMode? fan, ThermostatAction action, ThermostatMode? lastActiveMode
 });
 
 
@@ -757,13 +760,14 @@ class _$ThermostatStateCopyWithImpl<$Res>
 
 /// Create a copy of CapabilityState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? setpoint = null,Object? mode = null,Object? fan = freezed,Object? action = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? setpoint = null,Object? mode = null,Object? fan = freezed,Object? action = null,Object? lastActiveMode = freezed,}) {
   return _then(ThermostatState(
 setpoint: null == setpoint ? _self.setpoint : setpoint // ignore: cast_nullable_to_non_nullable
 as double,mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
 as ThermostatMode,fan: freezed == fan ? _self.fan : fan // ignore: cast_nullable_to_non_nullable
 as FanMode?,action: null == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
-as ThermostatAction,
+as ThermostatAction,lastActiveMode: freezed == lastActiveMode ? _self.lastActiveMode : lastActiveMode // ignore: cast_nullable_to_non_nullable
+as ThermostatMode?,
   ));
 }
 

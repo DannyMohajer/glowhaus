@@ -54,6 +54,32 @@ void main() {
       });
     });
 
+    test('a thermostat switches back on in its last active mode', () {
+      ThermostatMode resumes(ThermostatMode? last) {
+        final device = _demo(
+          'lr-thermostat',
+          state: {
+            'thermostat': CapabilityState.thermostat(
+              setpoint: 21,
+              mode: ThermostatMode.off,
+              lastActiveMode: last,
+            ),
+          },
+        );
+        final toggle = primaryToggle(device)!;
+        expect(toggle.on, isFalse);
+        final patch =
+            toggle.patchesFor(on: true)['thermostat']! as ThermostatPatch;
+        return patch.mode!;
+      }
+
+      expect(resumes(ThermostatMode.cool), ThermostatMode.cool);
+      expect(resumes(ThermostatMode.auto), ThermostatMode.auto);
+      expect(resumes(ThermostatMode.heat), ThermostatMode.heat);
+      // Never reported: the first mode the device supports.
+      expect(resumes(null), ThermostatMode.heat);
+    });
+
     test('a thermostat switches between off and its first mode', () {
       final toggle = primaryToggle(_demo('lr-thermostat'))!;
       expect(toggle.on, isTrue);
@@ -177,24 +203,47 @@ void main() {
   });
 
   group('demo names', () {
-    test('every default name of the demo home is translated', () {
-      final names = [
-        ...DemoHome.home.rooms.map((r) => r.name),
-        ...DemoHome.home.scenes.map((s) => s.name),
+    test('every seeded key is translated, and English matches the seed', () {
+      final named = <(String, String?)>[
+        for (final room in DemoHome.home.rooms) (room.name, room.nameKey),
+        for (final scene in DemoHome.home.scenes) (scene.name, scene.nameKey),
         for (final seed in DemoHome.devices()) ...[
-          seed.descriptor.name,
-          ...seed.descriptor.capabilities.map((c) => c.label).nonNulls,
+          (seed.descriptor.name, seed.descriptor.nameKey),
+          for (final capability in seed.descriptor.capabilities)
+            if (capability.label != null)
+              (capability.label!, capability.labelKey),
         ],
       ];
-      for (final name in names) {
-        expect(localizedName(en, name), name);
-        expect(localizedName(fa, name), isNot(name), reason: name);
+      for (final (name, key) in named) {
+        expect(translatedName(en, name: name, key: key), name);
+        expect(
+          translatedName(fa, name: name, key: key),
+          isNot(name),
+          reason: name,
+        );
       }
     });
 
-    test('names a user typed are shown as typed', () {
-      expect(localizedName(fa, "Daniel's desk lamp"), "Daniel's desk lamp");
-      expect(localizedName(fa, 'living room'), 'living room');
+    test('a renamed device is shown as typed, even with a default name', () {
+      final lamp = _demo('lr-lamp');
+      expect(lamp.displayName(fa), fa.demoFloorLamp);
+      expect(lamp.renamed('Floor lamp').displayName(fa), 'Floor lamp');
+      expect(lamp.renamed("Daniel's lamp").displayName(fa), "Daniel's lamp");
+    });
+
+    test('names without a key or with an unknown key are shown as typed', () {
+      expect(translatedName(fa, name: 'Living Room', key: null), 'Living Room');
+      expect(translatedName(fa, name: 'Patio', key: 'vendor.patio'), 'Patio');
+      final room = DemoHome.home.rooms.first;
+      expect(room.displayName(fa), fa.demoRoomLivingRoom);
+      expect(room.renamed('Salon').displayName(fa), 'Salon');
+    });
+
+    test('channel labels translate by key', () {
+      final channel = _demo('kt-switch').capability('ch1')!;
+      expect(channel.displayLabel(fa), fa.demoChannelCeiling);
+      expect(channel.copyWith(labelKey: null).displayLabel(fa), channel.label);
+      expect(Capability.of(CapabilityKind.onOff).displayLabel(fa), isNull);
     });
   });
 }

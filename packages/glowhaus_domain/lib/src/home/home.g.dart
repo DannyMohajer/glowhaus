@@ -21,6 +21,7 @@ _Room _$RoomFromJson(Map<String, dynamic> json) =>
               ) ??
               RoomKind.other,
         ),
+        nameKey: $checkedConvert('nameKey', (v) => v as String?),
       );
       return val;
     });
@@ -29,6 +30,7 @@ Map<String, dynamic> _$RoomToJson(_Room instance) => <String, dynamic>{
   'id': instance.id,
   'name': instance.name,
   'kind': _$RoomKindEnumMap[instance.kind]!,
+  'nameKey': ?instance.nameKey,
 };
 
 const _$RoomKindEnumMap = {
@@ -117,6 +119,7 @@ _Scene _$SceneFromJson(Map<String, dynamic> json) =>
                   .toList() ??
               const <SceneAction>[],
         ),
+        nameKey: $checkedConvert('nameKey', (v) => v as String?),
       );
       return val;
     });
@@ -125,6 +128,7 @@ Map<String, dynamic> _$SceneToJson(_Scene instance) => <String, dynamic>{
   'id': instance.id,
   'name': instance.name,
   'actions': instance.actions.map((e) => e.toJson()).toList(),
+  'nameKey': ?instance.nameKey,
 };
 
 _Home _$HomeFromJson(Map<String, dynamic> json) =>

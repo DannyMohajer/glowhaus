@@ -23,9 +23,18 @@ abstract class Room with _$Room {
     @JsonKey(unknownEnumValue: RoomKind.other)
     @Default(RoomKind.other)
     RoomKind kind,
+
+    /// Translation key of a seeded default [name]; null once renamed.
+    /// The name itself is always shown as typed when there is no key.
+    String? nameKey,
   }) = _Room;
 
   factory fromJson(Map<String, dynamic> json) => _$RoomFromJson(json);
+
+  const new _();
+
+  /// A user-chosen name is shown as typed, so renaming drops [nameKey].
+  Room renamed(String name) => copyWith(name: name, nameKey: null);
 }
 
 enum Role { owner, admin, member, guest }
@@ -63,9 +72,18 @@ abstract class Scene with _$Scene {
     required String id,
     required String name,
     @Default(<SceneAction>[]) List<SceneAction> actions,
+
+    /// Translation key of a seeded default [name]; null once renamed.
+    /// The name itself is always shown as typed when there is no key.
+    String? nameKey,
   }) = _Scene;
 
   factory fromJson(Map<String, dynamic> json) => _$SceneFromJson(json);
+
+  const new _();
+
+  /// A user-chosen name is shown as typed, so renaming drops [nameKey].
+  Scene renamed(String name) => copyWith(name: name, nameKey: null);
 }
 
 @freezed

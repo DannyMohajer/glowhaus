@@ -15,6 +15,9 @@ abstract class Capability with _$Capability {
     @JsonKey(unknownEnumValue: CapabilityKind.unknown)
     required CapabilityKind kind,
     String? label,
+
+    /// Optional translation key for the default [label].
+    String? labelKey,
     @Default(<String, dynamic>{}) Map<String, dynamic> config,
   }) = _Capability;
 

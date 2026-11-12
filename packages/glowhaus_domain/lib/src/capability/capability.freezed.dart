@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Capability {
 
- String get id;@JsonKey(unknownEnumValue: CapabilityKind.unknown) CapabilityKind get kind; String? get label; Map<String, dynamic> get config;
+ String get id;@JsonKey(unknownEnumValue: CapabilityKind.unknown) CapabilityKind get kind; String? get label;/// Optional translation key for the default [label].
+ String? get labelKey; Map<String, dynamic> get config;
 /// Create a copy of Capability
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +31,20 @@ $CapabilityCopyWith<Capability> get copyWith => _$CapabilityCopyWithImpl<Capabil
 @override
 bool operator ==(Object other) {
   final _this = this as Capability;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Capability&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.label, _this.label) || other.label == _this.label)&&const DeepCollectionEquality().equals(other.config, _this.config));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Capability&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.label, _this.label) || other.label == _this.label)&&(identical(other.labelKey, _this.labelKey) || other.labelKey == _this.labelKey)&&const DeepCollectionEquality().equals(other.config, _this.config));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Capability;
-  return Object.hash(runtimeType,_this.id,_this.kind,_this.label,const DeepCollectionEquality().hash(_this.config));
+  return Object.hash(runtimeType,_this.id,_this.kind,_this.label,_this.labelKey,const DeepCollectionEquality().hash(_this.config));
 }
 
 @override
 String toString() {
   final _this = this as Capability;
-  return 'Capability(id: ${_this.id}, kind: ${_this.kind}, label: ${_this.label}, config: ${_this.config})';
+  return 'Capability(id: ${_this.id}, kind: ${_this.kind}, label: ${_this.label}, labelKey: ${_this.labelKey}, config: ${_this.config})';
 }
 
 
@@ -54,7 +55,7 @@ abstract mixin class $CapabilityCopyWith<$Res>  {
   factory $CapabilityCopyWith(Capability value, $Res Function(Capability) _then) = _$CapabilityCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(unknownEnumValue: CapabilityKind.unknown) CapabilityKind kind, String? label, Map<String, dynamic> config
+ String id,@JsonKey(unknownEnumValue: CapabilityKind.unknown) CapabilityKind kind, String? label, String? labelKey, Map<String, dynamic> config
 });
 
 
@@ -71,11 +72,12 @@ class _$CapabilityCopyWithImpl<$Res>
 
 /// Create a copy of Capability
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? kind = null,Object? label = freezed,Object? config = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? kind = null,Object? label = freezed,Object? labelKey = freezed,Object? config = null,}) {
   return _then(Capability(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as CapabilityKind,label: freezed == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
+as String?,labelKey: freezed == labelKey ? _self.labelKey : labelKey // ignore: cast_nullable_to_non_nullable
 as String?,config: null == config ? _self.config : config // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>,
   ));
@@ -162,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(unknownEnumValue: CapabilityKind.unknown)  CapabilityKind kind,  String? label,  Map<String, dynamic> config)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(unknownEnumValue: CapabilityKind.unknown)  CapabilityKind kind,  String? label,  String? labelKey,  Map<String, dynamic> config)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Capability() when $default != null:
-return $default(_that.id,_that.kind,_that.label,_that.config);case _:
+return $default(_that.id,_that.kind,_that.label,_that.labelKey,_that.config);case _:
   return orElse();
 
 }
@@ -183,10 +185,10 @@ return $default(_that.id,_that.kind,_that.label,_that.config);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(unknownEnumValue: CapabilityKind.unknown)  CapabilityKind kind,  String? label,  Map<String, dynamic> config)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(unknownEnumValue: CapabilityKind.unknown)  CapabilityKind kind,  String? label,  String? labelKey,  Map<String, dynamic> config)  $default,) {final _that = this;
 switch (_that) {
 case _Capability():
-return $default(_that.id,_that.kind,_that.label,_that.config);case _:
+return $default(_that.id,_that.kind,_that.label,_that.labelKey,_that.config);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,10 +205,10 @@ return $default(_that.id,_that.kind,_that.label,_that.config);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(unknownEnumValue: CapabilityKind.unknown)  CapabilityKind kind,  String? label,  Map<String, dynamic> config)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(unknownEnumValue: CapabilityKind.unknown)  CapabilityKind kind,  String? label,  String? labelKey,  Map<String, dynamic> config)?  $default,) {final _that = this;
 switch (_that) {
 case _Capability() when $default != null:
-return $default(_that.id,_that.kind,_that.label,_that.config);case _:
+return $default(_that.id,_that.kind,_that.label,_that.labelKey,_that.config);case _:
   return null;
 
 }
@@ -218,12 +220,14 @@ return $default(_that.id,_that.kind,_that.label,_that.config);case _:
 @JsonSerializable()
 
 class _Capability extends Capability {
-  const _Capability({required this.id, @JsonKey(unknownEnumValue: CapabilityKind.unknown) required this.kind, this.label,  Map<String, dynamic> config = const <String, dynamic>{}}): _config = config,super._();
+  const _Capability({required this.id, @JsonKey(unknownEnumValue: CapabilityKind.unknown) required this.kind, this.label, this.labelKey,  Map<String, dynamic> config = const <String, dynamic>{}}): _config = config,super._();
   factory _Capability.fromJson(Map<String, dynamic> json) => _$CapabilityFromJson(json);
 
 @override final  String id;
 @override@JsonKey(unknownEnumValue: CapabilityKind.unknown) final  CapabilityKind kind;
 @override final  String? label;
+/// Optional translation key for the default [label].
+@override final  String? labelKey;
  final  Map<String, dynamic> _config;
 @override@JsonKey() Map<String, dynamic> get config {
   if (_config is EqualUnmodifiableMapView) return _config;
@@ -245,18 +249,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Capability&&(identical(other.id, id) || other.id == id)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.label, label) || other.label == label)&&const DeepCollectionEquality().equals(other.config, _config));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Capability&&(identical(other.id, id) || other.id == id)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.label, label) || other.label == label)&&(identical(other.labelKey, labelKey) || other.labelKey == labelKey)&&const DeepCollectionEquality().equals(other.config, _config));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,kind,label,const DeepCollectionEquality().hash(_config));
+    return Object.hash(runtimeType,id,kind,label,labelKey,const DeepCollectionEquality().hash(_config));
 }
 
 @override
 String toString() {
-    return 'Capability(id: $id, kind: $kind, label: $label, config: $config)';
+    return 'Capability(id: $id, kind: $kind, label: $label, labelKey: $labelKey, config: $config)';
 }
 
 
@@ -267,7 +271,7 @@ abstract mixin class _$CapabilityCopyWith<$Res> implements $CapabilityCopyWith<$
   factory _$CapabilityCopyWith(_Capability value, $Res Function(_Capability) _then) = __$CapabilityCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(unknownEnumValue: CapabilityKind.unknown) CapabilityKind kind, String? label, Map<String, dynamic> config
+ String id,@JsonKey(unknownEnumValue: CapabilityKind.unknown) CapabilityKind kind, String? label, String? labelKey, Map<String, dynamic> config
 });
 
 
@@ -284,11 +288,12 @@ class __$CapabilityCopyWithImpl<$Res>
 
 /// Create a copy of Capability
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? kind = null,Object? label = freezed,Object? config = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? kind = null,Object? label = freezed,Object? labelKey = freezed,Object? config = null,}) {
   return _then(_Capability(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as CapabilityKind,label: freezed == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
+as String?,labelKey: freezed == labelKey ? _self.labelKey : labelKey // ignore: cast_nullable_to_non_nullable
 as String?,config: null == config ? _self._config : config // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>,
   ));

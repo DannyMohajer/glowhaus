@@ -124,4 +124,17 @@ void main() {
       expect(DeviceDescriptor.fromJson(descriptor.toJson()), descriptor);
     }
   });
+
+  test('every default name has a translation key', () {
+    final keys = <String?>[
+      ...DemoHome.home.rooms.map((room) => room.nameKey),
+      ...DemoHome.home.scenes.map((scene) => scene.nameKey),
+      ...descriptors.map((descriptor) => descriptor.nameKey),
+      for (final descriptor in descriptors)
+        for (final capability in descriptor.capabilities)
+          if (capability.label != null) capability.labelKey,
+    ];
+    expect(keys, everyElement(isNotNull));
+    expect(keys.toSet(), DemoNames.all.toSet());
+  });
 }

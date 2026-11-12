@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DeviceDescriptor {
 
- String get id;@JsonKey(unknownEnumValue: DeviceType.unknown) DeviceType get type; String get name; List<Capability> get capabilities; String? get manufacturer; String? get model; String? get firmware; String? get roomHint;
+ String get id;@JsonKey(unknownEnumValue: DeviceType.unknown) DeviceType get type; String get name; List<Capability> get capabilities; String? get manufacturer; String? get model; String? get firmware; String? get roomHint;/// Optional translation key for the factory default [name].
+ String? get nameKey;
 /// Create a copy of DeviceDescriptor
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +31,20 @@ $DeviceDescriptorCopyWith<DeviceDescriptor> get copyWith => _$DeviceDescriptorCo
 @override
 bool operator ==(Object other) {
   final _this = this as DeviceDescriptor;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeviceDescriptor&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.name, _this.name) || other.name == _this.name)&&const DeepCollectionEquality().equals(other.capabilities, _this.capabilities)&&(identical(other.manufacturer, _this.manufacturer) || other.manufacturer == _this.manufacturer)&&(identical(other.model, _this.model) || other.model == _this.model)&&(identical(other.firmware, _this.firmware) || other.firmware == _this.firmware)&&(identical(other.roomHint, _this.roomHint) || other.roomHint == _this.roomHint));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeviceDescriptor&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.name, _this.name) || other.name == _this.name)&&const DeepCollectionEquality().equals(other.capabilities, _this.capabilities)&&(identical(other.manufacturer, _this.manufacturer) || other.manufacturer == _this.manufacturer)&&(identical(other.model, _this.model) || other.model == _this.model)&&(identical(other.firmware, _this.firmware) || other.firmware == _this.firmware)&&(identical(other.roomHint, _this.roomHint) || other.roomHint == _this.roomHint)&&(identical(other.nameKey, _this.nameKey) || other.nameKey == _this.nameKey));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as DeviceDescriptor;
-  return Object.hash(runtimeType,_this.id,_this.type,_this.name,const DeepCollectionEquality().hash(_this.capabilities),_this.manufacturer,_this.model,_this.firmware,_this.roomHint);
+  return Object.hash(runtimeType,_this.id,_this.type,_this.name,const DeepCollectionEquality().hash(_this.capabilities),_this.manufacturer,_this.model,_this.firmware,_this.roomHint,_this.nameKey);
 }
 
 @override
 String toString() {
   final _this = this as DeviceDescriptor;
-  return 'DeviceDescriptor(id: ${_this.id}, type: ${_this.type}, name: ${_this.name}, capabilities: ${_this.capabilities}, manufacturer: ${_this.manufacturer}, model: ${_this.model}, firmware: ${_this.firmware}, roomHint: ${_this.roomHint})';
+  return 'DeviceDescriptor(id: ${_this.id}, type: ${_this.type}, name: ${_this.name}, capabilities: ${_this.capabilities}, manufacturer: ${_this.manufacturer}, model: ${_this.model}, firmware: ${_this.firmware}, roomHint: ${_this.roomHint}, nameKey: ${_this.nameKey})';
 }
 
 
@@ -54,7 +55,7 @@ abstract mixin class $DeviceDescriptorCopyWith<$Res>  {
   factory $DeviceDescriptorCopyWith(DeviceDescriptor value, $Res Function(DeviceDescriptor) _then) = _$DeviceDescriptorCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(unknownEnumValue: DeviceType.unknown) DeviceType type, String name, List<Capability> capabilities, String? manufacturer, String? model, String? firmware, String? roomHint
+ String id,@JsonKey(unknownEnumValue: DeviceType.unknown) DeviceType type, String name, List<Capability> capabilities, String? manufacturer, String? model, String? firmware, String? roomHint, String? nameKey
 });
 
 
@@ -71,7 +72,7 @@ class _$DeviceDescriptorCopyWithImpl<$Res>
 
 /// Create a copy of DeviceDescriptor
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? name = null,Object? capabilities = null,Object? manufacturer = freezed,Object? model = freezed,Object? firmware = freezed,Object? roomHint = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? name = null,Object? capabilities = null,Object? manufacturer = freezed,Object? model = freezed,Object? firmware = freezed,Object? roomHint = freezed,Object? nameKey = freezed,}) {
   return _then(DeviceDescriptor(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
@@ -81,6 +82,7 @@ as List<Capability>,manufacturer: freezed == manufacturer ? _self.manufacturer :
 as String?,model: freezed == model ? _self.model : model // ignore: cast_nullable_to_non_nullable
 as String?,firmware: freezed == firmware ? _self.firmware : firmware // ignore: cast_nullable_to_non_nullable
 as String?,roomHint: freezed == roomHint ? _self.roomHint : roomHint // ignore: cast_nullable_to_non_nullable
+as String?,nameKey: freezed == nameKey ? _self.nameKey : nameKey // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -166,10 +168,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(unknownEnumValue: DeviceType.unknown)  DeviceType type,  String name,  List<Capability> capabilities,  String? manufacturer,  String? model,  String? firmware,  String? roomHint)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(unknownEnumValue: DeviceType.unknown)  DeviceType type,  String name,  List<Capability> capabilities,  String? manufacturer,  String? model,  String? firmware,  String? roomHint,  String? nameKey)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DeviceDescriptor() when $default != null:
-return $default(_that.id,_that.type,_that.name,_that.capabilities,_that.manufacturer,_that.model,_that.firmware,_that.roomHint);case _:
+return $default(_that.id,_that.type,_that.name,_that.capabilities,_that.manufacturer,_that.model,_that.firmware,_that.roomHint,_that.nameKey);case _:
   return orElse();
 
 }
@@ -187,10 +189,10 @@ return $default(_that.id,_that.type,_that.name,_that.capabilities,_that.manufact
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(unknownEnumValue: DeviceType.unknown)  DeviceType type,  String name,  List<Capability> capabilities,  String? manufacturer,  String? model,  String? firmware,  String? roomHint)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(unknownEnumValue: DeviceType.unknown)  DeviceType type,  String name,  List<Capability> capabilities,  String? manufacturer,  String? model,  String? firmware,  String? roomHint,  String? nameKey)  $default,) {final _that = this;
 switch (_that) {
 case _DeviceDescriptor():
-return $default(_that.id,_that.type,_that.name,_that.capabilities,_that.manufacturer,_that.model,_that.firmware,_that.roomHint);case _:
+return $default(_that.id,_that.type,_that.name,_that.capabilities,_that.manufacturer,_that.model,_that.firmware,_that.roomHint,_that.nameKey);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -207,10 +209,10 @@ return $default(_that.id,_that.type,_that.name,_that.capabilities,_that.manufact
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(unknownEnumValue: DeviceType.unknown)  DeviceType type,  String name,  List<Capability> capabilities,  String? manufacturer,  String? model,  String? firmware,  String? roomHint)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(unknownEnumValue: DeviceType.unknown)  DeviceType type,  String name,  List<Capability> capabilities,  String? manufacturer,  String? model,  String? firmware,  String? roomHint,  String? nameKey)?  $default,) {final _that = this;
 switch (_that) {
 case _DeviceDescriptor() when $default != null:
-return $default(_that.id,_that.type,_that.name,_that.capabilities,_that.manufacturer,_that.model,_that.firmware,_that.roomHint);case _:
+return $default(_that.id,_that.type,_that.name,_that.capabilities,_that.manufacturer,_that.model,_that.firmware,_that.roomHint,_that.nameKey);case _:
   return null;
 
 }
@@ -222,7 +224,7 @@ return $default(_that.id,_that.type,_that.name,_that.capabilities,_that.manufact
 @JsonSerializable()
 
 class _DeviceDescriptor implements DeviceDescriptor {
-  const _DeviceDescriptor({required this.id, @JsonKey(unknownEnumValue: DeviceType.unknown) required this.type, required this.name, required  List<Capability> capabilities, this.manufacturer, this.model, this.firmware, this.roomHint}): _capabilities = capabilities;
+  const _DeviceDescriptor({required this.id, @JsonKey(unknownEnumValue: DeviceType.unknown) required this.type, required this.name, required  List<Capability> capabilities, this.manufacturer, this.model, this.firmware, this.roomHint, this.nameKey}): _capabilities = capabilities;
   factory _DeviceDescriptor.fromJson(Map<String, dynamic> json) => _$DeviceDescriptorFromJson(json);
 
 @override final  String id;
@@ -239,6 +241,8 @@ class _DeviceDescriptor implements DeviceDescriptor {
 @override final  String? model;
 @override final  String? firmware;
 @override final  String? roomHint;
+/// Optional translation key for the factory default [name].
+@override final  String? nameKey;
 
 /// Create a copy of DeviceDescriptor
 /// with the given fields replaced by the non-null parameter values.
@@ -253,18 +257,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeviceDescriptor&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.name, name) || other.name == name)&&const DeepCollectionEquality().equals(other.capabilities, _capabilities)&&(identical(other.manufacturer, manufacturer) || other.manufacturer == manufacturer)&&(identical(other.model, model) || other.model == model)&&(identical(other.firmware, firmware) || other.firmware == firmware)&&(identical(other.roomHint, roomHint) || other.roomHint == roomHint));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeviceDescriptor&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.name, name) || other.name == name)&&const DeepCollectionEquality().equals(other.capabilities, _capabilities)&&(identical(other.manufacturer, manufacturer) || other.manufacturer == manufacturer)&&(identical(other.model, model) || other.model == model)&&(identical(other.firmware, firmware) || other.firmware == firmware)&&(identical(other.roomHint, roomHint) || other.roomHint == roomHint)&&(identical(other.nameKey, nameKey) || other.nameKey == nameKey));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,type,name,const DeepCollectionEquality().hash(_capabilities),manufacturer,model,firmware,roomHint);
+    return Object.hash(runtimeType,id,type,name,const DeepCollectionEquality().hash(_capabilities),manufacturer,model,firmware,roomHint,nameKey);
 }
 
 @override
 String toString() {
-    return 'DeviceDescriptor(id: $id, type: $type, name: $name, capabilities: $capabilities, manufacturer: $manufacturer, model: $model, firmware: $firmware, roomHint: $roomHint)';
+    return 'DeviceDescriptor(id: $id, type: $type, name: $name, capabilities: $capabilities, manufacturer: $manufacturer, model: $model, firmware: $firmware, roomHint: $roomHint, nameKey: $nameKey)';
 }
 
 
@@ -275,7 +279,7 @@ abstract mixin class _$DeviceDescriptorCopyWith<$Res> implements $DeviceDescript
   factory _$DeviceDescriptorCopyWith(_DeviceDescriptor value, $Res Function(_DeviceDescriptor) _then) = __$DeviceDescriptorCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(unknownEnumValue: DeviceType.unknown) DeviceType type, String name, List<Capability> capabilities, String? manufacturer, String? model, String? firmware, String? roomHint
+ String id,@JsonKey(unknownEnumValue: DeviceType.unknown) DeviceType type, String name, List<Capability> capabilities, String? manufacturer, String? model, String? firmware, String? roomHint, String? nameKey
 });
 
 
@@ -292,7 +296,7 @@ class __$DeviceDescriptorCopyWithImpl<$Res>
 
 /// Create a copy of DeviceDescriptor
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? type = null,Object? name = null,Object? capabilities = null,Object? manufacturer = freezed,Object? model = freezed,Object? firmware = freezed,Object? roomHint = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? type = null,Object? name = null,Object? capabilities = null,Object? manufacturer = freezed,Object? model = freezed,Object? firmware = freezed,Object? roomHint = freezed,Object? nameKey = freezed,}) {
   return _then(_DeviceDescriptor(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
@@ -302,6 +306,7 @@ as List<Capability>,manufacturer: freezed == manufacturer ? _self.manufacturer :
 as String?,model: freezed == model ? _self.model : model // ignore: cast_nullable_to_non_nullable
 as String?,firmware: freezed == firmware ? _self.firmware : firmware // ignore: cast_nullable_to_non_nullable
 as String?,roomHint: freezed == roomHint ? _self.roomHint : roomHint // ignore: cast_nullable_to_non_nullable
+as String?,nameKey: freezed == nameKey ? _self.nameKey : nameKey // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

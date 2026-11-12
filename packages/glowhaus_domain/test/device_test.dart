@@ -134,6 +134,46 @@ void main() {
     );
   });
 
+  group('names', () {
+    final descriptor = DeviceDescriptor(
+      id: 'lr-lamp',
+      type: DeviceType.light,
+      name: 'Floor lamp',
+      nameKey: 'demo.floorLamp',
+      capabilities: [Capability.of(CapabilityKind.onOff)],
+    );
+
+    test('the descriptor name key carries over to the device', () {
+      final device = Device.fromDescriptor(descriptor, homeId: 'h');
+      expect(device.nameKey, 'demo.floorLamp');
+      expect(
+        DeviceDescriptor.fromJson(descriptor.toJson()).nameKey,
+        'demo.floorLamp',
+      );
+    });
+
+    test('renaming clears the key, even to the default text', () {
+      final device = Device.fromDescriptor(descriptor, homeId: 'h');
+      final renamed = device.renamed('Floor lamp');
+      expect(renamed.name, 'Floor lamp');
+      expect(renamed.nameKey, isNull);
+    });
+
+    test('rooms and scenes drop their key when renamed', () {
+      const room = Room(id: 'r', name: 'Kitchen', nameKey: 'demo.kitchen');
+      const scene = Scene(id: 's', name: 'Away', nameKey: 'demo.away');
+      expect(room.renamed('Küche').nameKey, isNull);
+      expect(room.renamed('Küche').name, 'Küche');
+      expect(scene.renamed('Out').nameKey, isNull);
+      expect(Room.fromJson(room.toJson()).nameKey, 'demo.kitchen');
+    });
+
+    test('a descriptor without a key decodes with none', () {
+      final json = descriptor.toJson()..remove('nameKey');
+      expect(DeviceDescriptor.fromJson(json).nameKey, isNull);
+    });
+  });
+
   test('command results map to lifecycle statuses', () {
     expect(
       const CommandResult.acked(commandId: 'c').status,

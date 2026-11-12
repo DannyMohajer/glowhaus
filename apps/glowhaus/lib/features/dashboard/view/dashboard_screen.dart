@@ -80,7 +80,7 @@ class _DashboardView extends StatelessWidget {
                       for (final overview in state.rooms) ...[
                         const SizedBox(width: GlowSpace.x2),
                         GlowChip(
-                          label: localizedName(l10n, overview.room.name),
+                          label: overview.room.displayName(l10n),
                           selected: state.selectedRoomId == overview.room.id,
                           onTap: () => cubit.selectRoom(overview.room.id),
                         ),
@@ -124,8 +124,7 @@ class _DashboardView extends StatelessWidget {
                 const SizedBox(height: GlowSpace.x4),
                 _ScenesTeaser(
                   names: [
-                    for (final scene in state.scenes)
-                      localizedName(l10n, scene.name),
+                    for (final scene in state.scenes) scene.displayName(l10n),
                   ],
                 ),
               ],
@@ -221,7 +220,7 @@ class _RoomOverviewCard extends StatelessWidget {
         .take(_maxControls);
 
     return RoomCard(
-      title: localizedName(l10n, overview.room.name),
+      title: overview.room.displayName(l10n),
       subtitle:
           '${l10n.roomDeviceCount(overview.devices.length)} · '
           '${l10n.roomOnCount(overview.activeCount)}',
@@ -232,7 +231,7 @@ class _RoomOverviewCard extends StatelessWidget {
         for (final view in controllable)
           RoomQuickControl(
             icon: deviceIcon(view.device),
-            label: localizedName(l10n, view.device.name),
+            label: view.device.displayName(l10n),
             on: primaryToggle(view.device)!.on,
             pending: view.pending,
             onTap: view.device.isOffline

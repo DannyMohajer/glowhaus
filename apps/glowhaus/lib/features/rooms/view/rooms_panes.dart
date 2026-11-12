@@ -84,7 +84,7 @@ class RoomsListPane extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: GlowSpace.x3),
                 child: RoomCard(
-                  title: localizedName(l10n, overview.room.name),
+                  title: overview.room.displayName(l10n),
                   subtitle:
                       '${l10n.roomDeviceCount(overview.devices.length)} · '
                       '${l10n.roomOnCount(overview.activeCount)}',
@@ -171,7 +171,7 @@ class _RoomView extends StatelessWidget {
           ),
           children: [
             PaneHeader(
-              title: localizedName(l10n, room.name),
+              title: room.displayName(l10n),
               subtitle: l10n.roomDeviceCount(state.devices.length),
               backTo: backTo,
             ),
@@ -218,7 +218,7 @@ class _RoomView extends StatelessWidget {
                         builder: (context) {
                           final device = view.device;
                           final toggle = primaryToggle(device);
-                          final name = localizedName(l10n, device.name);
+                          final name = device.displayName(l10n);
                           return DecoratedBox(
                             // Marks the open device in master-detail.
                             position: DecorationPosition.foreground,

@@ -1,6 +1,58 @@
 import 'package:glowhaus_domain/glowhaus_domain.dart';
 import 'package:glowhaus_transport/src/simulated/simulated_device.dart';
 
+/// Translation keys of the demo's default names. The app translates these;
+/// a renamed room or device has no key and is shown exactly as typed.
+abstract final class DemoNames {
+  static const String livingRoom = 'demo.livingRoom';
+  static const String bedroom = 'demo.bedroom';
+  static const String kitchen = 'demo.kitchen';
+  static const String entrance = 'demo.entrance';
+  static const String movieNight = 'demo.movieNight';
+  static const String goodMorning = 'demo.goodMorning';
+  static const String away = 'demo.away';
+  static const String ceilingLight = 'demo.ceilingLight';
+  static const String floorLamp = 'demo.floorLamp';
+  static const String curtain = 'demo.curtain';
+  static const String thermostat = 'demo.thermostat';
+  static const String readingLight = 'demo.readingLight';
+  static const String climateSensor = 'demo.climateSensor';
+  static const String wallSwitch = 'demo.wallSwitch';
+  static const String coffeeMachine = 'demo.coffeeMachine';
+  static const String motionSensor = 'demo.motionSensor';
+  static const String frontDoorLock = 'demo.frontDoorLock';
+  static const String doorSensor = 'demo.doorSensor';
+  static const String doorbellCamera = 'demo.doorbellCamera';
+  static const String channelCeiling = 'demo.channelCeiling';
+  static const String channelCounter = 'demo.channelCounter';
+  static const String channelHood = 'demo.channelHood';
+
+  static const List<String> all = [
+    livingRoom,
+    bedroom,
+    kitchen,
+    entrance,
+    movieNight,
+    goodMorning,
+    away,
+    ceilingLight,
+    floorLamp,
+    curtain,
+    thermostat,
+    readingLight,
+    climateSensor,
+    wallSwitch,
+    coffeeMachine,
+    motionSensor,
+    frontDoorLock,
+    doorSensor,
+    doorbellCamera,
+    channelCeiling,
+    channelCounter,
+    channelHood,
+  ];
+}
+
 /// The seeded demo: one home, four rooms, twelve devices covering every
 /// device type and capability.
 abstract final class DemoHome {
@@ -15,15 +67,36 @@ abstract final class DemoHome {
     id: homeId,
     name: 'Glowhaus Demo',
     rooms: [
-      Room(id: livingRoom, name: 'Living Room', kind: RoomKind.livingRoom),
-      Room(id: bedroom, name: 'Bedroom', kind: RoomKind.bedroom),
-      Room(id: kitchen, name: 'Kitchen', kind: RoomKind.kitchen),
-      Room(id: entrance, name: 'Entrance', kind: RoomKind.entrance),
+      Room(
+        id: livingRoom,
+        name: 'Living Room',
+        nameKey: DemoNames.livingRoom,
+        kind: RoomKind.livingRoom,
+      ),
+      Room(
+        id: bedroom,
+        name: 'Bedroom',
+        nameKey: DemoNames.bedroom,
+        kind: RoomKind.bedroom,
+      ),
+      Room(
+        id: kitchen,
+        name: 'Kitchen',
+        nameKey: DemoNames.kitchen,
+        kind: RoomKind.kitchen,
+      ),
+      Room(
+        id: entrance,
+        name: 'Entrance',
+        nameKey: DemoNames.entrance,
+        kind: RoomKind.entrance,
+      ),
     ],
     scenes: [
       Scene(
         id: 'movie-night',
         name: 'Movie night',
+        nameKey: DemoNames.movieNight,
         actions: [
           SceneAction(
             deviceId: 'lr-ceiling',
@@ -45,6 +118,7 @@ abstract final class DemoHome {
       Scene(
         id: 'good-morning',
         name: 'Good morning',
+        nameKey: DemoNames.goodMorning,
         actions: [
           SceneAction(
             deviceId: 'lr-curtain',
@@ -59,6 +133,7 @@ abstract final class DemoHome {
       Scene(
         id: 'away',
         name: 'Away',
+        nameKey: DemoNames.away,
         actions: [
           SceneAction(
             deviceId: 'en-lock',
@@ -95,6 +170,7 @@ abstract final class DemoHome {
         id: 'lr-ceiling',
         type: DeviceType.light,
         name: 'Ceiling light',
+        nameKey: DemoNames.ceilingLight,
         manufacturer: _maker,
         model: 'GL-DIM-1',
         firmware: '1.2.0',
@@ -114,6 +190,7 @@ abstract final class DemoHome {
         id: 'lr-lamp',
         type: DeviceType.light,
         name: 'Floor lamp',
+        nameKey: DemoNames.floorLamp,
         manufacturer: _maker,
         model: 'GL-RGB-1',
         firmware: '1.0.0',
@@ -140,6 +217,7 @@ abstract final class DemoHome {
         id: 'lr-curtain',
         type: DeviceType.curtain,
         name: 'Curtain',
+        nameKey: DemoNames.curtain,
         manufacturer: _maker,
         model: 'GL-CRT-1',
         firmware: '1.1.3',
@@ -155,6 +233,7 @@ abstract final class DemoHome {
         id: 'lr-thermostat',
         type: DeviceType.thermostat,
         name: 'Thermostat',
+        nameKey: DemoNames.thermostat,
         manufacturer: _maker,
         model: 'GL-THM-2',
         firmware: '2.0.1',
@@ -175,6 +254,7 @@ abstract final class DemoHome {
           setpoint: 22.5,
           mode: ThermostatMode.heat,
           fan: FanMode.auto,
+          lastActiveMode: ThermostatMode.heat,
         ),
         'temperatureSensor': CapabilityState.temperatureSensor(celsius: 20.8),
       },
@@ -185,6 +265,7 @@ abstract final class DemoHome {
         id: 'br-reading',
         type: DeviceType.light,
         name: 'Reading light',
+        nameKey: DemoNames.readingLight,
         manufacturer: _maker,
         model: 'GL-SW-L',
         firmware: '1.0.4',
@@ -198,6 +279,7 @@ abstract final class DemoHome {
         id: 'br-climate',
         type: DeviceType.sensor,
         name: 'Climate sensor',
+        nameKey: DemoNames.climateSensor,
         manufacturer: _maker,
         model: 'GL-TH-1',
         firmware: '1.0.0',
@@ -218,14 +300,30 @@ abstract final class DemoHome {
         id: 'kt-switch',
         type: DeviceType.wallSwitch,
         name: 'Wall switch',
+        nameKey: DemoNames.wallSwitch,
         manufacturer: _maker,
         model: 'GL-SW-3',
         firmware: '1.3.0',
         roomHint: kitchen,
         capabilities: [
-          Capability(id: 'ch1', kind: CapabilityKind.onOff, label: 'Ceiling'),
-          Capability(id: 'ch2', kind: CapabilityKind.onOff, label: 'Counter'),
-          Capability(id: 'ch3', kind: CapabilityKind.onOff, label: 'Hood'),
+          Capability(
+            id: 'ch1',
+            kind: CapabilityKind.onOff,
+            label: 'Ceiling',
+            labelKey: DemoNames.channelCeiling,
+          ),
+          Capability(
+            id: 'ch2',
+            kind: CapabilityKind.onOff,
+            label: 'Counter',
+            labelKey: DemoNames.channelCounter,
+          ),
+          Capability(
+            id: 'ch3',
+            kind: CapabilityKind.onOff,
+            label: 'Hood',
+            labelKey: DemoNames.channelHood,
+          ),
         ],
       ),
       initialState: {
@@ -239,6 +337,7 @@ abstract final class DemoHome {
         id: 'kt-outlet',
         type: DeviceType.outlet,
         name: 'Coffee machine',
+        nameKey: DemoNames.coffeeMachine,
         manufacturer: _maker,
         model: 'GL-PLG-M',
         firmware: '1.1.0',
@@ -259,6 +358,7 @@ abstract final class DemoHome {
         id: 'kt-motion',
         type: DeviceType.sensor,
         name: 'Motion sensor',
+        nameKey: DemoNames.motionSensor,
         manufacturer: _maker,
         model: 'GL-PIR-1',
         firmware: '1.0.2',
@@ -277,6 +377,7 @@ abstract final class DemoHome {
         id: 'en-lock',
         type: DeviceType.lock,
         name: 'Front door lock',
+        nameKey: DemoNames.frontDoorLock,
         manufacturer: _maker,
         model: 'GL-LCK-1',
         firmware: '3.0.0',
@@ -290,6 +391,7 @@ abstract final class DemoHome {
         id: 'en-door',
         type: DeviceType.sensor,
         name: 'Door sensor',
+        nameKey: DemoNames.doorSensor,
         manufacturer: _maker,
         model: 'GL-CNT-1',
         firmware: '1.0.0',
@@ -305,6 +407,7 @@ abstract final class DemoHome {
         id: 'en-camera',
         type: DeviceType.camera,
         name: 'Doorbell camera',
+        nameKey: DemoNames.doorbellCamera,
         manufacturer: _maker,
         model: 'GL-CAM-1',
         firmware: '0.9.0',

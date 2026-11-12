@@ -16,7 +16,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Room {
 
- String get id; String get name;@JsonKey(unknownEnumValue: RoomKind.other) RoomKind get kind;
+ String get id; String get name;@JsonKey(unknownEnumValue: RoomKind.other) RoomKind get kind;/// Translation key of a seeded default [name]; null once renamed.
+/// The name itself is always shown as typed when there is no key.
+ String? get nameKey;
 /// Create a copy of Room
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +32,20 @@ $RoomCopyWith<Room> get copyWith => _$RoomCopyWithImpl<Room>(this as Room, _$ide
 @override
 bool operator ==(Object other) {
   final _this = this as Room;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Room&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.kind, _this.kind) || other.kind == _this.kind));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Room&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.nameKey, _this.nameKey) || other.nameKey == _this.nameKey));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Room;
-  return Object.hash(runtimeType,_this.id,_this.name,_this.kind);
+  return Object.hash(runtimeType,_this.id,_this.name,_this.kind,_this.nameKey);
 }
 
 @override
 String toString() {
   final _this = this as Room;
-  return 'Room(id: ${_this.id}, name: ${_this.name}, kind: ${_this.kind})';
+  return 'Room(id: ${_this.id}, name: ${_this.name}, kind: ${_this.kind}, nameKey: ${_this.nameKey})';
 }
 
 
@@ -54,7 +56,7 @@ abstract mixin class $RoomCopyWith<$Res>  {
   factory $RoomCopyWith(Room value, $Res Function(Room) _then) = _$RoomCopyWithImpl;
 @useResult
 $Res call({
- String id, String name,@JsonKey(unknownEnumValue: RoomKind.other) RoomKind kind
+ String id, String name,@JsonKey(unknownEnumValue: RoomKind.other) RoomKind kind, String? nameKey
 });
 
 
@@ -71,12 +73,13 @@ class _$RoomCopyWithImpl<$Res>
 
 /// Create a copy of Room
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? kind = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? kind = null,Object? nameKey = freezed,}) {
   return _then(Room(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
-as RoomKind,
+as RoomKind,nameKey: freezed == nameKey ? _self.nameKey : nameKey // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -161,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(unknownEnumValue: RoomKind.other)  RoomKind kind)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(unknownEnumValue: RoomKind.other)  RoomKind kind,  String? nameKey)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Room() when $default != null:
-return $default(_that.id,_that.name,_that.kind);case _:
+return $default(_that.id,_that.name,_that.kind,_that.nameKey);case _:
   return orElse();
 
 }
@@ -182,10 +185,10 @@ return $default(_that.id,_that.name,_that.kind);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(unknownEnumValue: RoomKind.other)  RoomKind kind)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(unknownEnumValue: RoomKind.other)  RoomKind kind,  String? nameKey)  $default,) {final _that = this;
 switch (_that) {
 case _Room():
-return $default(_that.id,_that.name,_that.kind);case _:
+return $default(_that.id,_that.name,_that.kind,_that.nameKey);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +205,10 @@ return $default(_that.id,_that.name,_that.kind);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name, @JsonKey(unknownEnumValue: RoomKind.other)  RoomKind kind)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name, @JsonKey(unknownEnumValue: RoomKind.other)  RoomKind kind,  String? nameKey)?  $default,) {final _that = this;
 switch (_that) {
 case _Room() when $default != null:
-return $default(_that.id,_that.name,_that.kind);case _:
+return $default(_that.id,_that.name,_that.kind,_that.nameKey);case _:
   return null;
 
 }
@@ -216,13 +219,16 @@ return $default(_that.id,_that.name,_that.kind);case _:
 /// @nodoc
 @JsonSerializable()
 
-class _Room implements Room {
-  const _Room({required this.id, required this.name, @JsonKey(unknownEnumValue: RoomKind.other) this.kind = RoomKind.other});
+class _Room extends Room {
+  const _Room({required this.id, required this.name, @JsonKey(unknownEnumValue: RoomKind.other) this.kind = RoomKind.other, this.nameKey}): super._();
   factory _Room.fromJson(Map<String, dynamic> json) => _$RoomFromJson(json);
 
 @override final  String id;
 @override final  String name;
 @override@JsonKey(unknownEnumValue: RoomKind.other) final  RoomKind kind;
+/// Translation key of a seeded default [name]; null once renamed.
+/// The name itself is always shown as typed when there is no key.
+@override final  String? nameKey;
 
 /// Create a copy of Room
 /// with the given fields replaced by the non-null parameter values.
@@ -237,18 +243,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Room&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.kind, kind) || other.kind == kind));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Room&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.nameKey, nameKey) || other.nameKey == nameKey));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,name,kind);
+    return Object.hash(runtimeType,id,name,kind,nameKey);
 }
 
 @override
 String toString() {
-    return 'Room(id: $id, name: $name, kind: $kind)';
+    return 'Room(id: $id, name: $name, kind: $kind, nameKey: $nameKey)';
 }
 
 
@@ -259,7 +265,7 @@ abstract mixin class _$RoomCopyWith<$Res> implements $RoomCopyWith<$Res> {
   factory _$RoomCopyWith(_Room value, $Res Function(_Room) _then) = __$RoomCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name,@JsonKey(unknownEnumValue: RoomKind.other) RoomKind kind
+ String id, String name,@JsonKey(unknownEnumValue: RoomKind.other) RoomKind kind, String? nameKey
 });
 
 
@@ -276,12 +282,13 @@ class __$RoomCopyWithImpl<$Res>
 
 /// Create a copy of Room
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? kind = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? kind = null,Object? nameKey = freezed,}) {
   return _then(_Room(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
-as RoomKind,
+as RoomKind,nameKey: freezed == nameKey ? _self.nameKey : nameKey // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -1135,7 +1142,9 @@ as Map<String, CapabilityPatch>,
 /// @nodoc
 mixin _$Scene {
 
- String get id; String get name; List<SceneAction> get actions;
+ String get id; String get name; List<SceneAction> get actions;/// Translation key of a seeded default [name]; null once renamed.
+/// The name itself is always shown as typed when there is no key.
+ String? get nameKey;
 /// Create a copy of Scene
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1149,20 +1158,20 @@ $SceneCopyWith<Scene> get copyWith => _$SceneCopyWithImpl<Scene>(this as Scene, 
 @override
 bool operator ==(Object other) {
   final _this = this as Scene;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Scene&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&const DeepCollectionEquality().equals(other.actions, _this.actions));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Scene&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&const DeepCollectionEquality().equals(other.actions, _this.actions)&&(identical(other.nameKey, _this.nameKey) || other.nameKey == _this.nameKey));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Scene;
-  return Object.hash(runtimeType,_this.id,_this.name,const DeepCollectionEquality().hash(_this.actions));
+  return Object.hash(runtimeType,_this.id,_this.name,const DeepCollectionEquality().hash(_this.actions),_this.nameKey);
 }
 
 @override
 String toString() {
   final _this = this as Scene;
-  return 'Scene(id: ${_this.id}, name: ${_this.name}, actions: ${_this.actions})';
+  return 'Scene(id: ${_this.id}, name: ${_this.name}, actions: ${_this.actions}, nameKey: ${_this.nameKey})';
 }
 
 
@@ -1173,7 +1182,7 @@ abstract mixin class $SceneCopyWith<$Res>  {
   factory $SceneCopyWith(Scene value, $Res Function(Scene) _then) = _$SceneCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, List<SceneAction> actions
+ String id, String name, List<SceneAction> actions, String? nameKey
 });
 
 
@@ -1190,12 +1199,13 @@ class _$SceneCopyWithImpl<$Res>
 
 /// Create a copy of Scene
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? actions = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? actions = null,Object? nameKey = freezed,}) {
   return _then(Scene(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,actions: null == actions ? _self.actions : actions // ignore: cast_nullable_to_non_nullable
-as List<SceneAction>,
+as List<SceneAction>,nameKey: freezed == nameKey ? _self.nameKey : nameKey // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -1280,10 +1290,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  List<SceneAction> actions)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  List<SceneAction> actions,  String? nameKey)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Scene() when $default != null:
-return $default(_that.id,_that.name,_that.actions);case _:
+return $default(_that.id,_that.name,_that.actions,_that.nameKey);case _:
   return orElse();
 
 }
@@ -1301,10 +1311,10 @@ return $default(_that.id,_that.name,_that.actions);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  List<SceneAction> actions)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  List<SceneAction> actions,  String? nameKey)  $default,) {final _that = this;
 switch (_that) {
 case _Scene():
-return $default(_that.id,_that.name,_that.actions);case _:
+return $default(_that.id,_that.name,_that.actions,_that.nameKey);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1321,10 +1331,10 @@ return $default(_that.id,_that.name,_that.actions);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  List<SceneAction> actions)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  List<SceneAction> actions,  String? nameKey)?  $default,) {final _that = this;
 switch (_that) {
 case _Scene() when $default != null:
-return $default(_that.id,_that.name,_that.actions);case _:
+return $default(_that.id,_that.name,_that.actions,_that.nameKey);case _:
   return null;
 
 }
@@ -1335,8 +1345,8 @@ return $default(_that.id,_that.name,_that.actions);case _:
 /// @nodoc
 @JsonSerializable()
 
-class _Scene implements Scene {
-  const _Scene({required this.id, required this.name,  List<SceneAction> actions = const <SceneAction>[]}): _actions = actions;
+class _Scene extends Scene {
+  const _Scene({required this.id, required this.name,  List<SceneAction> actions = const <SceneAction>[], this.nameKey}): _actions = actions,super._();
   factory _Scene.fromJson(Map<String, dynamic> json) => _$SceneFromJson(json);
 
 @override final  String id;
@@ -1348,6 +1358,9 @@ class _Scene implements Scene {
   return EqualUnmodifiableListView(_actions);
 }
 
+/// Translation key of a seeded default [name]; null once renamed.
+/// The name itself is always shown as typed when there is no key.
+@override final  String? nameKey;
 
 /// Create a copy of Scene
 /// with the given fields replaced by the non-null parameter values.
@@ -1362,18 +1375,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Scene&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&const DeepCollectionEquality().equals(other.actions, _actions));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Scene&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&const DeepCollectionEquality().equals(other.actions, _actions)&&(identical(other.nameKey, nameKey) || other.nameKey == nameKey));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,name,const DeepCollectionEquality().hash(_actions));
+    return Object.hash(runtimeType,id,name,const DeepCollectionEquality().hash(_actions),nameKey);
 }
 
 @override
 String toString() {
-    return 'Scene(id: $id, name: $name, actions: $actions)';
+    return 'Scene(id: $id, name: $name, actions: $actions, nameKey: $nameKey)';
 }
 
 
@@ -1384,7 +1397,7 @@ abstract mixin class _$SceneCopyWith<$Res> implements $SceneCopyWith<$Res> {
   factory _$SceneCopyWith(_Scene value, $Res Function(_Scene) _then) = __$SceneCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, List<SceneAction> actions
+ String id, String name, List<SceneAction> actions, String? nameKey
 });
 
 
@@ -1401,12 +1414,13 @@ class __$SceneCopyWithImpl<$Res>
 
 /// Create a copy of Scene
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? actions = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? actions = null,Object? nameKey = freezed,}) {
   return _then(_Scene(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,actions: null == actions ? _self._actions : actions // ignore: cast_nullable_to_non_nullable
-as List<SceneAction>,
+as List<SceneAction>,nameKey: freezed == nameKey ? _self.nameKey : nameKey // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

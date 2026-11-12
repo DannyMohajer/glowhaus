@@ -49,7 +49,7 @@ class PrimaryToggle {
 /// What the tile switch of [device] controls, or null if it has none.
 ///
 /// On/off channels first (all of them together), then a lock, then a
-/// thermostat (off, or back to its first available mode).
+/// thermostat (off, or back to the mode it last ran in).
 PrimaryToggle? primaryToggle(Device device) {
   final switches = device.capabilitiesOf(CapabilityKind.onOff).toList();
   if (switches.isNotEmpty) {
@@ -79,11 +79,18 @@ PrimaryToggle? primaryToggle(Device device) {
     final modes =
         thermostat.thermostatConfig?.modes ??
         const [ThermostatMode.off, ThermostatMode.heat];
-    final onMode = modes.firstWhere(
-      (mode) => mode != ThermostatMode.off,
-      orElse: () => ThermostatMode.heat,
-    );
-    final mode = device.stateOf<ThermostatState>(thermostat.id)?.mode;
+    final state = device.stateOf<ThermostatState>(thermostat.id);
+    final mode = state?.mode;
+    // Resume the last active mode the device reported; fall back to the
+    // first mode it supports when it never ran or does not report one.
+    final onMode = switch (state?.lastActiveMode) {
+      final last? when last != ThermostatMode.off && modes.contains(last) =>
+        last,
+      _ => modes.firstWhere(
+        (mode) => mode != ThermostatMode.off,
+        orElse: () => ThermostatMode.heat,
+      ),
+    };
     return PrimaryToggle(
       on: mode != null && mode != ThermostatMode.off,
       patchesFor: ({required on}) => {

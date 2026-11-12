@@ -40,6 +40,9 @@ abstract class Device with _$Device {
     String? firmware,
     @Default(<String, CapabilityState>{}) Map<String, CapabilityState> state,
     @Default(DeviceAvailability.unknown) DeviceAvailability availability,
+
+    /// Translation key of the factory default [name]; null once renamed.
+    String? nameKey,
   }) = _Device;
 
   /// Builds a device from a discovery announce. Room assignment is owned by
@@ -58,9 +61,13 @@ abstract class Device with _$Device {
     manufacturer: descriptor.manufacturer,
     model: descriptor.model,
     firmware: descriptor.firmware,
+    nameKey: descriptor.nameKey,
   );
 
   const new _();
+
+  /// A user-chosen name is shown as typed, so renaming drops [nameKey].
+  Device renamed(String name) => copyWith(name: name, nameKey: null);
 
   bool get isOnline => availability == DeviceAvailability.online;
 

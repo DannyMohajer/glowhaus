@@ -15,7 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Device {
 
- String get id; String get homeId; DeviceType get type; String get name; List<Capability> get capabilities; String? get roomId; String? get manufacturer; String? get model; String? get firmware; Map<String, CapabilityState> get state; DeviceAvailability get availability;
+ String get id; String get homeId; DeviceType get type; String get name; List<Capability> get capabilities; String? get roomId; String? get manufacturer; String? get model; String? get firmware; Map<String, CapabilityState> get state; DeviceAvailability get availability;/// Translation key of the factory default [name]; null once renamed.
+ String? get nameKey;
 /// Create a copy of Device
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +28,20 @@ $DeviceCopyWith<Device> get copyWith => _$DeviceCopyWithImpl<Device>(this as Dev
 @override
 bool operator ==(Object other) {
   final _this = this as Device;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Device&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.homeId, _this.homeId) || other.homeId == _this.homeId)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.name, _this.name) || other.name == _this.name)&&const DeepCollectionEquality().equals(other.capabilities, _this.capabilities)&&(identical(other.roomId, _this.roomId) || other.roomId == _this.roomId)&&(identical(other.manufacturer, _this.manufacturer) || other.manufacturer == _this.manufacturer)&&(identical(other.model, _this.model) || other.model == _this.model)&&(identical(other.firmware, _this.firmware) || other.firmware == _this.firmware)&&const DeepCollectionEquality().equals(other.state, _this.state)&&(identical(other.availability, _this.availability) || other.availability == _this.availability));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Device&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.homeId, _this.homeId) || other.homeId == _this.homeId)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.name, _this.name) || other.name == _this.name)&&const DeepCollectionEquality().equals(other.capabilities, _this.capabilities)&&(identical(other.roomId, _this.roomId) || other.roomId == _this.roomId)&&(identical(other.manufacturer, _this.manufacturer) || other.manufacturer == _this.manufacturer)&&(identical(other.model, _this.model) || other.model == _this.model)&&(identical(other.firmware, _this.firmware) || other.firmware == _this.firmware)&&const DeepCollectionEquality().equals(other.state, _this.state)&&(identical(other.availability, _this.availability) || other.availability == _this.availability)&&(identical(other.nameKey, _this.nameKey) || other.nameKey == _this.nameKey));
 }
 
 
 @override
 int get hashCode {
   final _this = this as Device;
-  return Object.hash(runtimeType,_this.id,_this.homeId,_this.type,_this.name,const DeepCollectionEquality().hash(_this.capabilities),_this.roomId,_this.manufacturer,_this.model,_this.firmware,const DeepCollectionEquality().hash(_this.state),_this.availability);
+  return Object.hash(runtimeType,_this.id,_this.homeId,_this.type,_this.name,const DeepCollectionEquality().hash(_this.capabilities),_this.roomId,_this.manufacturer,_this.model,_this.firmware,const DeepCollectionEquality().hash(_this.state),_this.availability,_this.nameKey);
 }
 
 @override
 String toString() {
   final _this = this as Device;
-  return 'Device(id: ${_this.id}, homeId: ${_this.homeId}, type: ${_this.type}, name: ${_this.name}, capabilities: ${_this.capabilities}, roomId: ${_this.roomId}, manufacturer: ${_this.manufacturer}, model: ${_this.model}, firmware: ${_this.firmware}, state: ${_this.state}, availability: ${_this.availability})';
+  return 'Device(id: ${_this.id}, homeId: ${_this.homeId}, type: ${_this.type}, name: ${_this.name}, capabilities: ${_this.capabilities}, roomId: ${_this.roomId}, manufacturer: ${_this.manufacturer}, model: ${_this.model}, firmware: ${_this.firmware}, state: ${_this.state}, availability: ${_this.availability}, nameKey: ${_this.nameKey})';
 }
 
 
@@ -51,7 +52,7 @@ abstract mixin class $DeviceCopyWith<$Res>  {
   factory $DeviceCopyWith(Device value, $Res Function(Device) _then) = _$DeviceCopyWithImpl;
 @useResult
 $Res call({
- String id, String homeId, DeviceType type, String name, List<Capability> capabilities, String? roomId, String? manufacturer, String? model, String? firmware, Map<String, CapabilityState> state, DeviceAvailability availability
+ String id, String homeId, DeviceType type, String name, List<Capability> capabilities, String? roomId, String? manufacturer, String? model, String? firmware, Map<String, CapabilityState> state, DeviceAvailability availability, String? nameKey
 });
 
 
@@ -68,7 +69,7 @@ class _$DeviceCopyWithImpl<$Res>
 
 /// Create a copy of Device
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? homeId = null,Object? type = null,Object? name = null,Object? capabilities = null,Object? roomId = freezed,Object? manufacturer = freezed,Object? model = freezed,Object? firmware = freezed,Object? state = null,Object? availability = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? homeId = null,Object? type = null,Object? name = null,Object? capabilities = null,Object? roomId = freezed,Object? manufacturer = freezed,Object? model = freezed,Object? firmware = freezed,Object? state = null,Object? availability = null,Object? nameKey = freezed,}) {
   return _then(Device(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,homeId: null == homeId ? _self.homeId : homeId // ignore: cast_nullable_to_non_nullable
@@ -81,7 +82,8 @@ as String?,model: freezed == model ? _self.model : model // ignore: cast_nullabl
 as String?,firmware: freezed == firmware ? _self.firmware : firmware // ignore: cast_nullable_to_non_nullable
 as String?,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
 as Map<String, CapabilityState>,availability: null == availability ? _self.availability : availability // ignore: cast_nullable_to_non_nullable
-as DeviceAvailability,
+as DeviceAvailability,nameKey: freezed == nameKey ? _self.nameKey : nameKey // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -166,10 +168,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String homeId,  DeviceType type,  String name,  List<Capability> capabilities,  String? roomId,  String? manufacturer,  String? model,  String? firmware,  Map<String, CapabilityState> state,  DeviceAvailability availability)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String homeId,  DeviceType type,  String name,  List<Capability> capabilities,  String? roomId,  String? manufacturer,  String? model,  String? firmware,  Map<String, CapabilityState> state,  DeviceAvailability availability,  String? nameKey)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Device() when $default != null:
-return $default(_that.id,_that.homeId,_that.type,_that.name,_that.capabilities,_that.roomId,_that.manufacturer,_that.model,_that.firmware,_that.state,_that.availability);case _:
+return $default(_that.id,_that.homeId,_that.type,_that.name,_that.capabilities,_that.roomId,_that.manufacturer,_that.model,_that.firmware,_that.state,_that.availability,_that.nameKey);case _:
   return orElse();
 
 }
@@ -187,10 +189,10 @@ return $default(_that.id,_that.homeId,_that.type,_that.name,_that.capabilities,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String homeId,  DeviceType type,  String name,  List<Capability> capabilities,  String? roomId,  String? manufacturer,  String? model,  String? firmware,  Map<String, CapabilityState> state,  DeviceAvailability availability)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String homeId,  DeviceType type,  String name,  List<Capability> capabilities,  String? roomId,  String? manufacturer,  String? model,  String? firmware,  Map<String, CapabilityState> state,  DeviceAvailability availability,  String? nameKey)  $default,) {final _that = this;
 switch (_that) {
 case _Device():
-return $default(_that.id,_that.homeId,_that.type,_that.name,_that.capabilities,_that.roomId,_that.manufacturer,_that.model,_that.firmware,_that.state,_that.availability);case _:
+return $default(_that.id,_that.homeId,_that.type,_that.name,_that.capabilities,_that.roomId,_that.manufacturer,_that.model,_that.firmware,_that.state,_that.availability,_that.nameKey);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -207,10 +209,10 @@ return $default(_that.id,_that.homeId,_that.type,_that.name,_that.capabilities,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String homeId,  DeviceType type,  String name,  List<Capability> capabilities,  String? roomId,  String? manufacturer,  String? model,  String? firmware,  Map<String, CapabilityState> state,  DeviceAvailability availability)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String homeId,  DeviceType type,  String name,  List<Capability> capabilities,  String? roomId,  String? manufacturer,  String? model,  String? firmware,  Map<String, CapabilityState> state,  DeviceAvailability availability,  String? nameKey)?  $default,) {final _that = this;
 switch (_that) {
 case _Device() when $default != null:
-return $default(_that.id,_that.homeId,_that.type,_that.name,_that.capabilities,_that.roomId,_that.manufacturer,_that.model,_that.firmware,_that.state,_that.availability);case _:
+return $default(_that.id,_that.homeId,_that.type,_that.name,_that.capabilities,_that.roomId,_that.manufacturer,_that.model,_that.firmware,_that.state,_that.availability,_that.nameKey);case _:
   return null;
 
 }
@@ -222,7 +224,7 @@ return $default(_that.id,_that.homeId,_that.type,_that.name,_that.capabilities,_
 
 
 class _Device extends Device {
-  const _Device({required this.id, required this.homeId, required this.type, required this.name, required  List<Capability> capabilities, this.roomId, this.manufacturer, this.model, this.firmware,  Map<String, CapabilityState> state = const <String, CapabilityState>{}, this.availability = DeviceAvailability.unknown}): _capabilities = capabilities,_state = state,super._();
+  const _Device({required this.id, required this.homeId, required this.type, required this.name, required  List<Capability> capabilities, this.roomId, this.manufacturer, this.model, this.firmware,  Map<String, CapabilityState> state = const <String, CapabilityState>{}, this.availability = DeviceAvailability.unknown, this.nameKey}): _capabilities = capabilities,_state = state,super._();
   
 
 @override final  String id;
@@ -248,6 +250,8 @@ class _Device extends Device {
 }
 
 @override@JsonKey() final  DeviceAvailability availability;
+/// Translation key of the factory default [name]; null once renamed.
+@override final  String? nameKey;
 
 /// Create a copy of Device
 /// with the given fields replaced by the non-null parameter values.
@@ -259,18 +263,18 @@ _$DeviceCopyWith<_Device> get copyWith => __$DeviceCopyWithImpl<_Device>(this, _
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Device&&(identical(other.id, id) || other.id == id)&&(identical(other.homeId, homeId) || other.homeId == homeId)&&(identical(other.type, type) || other.type == type)&&(identical(other.name, name) || other.name == name)&&const DeepCollectionEquality().equals(other.capabilities, _capabilities)&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.manufacturer, manufacturer) || other.manufacturer == manufacturer)&&(identical(other.model, model) || other.model == model)&&(identical(other.firmware, firmware) || other.firmware == firmware)&&const DeepCollectionEquality().equals(other.state, _state)&&(identical(other.availability, availability) || other.availability == availability));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Device&&(identical(other.id, id) || other.id == id)&&(identical(other.homeId, homeId) || other.homeId == homeId)&&(identical(other.type, type) || other.type == type)&&(identical(other.name, name) || other.name == name)&&const DeepCollectionEquality().equals(other.capabilities, _capabilities)&&(identical(other.roomId, roomId) || other.roomId == roomId)&&(identical(other.manufacturer, manufacturer) || other.manufacturer == manufacturer)&&(identical(other.model, model) || other.model == model)&&(identical(other.firmware, firmware) || other.firmware == firmware)&&const DeepCollectionEquality().equals(other.state, _state)&&(identical(other.availability, availability) || other.availability == availability)&&(identical(other.nameKey, nameKey) || other.nameKey == nameKey));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,homeId,type,name,const DeepCollectionEquality().hash(_capabilities),roomId,manufacturer,model,firmware,const DeepCollectionEquality().hash(_state),availability);
+    return Object.hash(runtimeType,id,homeId,type,name,const DeepCollectionEquality().hash(_capabilities),roomId,manufacturer,model,firmware,const DeepCollectionEquality().hash(_state),availability,nameKey);
 }
 
 @override
 String toString() {
-    return 'Device(id: $id, homeId: $homeId, type: $type, name: $name, capabilities: $capabilities, roomId: $roomId, manufacturer: $manufacturer, model: $model, firmware: $firmware, state: $state, availability: $availability)';
+    return 'Device(id: $id, homeId: $homeId, type: $type, name: $name, capabilities: $capabilities, roomId: $roomId, manufacturer: $manufacturer, model: $model, firmware: $firmware, state: $state, availability: $availability, nameKey: $nameKey)';
 }
 
 
@@ -281,7 +285,7 @@ abstract mixin class _$DeviceCopyWith<$Res> implements $DeviceCopyWith<$Res> {
   factory _$DeviceCopyWith(_Device value, $Res Function(_Device) _then) = __$DeviceCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String homeId, DeviceType type, String name, List<Capability> capabilities, String? roomId, String? manufacturer, String? model, String? firmware, Map<String, CapabilityState> state, DeviceAvailability availability
+ String id, String homeId, DeviceType type, String name, List<Capability> capabilities, String? roomId, String? manufacturer, String? model, String? firmware, Map<String, CapabilityState> state, DeviceAvailability availability, String? nameKey
 });
 
 
@@ -298,7 +302,7 @@ class __$DeviceCopyWithImpl<$Res>
 
 /// Create a copy of Device
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? homeId = null,Object? type = null,Object? name = null,Object? capabilities = null,Object? roomId = freezed,Object? manufacturer = freezed,Object? model = freezed,Object? firmware = freezed,Object? state = null,Object? availability = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? homeId = null,Object? type = null,Object? name = null,Object? capabilities = null,Object? roomId = freezed,Object? manufacturer = freezed,Object? model = freezed,Object? firmware = freezed,Object? state = null,Object? availability = null,Object? nameKey = freezed,}) {
   return _then(_Device(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,homeId: null == homeId ? _self.homeId : homeId // ignore: cast_nullable_to_non_nullable
@@ -311,7 +315,8 @@ as String?,model: freezed == model ? _self.model : model // ignore: cast_nullabl
 as String?,firmware: freezed == firmware ? _self.firmware : firmware // ignore: cast_nullable_to_non_nullable
 as String?,state: null == state ? _self._state : state // ignore: cast_nullable_to_non_nullable
 as Map<String, CapabilityState>,availability: null == availability ? _self.availability : availability // ignore: cast_nullable_to_non_nullable
-as DeviceAvailability,
+as DeviceAvailability,nameKey: freezed == nameKey ? _self.nameKey : nameKey // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

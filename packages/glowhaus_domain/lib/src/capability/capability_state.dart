@@ -28,6 +28,10 @@ sealed class CapabilityState with _$CapabilityState {
     required ThermostatMode mode,
     FanMode? fan,
     @Default(ThermostatAction.idle) ThermostatAction action,
+
+    /// The mode the device resumes when switched back on: the last mode
+    /// other than `off`. Reported by the device so every app agrees.
+    ThermostatMode? lastActiveMode,
   }) = ThermostatState;
 
   const factory powerMeter({required double watts, double? energyKwh}) =
