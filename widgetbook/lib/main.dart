@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:glowhaus_ui/glowhaus_ui.dart';
+import 'package:glowhaus_widgetbook/home_page.dart';
 import 'package:glowhaus_widgetbook/samples.dart';
 import 'package:widgetbook/widgetbook.dart';
 
@@ -22,6 +23,7 @@ class GlowhausWidgetbook extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Widgetbook.material(
+      home: const CatalogHomePage(),
       addons: [
         ThemeAddon<Brightness>(
           themes: const [

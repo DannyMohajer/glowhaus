@@ -177,7 +177,7 @@ void main() {
 
     test('Persian uses Persian digits', () {
       expect(deviceStatus(Readings(fa), _demo('lr-ceiling')), 'روشن، ۷۰٪');
-      expect(Readings(fa).temperature(22.5), '۲۲٫۵°');
+      expect(Readings(fa).temperature(22.5), '\u200E۲۲٫۵°\u200E');
     });
   });
 
@@ -245,5 +245,32 @@ void main() {
       expect(channel.copyWith(labelKey: null).displayLabel(fa), channel.label);
       expect(Capability.of(CapabilityKind.onOff).displayLabel(fa), isNull);
     });
+  });
+
+  test('Persian keeps the degree sign right of the digits everywhere', () {
+    final value = Readings(fa).temperature(22.5);
+    bool degreeRightOfDigits(String text) {
+      final painter = TextPainter(
+        text: TextSpan(text: text, style: const TextStyle(fontSize: 10)),
+        textDirection: TextDirection.rtl,
+      )..layout();
+      double x(int i) => painter
+          .getBoxesForSelection(
+            TextSelection(baseOffset: i, extentOffset: i + 1),
+          )
+          .first
+          .left;
+      return x(text.indexOf('°')) > x(text.indexOf(RegExp('[۰-۹]')));
+    }
+
+    // Alone (dial), before Persian text (tiles), after it ("Now"), between.
+    for (final text in [
+      value,
+      '$value${fa.listSeparator}${fa.stateHeating}',
+      fa.currentTemperature(value),
+      'اتاق${fa.listSeparator}$value${fa.listSeparator}گرم',
+    ]) {
+      expect(degreeRightOfDigits(text), isTrue, reason: text);
+    }
   });
 }

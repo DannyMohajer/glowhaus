@@ -134,7 +134,7 @@ void main() {
       expect(find.text('۵ دستگاه فعال'), findsOneWidget);
       expect(find.text('اتاق نشیمن'), findsWidgets);
       expect(find.text('۴ دستگاه، ۳ روشن'), findsOneWidget);
-      expect(find.text('۲۰٫۸°'), findsOneWidget);
+      expect(find.text('\u200E۲۰٫۸°\u200E'), findsOneWidget);
       expect(find.text('Living Room'), findsNothing);
 
       // Mirrored: the room icon sits to the right of the room title.

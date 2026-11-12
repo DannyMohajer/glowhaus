@@ -330,7 +330,7 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String temperatureValue(String value) {
-    return '$value°';
+    return '‎$value°‎';
   }
 
   @override

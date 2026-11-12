@@ -83,7 +83,7 @@
   "stateChannelsOn": "{on} از {total} روشن",
   "stateLive": "زنده",
   "stateUnknown": "در انتظار دستگاه…",
-  "temperatureValue": "{value}°",
+  "temperatureValue": "‎{value}°‎",
   "wattsValue": "{value} وات",
   "kwhValue": "{value} کیلووات‌ساعت",
   "detailPower": "برق",

@@ -598,7 +598,7 @@ abstract class AppLocalizations {
   /// **'Waiting for device…'**
   String get stateUnknown;
 
-  /// No description provided for @temperatureValue.
+  /// A temperature with its unit. Right-to-left languages wrap it in U+200E marks so the degree sign stays right of the digits wherever it appears.
   ///
   /// In en, this message translates to:
   /// **'{value}°'**

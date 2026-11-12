@@ -164,7 +164,8 @@
       "value": {
         "type": "String"
       }
-    }
+    },
+    "description": "A temperature with its unit. Right-to-left languages wrap it in U+200E marks so the degree sign stays right of the digits wherever it appears."
   },
   "wattsValue": "{value} W",
   "@wattsValue": {
