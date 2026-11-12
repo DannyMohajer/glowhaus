@@ -8,7 +8,11 @@ The key words MUST, SHOULD and MAY are used as in RFC 2119.
 
 ## 1. Overview
 
-- Transport: MQTT 3.1.1 or 5. Payloads are UTF-8 JSON objects.
+- Transport: **MQTT 3.1.1**. Payloads are UTF-8 JSON objects. An MQTT 5
+  broker works too, but nothing in this protocol uses MQTT 5 features: there
+  are no user properties, no message expiry, no shared subscriptions. The
+  `ts` field does what message expiry would (section 8.1), so the protocol
+  behaves the same on every broker.
 - Every payload carries the protocol version: `"v": 1`.
 - A **home** contains **devices**. A device exposes **capabilities**
   (`onOff`, `brightness`, ...). State and commands are both expressed as
@@ -39,11 +43,29 @@ Timestamps (`ts`) are integer milliseconds since the Unix epoch, UTC.
 
 | Topic | Direction | QoS | Retained | Purpose |
 |---|---|---|---|---|
-| `glowhaus/{homeId}/discovery` | both | 1 | no | Device announcements and app queries |
+| `glowhaus/{homeId}/discovery` | both | 0 | no | Device announcements and app queries |
 | `glowhaus/{homeId}/{deviceId}/set` | app to device | 1 | **no** | Commands |
 | `glowhaus/{homeId}/{deviceId}/ack` | device to app | 1 | no | Command results |
 | `glowhaus/{homeId}/{deviceId}/state` | device to app | 1 | **yes** | Full current state |
 | `glowhaus/{homeId}/{deviceId}/availability` | device to app | 1 | **yes** | Online / offline (last will) |
+
+QoS, in detail:
+
+- `set` and `ack` are QoS 1 in both the publish and the subscription. A
+  command may therefore be delivered twice; section 8.1 says how a device
+  stays idempotent. An ack may be delivered twice; an app ignores an ack for
+  a command that is no longer pending.
+- `state` and `availability` are QoS 1 and retained, so a client that
+  connects later gets the latest value at once and a lost publish is retried.
+- `discovery` is QoS 0: best effort. Announces repeat (on connect, on every
+  query), so losing one costs nothing; a lost query is answered by the next
+  one. Subscribe with QoS 0 as well; a subscription at a higher QoS gains
+  nothing because the broker delivers at the lower of the two.
+- A broker delivers every message at the lower of the publish QoS and the
+  subscription QoS. Subscribing to `state` at QoS 0 would silently make it
+  best effort; apps MUST subscribe to `set`, `ack`, `state` and
+  `availability` at QoS 1.
+- QoS 2 is never used.
 
 Typical subscriptions:
 
@@ -205,6 +227,9 @@ Topic: `glowhaus/{homeId}/{deviceId}/set`.
 - `ts` is required. A device MUST reject a command whose `ts` is more than
   10 seconds older than its own clock with error `expired`, without applying
   it. Devices therefore need a synchronized clock (SNTP or equivalent).
+  This is the protocol's only command expiry. It is deliberately not the
+  MQTT 5 message-expiry property, which MQTT 3.1.1 lacks and which would
+  make a door unlock late on one broker and not on another.
 - A command is **atomic**: the device validates everything first and either
   applies all of it or none of it. One unknown capability id or one bad value
   rejects the whole command.
@@ -606,6 +631,13 @@ a throwaway instance with no secrets and no real devices.
 
 - Topic strings are built and parsed only by `TopicCodec` in
   `packages/glowhaus_domain`.
+- `packages/glowhaus_mqtt` holds the `MqttConnection` interface (connect with
+  a will, subscribe, publish, messages) that a real MQTT client and the
+  `InMemoryBroker` both implement. The in-memory broker honours the rules
+  above that matter here: retained messages, wildcard matching, the last
+  will on a dropped connection, QoS downgrade to the lower of the two sides,
+  and loss only for QoS 0. It is the broker behind the offline demo, the
+  tests, and the in-browser device panel.
 - The payloads above map one to one to the protocol models in the same package.
 - `SimulatedTransport` does not use MQTT, but its devices follow the same
   rules (atomic commands, error codes, state after ack), so behaviour seen in

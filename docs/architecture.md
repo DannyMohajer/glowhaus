@@ -13,6 +13,7 @@ graph TD
   wb["widgetbook<br/>component catalog"]
   ui["packages/glowhaus_ui<br/>design system (Flutter)"]
   transport["packages/glowhaus_transport<br/>Transport + SimulatedTransport (pure Dart)"]
+  mqtt["packages/glowhaus_mqtt<br/>MqttConnection + InMemoryBroker (pure Dart)"]
   domain["packages/glowhaus_domain<br/>models + protocol (pure Dart)"]
 
   app --> ui
@@ -20,12 +21,14 @@ graph TD
   app --> domain
   wb --> ui
   transport --> domain
+  transport --> mqtt
 ```
 
 | Package | Depends on | Contains | Must never contain |
 |---|---|---|---|
 | `glowhaus_domain` | Dart only | `Home`, `Room`, `Device`, `Capability`, `Scene`, `User`/`Role`, command lifecycle, protocol payload models, the topic codec | Flutter imports, I/O, timers |
-| `glowhaus_transport` | `glowhaus_domain` | `Transport` interface, `SimulatedTransport`, seeded demo home | Flutter imports, UI concepts |
+| `glowhaus_mqtt` | Dart only | `MqttConnection` interface, QoS and topic matching, `InMemoryBroker` | Glowhaus topics or payloads, Flutter imports |
+| `glowhaus_transport` | `glowhaus_domain`, `glowhaus_mqtt` | `Transport` interface, `SimulatedTransport`, seeded demo home | Flutter imports, UI concepts |
 | `glowhaus_ui` | Flutter only | Tokens, themes, components | Domain models, blocs, strings that need translating |
 | `apps/glowhaus` | all three | Features (bloc + view), repositories, routing, DI, l10n | Topic strings, raw JSON handling |
 | `widgetbook` | `glowhaus_ui` | One use-case per component | App logic |
