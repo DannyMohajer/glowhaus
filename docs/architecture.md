@@ -82,6 +82,10 @@ Layers, top to bottom:
    plus the patches of commands still pending. Because the overlay lives here,
    the dashboard card, the room tile and the detail screen all show the same
    pending state and roll back together.
+   An overlay entry is removed when a reported state **matches** the command's
+   values (not when the ack arrives), or when the command fails or times out.
+   A curtain therefore shows its new target immediately while the reported
+   `position` catches up.
 4. **Transport**: the seam. See below.
 
 App-wide state is limited to what is truly app-wide: `SettingsCubit` (theme

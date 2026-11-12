@@ -52,7 +52,8 @@ Typical subscriptions:
 
 Rules:
 
-- Commands MUST NOT be retained.
+- `set` MUST NEVER be published with the retain flag. A device MUST ignore any
+  `set` message that arrives flagged as retained.
 - Devices MUST connect with a clean session (clean start, no session expiry)
   so commands sent while the device was offline are not delivered later. A door
   must not unlock ten minutes after someone tapped the button.
@@ -172,6 +173,8 @@ Topic: `glowhaus/{homeId}/{deviceId}/state`, retained.
   object (section 9).
 - A state message is always a **full snapshot** of every capability, never a
   delta. A receiver can replace what it has.
+- An app MUST ignore fields it does not know inside a capability's state, and
+  entries whose capability id or kind it does not know.
 - A device MUST publish state after connecting and whenever any value changes,
   whatever the cause (command, physical button, schedule).
 - Fast-changing values (power, position while moving) SHOULD be limited to
@@ -197,8 +200,12 @@ Topic: `glowhaus/{homeId}/{deviceId}/set`.
 
 - `set` is keyed by capability `id` and contains only the fields to change.
   Only writable fields (section 9) may appear.
+- `ts` is required. A device MUST reject a command whose `ts` is more than
+  10 seconds older than its own clock with error `expired`, without applying
+  it. Devices therefore need a synchronized clock (SNTP or equivalent).
 - A command is **atomic**: the device validates everything first and either
-  applies all of it or none of it.
+  applies all of it or none of it. One unknown capability id or one bad value
+  rejects the whole command.
 - A device MUST remember at least the last 8 `commandId`s it handled. If one
   arrives again (QoS 1 redelivery) it re-sends the same ack and does not apply
   the command twice.
@@ -237,12 +244,13 @@ Failure:
 |---|---|
 | `invalid_payload` | Not valid JSON, or required fields missing or of the wrong type |
 | `unsupported_version` | `v` is higher than the device supports |
-| `unknown_capability` | A key in `set` is not a capability id of this device |
+| `unsupported_capability` | A key in `set` is not a capability id of this device. The whole command is rejected |
 | `read_only` | A field in `set` is not writable |
 | `out_of_range` | A value is outside the allowed range or not an allowed option |
 | `busy` | The device cannot take the command right now; try again |
 | `hardware_fault` | The device tried and failed (jammed lock, blocked motor) |
 | `not_allowed` | Refused by device policy (child lock, local override) |
+| `expired` | `ts` is more than 10 s in the past; the command was not applied |
 
 Apps MUST treat unknown codes as a generic failure.
 
@@ -258,6 +266,11 @@ pending ─────────────────▶ acked
 ```
 
 - While `pending`, an app MAY show the requested value optimistically.
+- An ack does **not** end the optimistic display. The app keeps showing the
+  requested value until a `state` message arrives whose values match what the
+  command asked for; only then is the reported state shown again. If no
+  matching state arrives within 10 s of the ack, the app drops the optimistic
+  value and shows whatever the device last reported.
 - On `failed` or `timedOut` it MUST fall back to the last state the device
   reported.
 - Acks are visible to every app in the home. An app ignores acks whose
@@ -298,10 +311,14 @@ For curtains, blinds and shutters. 0 is fully closed, 100 fully open.
 
 | Field | Type | | Notes |
 |---|---|---|---|
-| `position` | int 0..100 | | Where it is now |
-| `target` | int 0..100 | W | Where it is going |
-| `motion` | `opening` \| `closing` \| `stopped` | | |
+| `position` | int 0..100 | | Current position |
+| `target` | int 0..100 | W | Position it is moving to. Equals `position` when at rest |
+| `moving` | bool | | True while the motor is running |
 | `stop` | `true` | W | Write-only. Stops movement; `target` becomes the current position. Never appears in state |
+
+A long-running device acks when it starts moving and then publishes state
+(about once per second) with `moving: true` and the advancing `position` until
+it arrives, followed by a final state with `moving: false`.
 
 ### `thermostat`
 | Field | Type | | Notes |
@@ -431,7 +448,7 @@ Three capabilities of the same kind, told apart by `id`.
 ```
 ```json
 { "v": 1, "ts": 1794500000000,
-  "state": { "position": { "position": 40, "target": 100, "motion": "opening" } } }
+  "state": { "position": { "position": 40, "target": 100, "moving": true } } }
 ```
 ```json
 { "v": 1, "commandId": "c-1005", "ts": 1794500001000,
@@ -555,7 +572,8 @@ Sensors have no writable fields. Any command gets `read_only`.
 4. Publish your full `state` (retained).
 5. Subscribe to your `set` topic and to `discovery`.
 6. On `query`: wait 0 to 500 ms, then announce again.
-7. On `set`: validate everything, apply all or nothing, ack within 2 s, then
+7. On `set`: ignore it if retained; reject with `expired` if `ts` is older
+   than 10 s; validate everything, apply all or nothing, ack within 2 s, then
    publish state. Re-ack duplicate `commandId`s without re-applying.
 8. On any local change: publish state.
 9. On removal: publish `bye`, then empty retained payloads to `state` and
@@ -563,10 +581,23 @@ Sensors have no writable fields. Any command gets `read_only`.
 
 ## 12. Security
 
-The protocol does not define authentication. Deployments SHOULD use TLS,
-per-client credentials, and broker ACLs that restrict each device to its own
-topics and each app to the homes its user belongs to. The public Glowhaus demo
-uses a throwaway broker with no secrets and no real devices.
+The protocol itself carries no authentication; it relies on the broker.
+A real deployment MUST provide:
+
+- **Encryption**: MQTT over TLS (port 8883) for native clients and devices,
+  MQTT over secure WebSocket (WSS) for web clients. No plaintext listeners.
+- **Per-home credentials**: every app session and every device authenticates
+  with credentials that are scoped to one home (username/password or client
+  certificate). Credentials are never shared between homes.
+- **Topic ACLs per `homeId`**: a client may only touch `glowhaus/{homeId}/#`
+  for its own home. Within that, a device may publish only to its own `state`,
+  `ack`, `availability` and to `discovery`, and subscribe only to its own
+  `set` and to `discovery`. Apps may publish to `set` and `discovery` and
+  subscribe to the rest.
+
+Broker configuration implementing this ships with milestone 3. Until then the
+app runs against the in-memory simulation only. The public demo broker will be
+a throwaway instance with no secrets and no real devices.
 
 ## 13. In the Glowhaus codebase
 

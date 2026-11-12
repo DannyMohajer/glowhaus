@@ -1,4 +1,4 @@
-package dev.glowhaus.glowhaus
+package com.danielmohajer.glowhaus
 
 import io.flutter.embedding.android.FlutterActivity
 
