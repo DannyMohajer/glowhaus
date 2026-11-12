@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: 3.47.7
+
+jobs:
+  analyze:
+    name: Analyze, format, codegen
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+
+      # Generated code is committed. Regenerate it and fail if anything
+      # changed, so a stale freezed/json/injectable/l10n file cannot merge.
+      - name: Codegen is up to date
+        run: |
+          dart run melos run codegen
+          (cd apps/glowhaus && flutter gen-l10n)
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Generated files are out of date. Run 'dart run melos run codegen' and 'flutter gen-l10n', then commit."
+            git status --porcelain
+            git --no-pager diff --stat
+            exit 1
+          fi
+
+      - name: Format
+        run: dart run melos run format
+      - name: Analyze (zero warnings, zero infos)
+        run: dart run melos run analyze
+
+  test:
+    name: Test (all packages, goldens)
+    # Goldens are rendered on macOS (real font rasterization differs per OS).
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: dart run melos run test
+      - name: Keep golden failures
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-failures
+          path: '**/test/**/failures/'
+          if-no-files-found: ignore
+
+  build-web:
+    name: Build web (app + Widgetbook)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      # Served from https://<owner>.github.io/<repo>/, Widgetbook at /widgetbook/.
+      - run: tool/build_web.sh "/${{ github.event.repository.name }}/"
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: build/site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [analyze, test, build-web]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
