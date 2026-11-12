@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:glowhaus/app/router/routes.dart';
 import 'package:glowhaus/features/dashboard/view/dashboard_screen.dart';
+import 'package:glowhaus/features/device/view/device_pane.dart';
+import 'package:glowhaus/features/rooms/view/rooms_panes.dart';
 import 'package:glowhaus/features/settings/cubit/settings_state.dart';
 import 'package:glowhaus/features/settings/view/settings_screen.dart';
 import 'package:glowhaus/features/welcome/view/welcome_screen.dart';
@@ -44,17 +46,34 @@ void main() {
     final router = await tester.pumpApp(
       location: Routes.device('living-room', 'lr-lamp'),
     );
-    expect(find.text('lr-lamp'), findsOneWidget);
-    expect(find.text('living-room'), findsNothing);
+    expect(find.byType(DevicePane), findsOneWidget);
+    expect(find.byType(RoomPane), findsNothing);
+    expect(find.byType(RoomsListPane), findsNothing);
+    expect(find.text('Floor lamp'), findsOneWidget);
 
     await tester.tap(find.bySemanticsLabel('Back'));
     await tester.pumpAndSettle();
     expect(router.state.uri.path, Routes.room('living-room'));
-    expect(find.text('living-room'), findsOneWidget);
+    expect(find.byType(RoomPane), findsOneWidget);
 
     await tester.tap(find.bySemanticsLabel('Back'));
     await tester.pumpAndSettle();
     expect(router.state.uri.path, Routes.rooms);
+    expect(find.byType(RoomsListPane), findsOneWidget);
+  });
+
+  testWidgets('phone: rooms list, room, device by tapping through', (
+    tester,
+  ) async {
+    final router = await tester.pumpApp(location: Routes.rooms);
+    await tester.tap(find.text('Kitchen'));
+    await tester.pumpAndSettle();
+    expect(router.state.uri.path, Routes.room('kitchen'));
+
+    await tester.tap(find.text('Coffee machine'));
+    await tester.pumpAndSettle();
+    expect(router.state.uri.path, Routes.device('kitchen', 'kt-outlet'));
+    expect(find.byType(DevicePane), findsOneWidget);
   });
 
   testWidgets('tablet: side rail; room and device side by side', (
@@ -66,35 +85,47 @@ void main() {
     );
     expect(find.byType(GlowNavRail), findsOneWidget);
     expect(find.byType(GlowBottomNav), findsNothing);
-    expect(find.text('living-room'), findsOneWidget);
-    expect(find.text('lr-lamp'), findsOneWidget);
+    expect(find.byType(RoomsListPane), findsNothing);
     expect(
-      tester.getCenter(find.text('living-room')).dx,
-      lessThan(tester.getCenter(find.text('lr-lamp')).dx),
+      tester.getCenter(find.byType(RoomPane)).dx,
+      lessThan(tester.getCenter(find.byType(DevicePane)).dx),
     );
+    expect(find.bySemanticsLabel('Back'), findsOneWidget);
   });
 
   testWidgets('tablet: the rooms route shows the list and a hint', (
     tester,
   ) async {
     await tester.pumpApp(size: tablet, location: Routes.rooms);
+    expect(find.byType(RoomsListPane), findsOneWidget);
     expect(find.text('Select a room'), findsOneWidget);
   });
 
   testWidgets('desktop: rooms, room and device are all visible', (
     tester,
   ) async {
-    await tester.pumpApp(
+    final router = await tester.pumpApp(
       size: desktop,
       location: Routes.device('kitchen', 'kt-outlet'),
     );
     final xs = [
-      tester.getCenter(find.text('Rooms').last).dx,
-      tester.getCenter(find.text('kitchen')).dx,
-      tester.getCenter(find.text('kt-outlet')).dx,
+      tester.getCenter(find.byType(RoomsListPane)).dx,
+      tester.getCenter(find.byType(RoomPane)).dx,
+      tester.getCenter(find.byType(DevicePane)).dx,
     ];
     expect(xs, orderedEquals([...xs]..sort()));
     expect(find.bySemanticsLabel('Back'), findsNothing);
+
+    // Picking another room swaps the middle pane and clears the device.
+    await tester.tap(find.text('Entrance'));
+    await tester.pumpAndSettle();
+    expect(router.state.uri.path, Routes.room('entrance'));
+    expect(find.text('Select a device'), findsOneWidget);
+
+    await tester.tap(find.text('Front door lock'));
+    await tester.pumpAndSettle();
+    expect(router.state.uri.path, Routes.device('entrance', 'en-lock'));
+    expect(find.byType(RoomsListPane), findsOneWidget);
   });
 
   testWidgets('desktop: a room without a device shows a device hint', (
@@ -115,8 +146,17 @@ void main() {
     await tester.pumpAndSettle();
     expect(router.state.uri.path, Routes.device('kitchen', 'kt-outlet'));
     expect(find.byType(GlowBottomNav), findsOneWidget);
-    expect(find.text('kt-outlet'), findsOneWidget);
-    expect(find.text('kitchen'), findsNothing);
+    expect(find.byType(DevicePane), findsOneWidget);
+    expect(find.byType(RoomPane), findsNothing);
+  });
+
+  testWidgets('unknown room or device shows a message, not a crash', (
+    tester,
+  ) async {
+    await tester.pumpApp(location: Routes.room('attic'));
+    expect(find.text('This room no longer exists'), findsOneWidget);
+    await tester.pumpApp(location: Routes.device('kitchen', 'ghost'));
+    expect(find.text('This device is no longer available'), findsOneWidget);
   });
 
   testWidgets('tapping the current destination returns to its first page', (

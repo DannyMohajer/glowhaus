@@ -53,7 +53,10 @@ void main() {
         greaterThanOrEqualTo(4.5),
       );
     }
-    // Secondary text on cards.
+    // Secondary text, on cards and directly on the page background.
+    expect(light.textMuted, const Color(0xFF6B6B6B));
+    expect(_contrast(light.textMuted, light.bg), greaterThanOrEqualTo(4.5));
+    expect(_contrast(dark.textMuted, dark.bg), greaterThanOrEqualTo(4.5));
     expect(
       _contrast(light.textMuted, light.surface),
       greaterThanOrEqualTo(4.5),

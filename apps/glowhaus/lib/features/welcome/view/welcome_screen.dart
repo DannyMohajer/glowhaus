@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glowhaus/app/app_shell.dart';
 import 'package:glowhaus/app/router/routes.dart';
+import 'package:glowhaus/features/settings/cubit/settings_cubit.dart';
 import 'package:glowhaus/l10n/generated/app_localizations.dart';
 import 'package:glowhaus_ui/glowhaus_ui.dart';
 import 'package:go_router/go_router.dart';
@@ -71,7 +73,10 @@ class WelcomeScreen extends StatelessWidget {
                         label: l10n.welcomeStart,
                         icon: rtl ? GlowIcons.arrowLeft : GlowIcons.arrowRight,
                         expand: true,
-                        onTap: () => context.go(Routes.home),
+                        onTap: () {
+                          context.read<SettingsCubit>().welcomeSeen();
+                          context.go(Routes.home);
+                        },
                       ),
                     ],
                   ),

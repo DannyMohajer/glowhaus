@@ -31,16 +31,256 @@
   "settingsLatency": "Network delay",
   "settingsLatencyValue": "{ms} ms",
   "@settingsLatencyValue": {
-    "placeholders": { "ms": { "type": "int", "format": "decimalPattern" } }
+    "placeholders": {
+      "ms": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
   },
   "settingsFailureRate": "Failure rate",
   "settingsFailureRateHint": "Share of commands that fail or time out",
   "percentValue": "{value}%",
   "@percentValue": {
-    "placeholders": { "value": { "type": "int", "format": "decimalPattern" } }
+    "placeholders": {
+      "value": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
   },
   "roomsTitle": "Rooms",
   "selectRoom": "Select a room",
   "selectDevice": "Select a device",
-  "back": "Back"
+  "back": "Back",
+  "settingsShowWelcome": "Show welcome screen",
+  "settingsShowWelcomeHint": "Open with the welcome screen next time",
+  "greetingHi": "Hi {name},",
+  "@greetingHi": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "greetingWelcomeHome": "Welcome home!",
+  "activeDevices": "{count, plural, =0{No devices active} =1{1 device active} other{{count} devices active}}",
+  "@activeDevices": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "connectionOnline": "Connected",
+  "connectionConnecting": "Connecting…",
+  "connectionOffline": "Offline",
+  "filterAll": "All",
+  "roomDeviceCount": "{count, plural, =1{1 device} other{{count} devices}}",
+  "@roomDeviceCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "roomOnCount": "{count} on",
+  "@roomOnCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "scenesTitle": "Scenes",
+  "scenesSoon": "One tap for the whole house. Coming soon.",
+  "emptyRoom": "No devices here yet",
+  "deviceNotFound": "This device is no longer available",
+  "roomNotFound": "This room no longer exists",
+  "loading": "Loading your home…",
+  "typeLights": "Lights",
+  "typeSwitches": "Switches",
+  "typeCurtains": "Curtains",
+  "typeClimate": "Climate",
+  "typeOutlets": "Outlets",
+  "typeLocks": "Locks",
+  "typeSensors": "Sensors",
+  "typeCameras": "Cameras",
+  "typeOther": "Other",
+  "stateOn": "On",
+  "stateOff": "Off",
+  "stateOffline": "Offline",
+  "stateOnLevel": "On · {percent}%",
+  "@stateOnLevel": {
+    "placeholders": {
+      "percent": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "stateLocked": "Locked",
+  "stateUnlocked": "Unlocked",
+  "stateJammed": "Jammed",
+  "stateOpenPercent": "{percent}% open",
+  "@stateOpenPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "stateClosed": "Closed",
+  "stateOpen": "Open",
+  "stateOpening": "Opening…",
+  "stateClosing": "Closing…",
+  "stateHeating": "Heating",
+  "stateCooling": "Cooling",
+  "stateIdle": "Idle",
+  "stateMotion": "Motion detected",
+  "stateNoMotion": "No motion",
+  "stateChannelsOn": "{on} of {total} on",
+  "@stateChannelsOn": {
+    "placeholders": {
+      "on": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "total": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "stateLive": "Live",
+  "stateUnknown": "Waiting for device…",
+  "temperatureValue": "{value}°",
+  "@temperatureValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "wattsValue": "{value} W",
+  "@wattsValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "kwhValue": "{value} kWh",
+  "@kwhValue": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "detailPower": "Power",
+  "detailBrightness": "Brightness",
+  "detailColor": "Colour",
+  "detailColorTemperature": "White tone",
+  "tempWarm": "Warm",
+  "tempNeutral": "Neutral",
+  "tempCool": "Cool",
+  "tempDaylight": "Daylight",
+  "detailPosition": "Position",
+  "actionOpen": "Open",
+  "actionClose": "Close",
+  "actionStop": "Stop",
+  "detailSetpoint": "Target temperature",
+  "thermostatHeatingTo": "Heating to",
+  "thermostatCoolingTo": "Cooling to",
+  "thermostatAutoTo": "Keeping at",
+  "thermostatOff": "Off",
+  "modeHeating": "Heating",
+  "modeCooling": "Cooling",
+  "currentTemperature": "Now {value}",
+  "@currentTemperature": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "detailFan": "Fan",
+  "fanAuto": "Auto",
+  "fanLow": "Low",
+  "fanMedium": "Medium",
+  "fanHigh": "High",
+  "detailLivePower": "Power use",
+  "detailEnergy": "Total energy",
+  "detailLock": "Door lock",
+  "detailTemperature": "Temperature",
+  "detailHumidity": "Humidity",
+  "detailMotion": "Motion",
+  "detailContact": "Door",
+  "detailCamera": "Camera",
+  "cameraSoon": "Live view arrives in a later release",
+  "offlineBanner": "Offline. Showing the last known state.",
+  "pendingLabel": "Sending…",
+  "deviceInfo": "{model} · firmware {firmware}",
+  "@deviceInfo": {
+    "placeholders": {
+      "model": {
+        "type": "String"
+      },
+      "firmware": {
+        "type": "String"
+      }
+    }
+  },
+  "feedbackTimedOut": "{device} didn't respond. Your change was undone.",
+  "@feedbackTimedOut": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "feedbackBusy": "{device} is busy and rejected the change. It was undone.",
+  "@feedbackBusy": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "feedbackRejected": "{device} couldn't apply the change. It was undone.",
+  "@feedbackRejected": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "demoRoomLivingRoom": "Living Room",
+  "demoRoomBedroom": "Bedroom",
+  "demoRoomKitchen": "Kitchen",
+  "demoRoomEntrance": "Entrance",
+  "demoCeilingLight": "Ceiling light",
+  "demoFloorLamp": "Floor lamp",
+  "demoCurtain": "Curtain",
+  "demoThermostat": "Thermostat",
+  "demoReadingLight": "Reading light",
+  "demoClimateSensor": "Climate sensor",
+  "demoWallSwitch": "Wall switch",
+  "demoCoffeeMachine": "Coffee machine",
+  "demoMotionSensor": "Motion sensor",
+  "demoFrontDoorLock": "Front door lock",
+  "demoDoorSensor": "Door sensor",
+  "demoDoorbellCamera": "Doorbell camera",
+  "demoChannelCeiling": "Ceiling",
+  "demoChannelCounter": "Counter",
+  "demoChannelHood": "Hood",
+  "demoSceneMovieNight": "Movie night",
+  "demoSceneGoodMorning": "Good morning",
+  "demoSceneAway": "Away",
+  "modeAuto": "Auto mode"
 }

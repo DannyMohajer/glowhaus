@@ -135,4 +135,410 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get back => 'Geri';
+
+  @override
+  String get settingsShowWelcome => 'Karşılama ekranını göster';
+
+  @override
+  String get settingsShowWelcomeHint =>
+      'Bir sonraki açılışta karşılama ekranıyla başla';
+
+  @override
+  String greetingHi(String name) {
+    return 'Merhaba $name,';
+  }
+
+  @override
+  String get greetingWelcomeHome => 'Evine hoş geldin!';
+
+  @override
+  String activeDevices(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString cihaz etkin',
+      zero: 'Etkin cihaz yok',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get connectionOnline => 'Bağlı';
+
+  @override
+  String get connectionConnecting => 'Bağlanıyor…';
+
+  @override
+  String get connectionOffline => 'Çevrimdışı';
+
+  @override
+  String get filterAll => 'Tümü';
+
+  @override
+  String roomDeviceCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString cihaz',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String roomOnCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString açık';
+  }
+
+  @override
+  String get scenesTitle => 'Sahneler';
+
+  @override
+  String get scenesSoon => 'Tek dokunuşla tüm ev. Yakında.';
+
+  @override
+  String get emptyRoom => 'Burada henüz cihaz yok';
+
+  @override
+  String get deviceNotFound => 'Bu cihaz artık kullanılamıyor';
+
+  @override
+  String get roomNotFound => 'Bu oda artık yok';
+
+  @override
+  String get loading => 'Evin yükleniyor…';
+
+  @override
+  String get typeLights => 'Işıklar';
+
+  @override
+  String get typeSwitches => 'Anahtarlar';
+
+  @override
+  String get typeCurtains => 'Perdeler';
+
+  @override
+  String get typeClimate => 'İklim';
+
+  @override
+  String get typeOutlets => 'Prizler';
+
+  @override
+  String get typeLocks => 'Kilitler';
+
+  @override
+  String get typeSensors => 'Sensörler';
+
+  @override
+  String get typeCameras => 'Kameralar';
+
+  @override
+  String get typeOther => 'Diğer';
+
+  @override
+  String get stateOn => 'Açık';
+
+  @override
+  String get stateOff => 'Kapalı';
+
+  @override
+  String get stateOffline => 'Çevrimdışı';
+
+  @override
+  String stateOnLevel(int percent) {
+    final intl.NumberFormat percentNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String percentString = percentNumberFormat.format(percent);
+
+    return 'Açık · %$percentString';
+  }
+
+  @override
+  String get stateLocked => 'Kilitli';
+
+  @override
+  String get stateUnlocked => 'Kilit açık';
+
+  @override
+  String get stateJammed => 'Sıkıştı';
+
+  @override
+  String stateOpenPercent(int percent) {
+    final intl.NumberFormat percentNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String percentString = percentNumberFormat.format(percent);
+
+    return '%$percentString açık';
+  }
+
+  @override
+  String get stateClosed => 'Kapalı';
+
+  @override
+  String get stateOpen => 'Açık';
+
+  @override
+  String get stateOpening => 'Açılıyor…';
+
+  @override
+  String get stateClosing => 'Kapanıyor…';
+
+  @override
+  String get stateHeating => 'Isıtıyor';
+
+  @override
+  String get stateCooling => 'Soğutuyor';
+
+  @override
+  String get stateIdle => 'Beklemede';
+
+  @override
+  String get stateMotion => 'Hareket algılandı';
+
+  @override
+  String get stateNoMotion => 'Hareket yok';
+
+  @override
+  String stateChannelsOn(int on, int total) {
+    final intl.NumberFormat onNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String onString = onNumberFormat.format(on);
+    final intl.NumberFormat totalNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String totalString = totalNumberFormat.format(total);
+
+    return '$totalString kanaldan $onString açık';
+  }
+
+  @override
+  String get stateLive => 'Canlı';
+
+  @override
+  String get stateUnknown => 'Cihaz bekleniyor…';
+
+  @override
+  String temperatureValue(String value) {
+    return '$value°';
+  }
+
+  @override
+  String wattsValue(String value) {
+    return '$value W';
+  }
+
+  @override
+  String kwhValue(String value) {
+    return '$value kWh';
+  }
+
+  @override
+  String get detailPower => 'Güç';
+
+  @override
+  String get detailBrightness => 'Parlaklık';
+
+  @override
+  String get detailColor => 'Renk';
+
+  @override
+  String get detailColorTemperature => 'Beyaz tonu';
+
+  @override
+  String get tempWarm => 'Sıcak';
+
+  @override
+  String get tempNeutral => 'Nötr';
+
+  @override
+  String get tempCool => 'Soğuk';
+
+  @override
+  String get tempDaylight => 'Gün ışığı';
+
+  @override
+  String get detailPosition => 'Konum';
+
+  @override
+  String get actionOpen => 'Aç';
+
+  @override
+  String get actionClose => 'Kapat';
+
+  @override
+  String get actionStop => 'Durdur';
+
+  @override
+  String get detailSetpoint => 'Hedef sıcaklık';
+
+  @override
+  String get thermostatHeatingTo => 'Isıtma hedefi';
+
+  @override
+  String get thermostatCoolingTo => 'Soğutma hedefi';
+
+  @override
+  String get thermostatAutoTo => 'Sabit tutuluyor';
+
+  @override
+  String get thermostatOff => 'Kapalı';
+
+  @override
+  String get modeHeating => 'Isıtma';
+
+  @override
+  String get modeCooling => 'Soğutma';
+
+  @override
+  String currentTemperature(String value) {
+    return 'Şu an $value';
+  }
+
+  @override
+  String get detailFan => 'Fan';
+
+  @override
+  String get fanAuto => 'Otomatik';
+
+  @override
+  String get fanLow => 'Düşük';
+
+  @override
+  String get fanMedium => 'Orta';
+
+  @override
+  String get fanHigh => 'Yüksek';
+
+  @override
+  String get detailLivePower => 'Anlık tüketim';
+
+  @override
+  String get detailEnergy => 'Toplam enerji';
+
+  @override
+  String get detailLock => 'Kapı kilidi';
+
+  @override
+  String get detailTemperature => 'Sıcaklık';
+
+  @override
+  String get detailHumidity => 'Nem';
+
+  @override
+  String get detailMotion => 'Hareket';
+
+  @override
+  String get detailContact => 'Kapı';
+
+  @override
+  String get detailCamera => 'Kamera';
+
+  @override
+  String get cameraSoon => 'Canlı görüntü sonraki bir sürümde gelecek';
+
+  @override
+  String get offlineBanner => 'Çevrimdışı. Bilinen son durum gösteriliyor.';
+
+  @override
+  String get pendingLabel => 'Gönderiliyor…';
+
+  @override
+  String deviceInfo(String model, String firmware) {
+    return '$model · yazılım $firmware';
+  }
+
+  @override
+  String feedbackTimedOut(String device) {
+    return '$device yanıt vermedi. Değişikliğin geri alındı.';
+  }
+
+  @override
+  String feedbackBusy(String device) {
+    return '$device meşgul ve değişikliği reddetti. Değişiklik geri alındı.';
+  }
+
+  @override
+  String feedbackRejected(String device) {
+    return '$device değişikliği uygulayamadı. Değişiklik geri alındı.';
+  }
+
+  @override
+  String get demoRoomLivingRoom => 'Oturma Odası';
+
+  @override
+  String get demoRoomBedroom => 'Yatak Odası';
+
+  @override
+  String get demoRoomKitchen => 'Mutfak';
+
+  @override
+  String get demoRoomEntrance => 'Giriş';
+
+  @override
+  String get demoCeilingLight => 'Tavan lambası';
+
+  @override
+  String get demoFloorLamp => 'Lambader';
+
+  @override
+  String get demoCurtain => 'Perde';
+
+  @override
+  String get demoThermostat => 'Termostat';
+
+  @override
+  String get demoReadingLight => 'Okuma lambası';
+
+  @override
+  String get demoClimateSensor => 'İklim sensörü';
+
+  @override
+  String get demoWallSwitch => 'Duvar anahtarı';
+
+  @override
+  String get demoCoffeeMachine => 'Kahve makinesi';
+
+  @override
+  String get demoMotionSensor => 'Hareket sensörü';
+
+  @override
+  String get demoFrontDoorLock => 'Ön kapı kilidi';
+
+  @override
+  String get demoDoorSensor => 'Kapı sensörü';
+
+  @override
+  String get demoDoorbellCamera => 'Kapı zili kamerası';
+
+  @override
+  String get demoChannelCeiling => 'Tavan';
+
+  @override
+  String get demoChannelCounter => 'Tezgâh';
+
+  @override
+  String get demoChannelHood => 'Davlumbaz';
+
+  @override
+  String get demoSceneMovieNight => 'Film gecesi';
+
+  @override
+  String get demoSceneGoodMorning => 'Günaydın';
+
+  @override
+  String get demoSceneAway => 'Dışarıda';
+
+  @override
+  String get modeAuto => 'Otomatik mod';
 }

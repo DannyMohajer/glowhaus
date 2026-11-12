@@ -36,7 +36,7 @@ class GlowhausColors extends ThemeExtension<GlowhausColors> {
     surfaceAlt: const Color(0xFFF7F7F5),
     border: const Color(0xFFE6E6E3),
     text: const Color(0xFF111111),
-    textMuted: const Color(0xFF707070),
+    textMuted: const Color(0xFF6B6B6B),
     textFaint: const Color(0xFFB5B5B2),
     accent: accent,
     onAccent: const Color(0xFFFFFFFF),

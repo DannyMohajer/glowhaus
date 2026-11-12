@@ -12,7 +12,10 @@
 
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:glowhaus/app/di/injection.dart' as _i348;
+import 'package:glowhaus/data/device_repository.dart' as _i284;
+import 'package:glowhaus/data/home_repository.dart' as _i851;
 import 'package:glowhaus/features/settings/cubit/settings_cubit.dart' as _i849;
+import 'package:glowhaus/features/settings/data/app_platform.dart' as _i920;
 import 'package:glowhaus/features/settings/data/language_preparer.dart'
     as _i693;
 import 'package:glowhaus/features/settings/data/settings_store.dart' as _i1068;
@@ -37,6 +40,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i319.SimulatedTransport>(
       () => appModule.simulatedTransport,
     );
+    gh.lazySingleton<_i851.HomeRepository>(() => appModule.homeRepository);
+    gh.lazySingleton<_i920.AppPlatform>(() => const _i920.AppPlatform());
     gh.lazySingleton<_i693.LanguagePreparer>(
       () => _i693.FontLanguagePreparer(),
     );
@@ -46,6 +51,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i893.SimulationControl>(
       () => appModule.simulationControl(gh<_i319.SimulatedTransport>()),
     );
+    gh.lazySingleton<_i284.DeviceRepository>(
+      () => appModule.deviceRepository(gh<_i319.Transport>()),
+    );
     gh.lazySingleton<_i1068.SettingsStore>(
       () => _i1068.PrefsSettingsStore(gh<_i460.SharedPreferences>()),
     );
@@ -54,6 +62,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1068.SettingsStore>(),
         gh<_i893.SimulationControl>(),
         gh<_i693.LanguagePreparer>(),
+        gh<_i920.AppPlatform>(),
       ),
     );
     return this;

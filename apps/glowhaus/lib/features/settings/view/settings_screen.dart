@@ -101,6 +101,14 @@ class SettingsScreen extends StatelessWidget {
                       onChanged: (value) =>
                           cubit.setReduceMotion(enabled: value),
                     ),
+                    if (cubit.welcomeToggleAvailable)
+                      _SwitchRow(
+                        title: l10n.settingsShowWelcome,
+                        subtitle: l10n.settingsShowWelcomeHint,
+                        value: state.showWelcome,
+                        onChanged: (value) =>
+                            cubit.setShowWelcome(enabled: value),
+                      ),
                   ],
                 ),
                 if (cubit.simulationAvailable) ...[

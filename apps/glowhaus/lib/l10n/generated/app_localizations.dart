@@ -321,6 +321,678 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back'**
   String get back;
+
+  /// No description provided for @settingsShowWelcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Show welcome screen'**
+  String get settingsShowWelcome;
+
+  /// No description provided for @settingsShowWelcomeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Open with the welcome screen next time'**
+  String get settingsShowWelcomeHint;
+
+  /// No description provided for @greetingHi.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi {name},'**
+  String greetingHi(String name);
+
+  /// No description provided for @greetingWelcomeHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome home!'**
+  String get greetingWelcomeHome;
+
+  /// No description provided for @activeDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No devices active} =1{1 device active} other{{count} devices active}}'**
+  String activeDevices(int count);
+
+  /// No description provided for @connectionOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get connectionOnline;
+
+  /// No description provided for @connectionConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting…'**
+  String get connectionConnecting;
+
+  /// No description provided for @connectionOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get connectionOffline;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAll;
+
+  /// No description provided for @roomDeviceCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 device} other{{count} devices}}'**
+  String roomDeviceCount(int count);
+
+  /// No description provided for @roomOnCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} on'**
+  String roomOnCount(int count);
+
+  /// No description provided for @scenesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scenes'**
+  String get scenesTitle;
+
+  /// No description provided for @scenesSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'One tap for the whole house. Coming soon.'**
+  String get scenesSoon;
+
+  /// No description provided for @emptyRoom.
+  ///
+  /// In en, this message translates to:
+  /// **'No devices here yet'**
+  String get emptyRoom;
+
+  /// No description provided for @deviceNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This device is no longer available'**
+  String get deviceNotFound;
+
+  /// No description provided for @roomNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This room no longer exists'**
+  String get roomNotFound;
+
+  /// No description provided for @loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your home…'**
+  String get loading;
+
+  /// No description provided for @typeLights.
+  ///
+  /// In en, this message translates to:
+  /// **'Lights'**
+  String get typeLights;
+
+  /// No description provided for @typeSwitches.
+  ///
+  /// In en, this message translates to:
+  /// **'Switches'**
+  String get typeSwitches;
+
+  /// No description provided for @typeCurtains.
+  ///
+  /// In en, this message translates to:
+  /// **'Curtains'**
+  String get typeCurtains;
+
+  /// No description provided for @typeClimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Climate'**
+  String get typeClimate;
+
+  /// No description provided for @typeOutlets.
+  ///
+  /// In en, this message translates to:
+  /// **'Outlets'**
+  String get typeOutlets;
+
+  /// No description provided for @typeLocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Locks'**
+  String get typeLocks;
+
+  /// No description provided for @typeSensors.
+  ///
+  /// In en, this message translates to:
+  /// **'Sensors'**
+  String get typeSensors;
+
+  /// No description provided for @typeCameras.
+  ///
+  /// In en, this message translates to:
+  /// **'Cameras'**
+  String get typeCameras;
+
+  /// No description provided for @typeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get typeOther;
+
+  /// No description provided for @stateOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get stateOn;
+
+  /// No description provided for @stateOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get stateOff;
+
+  /// No description provided for @stateOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get stateOffline;
+
+  /// No description provided for @stateOnLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'On · {percent}%'**
+  String stateOnLevel(int percent);
+
+  /// No description provided for @stateLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get stateLocked;
+
+  /// No description provided for @stateUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlocked'**
+  String get stateUnlocked;
+
+  /// No description provided for @stateJammed.
+  ///
+  /// In en, this message translates to:
+  /// **'Jammed'**
+  String get stateJammed;
+
+  /// No description provided for @stateOpenPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% open'**
+  String stateOpenPercent(int percent);
+
+  /// No description provided for @stateClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get stateClosed;
+
+  /// No description provided for @stateOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get stateOpen;
+
+  /// No description provided for @stateOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening…'**
+  String get stateOpening;
+
+  /// No description provided for @stateClosing.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing…'**
+  String get stateClosing;
+
+  /// No description provided for @stateHeating.
+  ///
+  /// In en, this message translates to:
+  /// **'Heating'**
+  String get stateHeating;
+
+  /// No description provided for @stateCooling.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooling'**
+  String get stateCooling;
+
+  /// No description provided for @stateIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Idle'**
+  String get stateIdle;
+
+  /// No description provided for @stateMotion.
+  ///
+  /// In en, this message translates to:
+  /// **'Motion detected'**
+  String get stateMotion;
+
+  /// No description provided for @stateNoMotion.
+  ///
+  /// In en, this message translates to:
+  /// **'No motion'**
+  String get stateNoMotion;
+
+  /// No description provided for @stateChannelsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'{on} of {total} on'**
+  String stateChannelsOn(int on, int total);
+
+  /// No description provided for @stateLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get stateLive;
+
+  /// No description provided for @stateUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for device…'**
+  String get stateUnknown;
+
+  /// No description provided for @temperatureValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}°'**
+  String temperatureValue(String value);
+
+  /// No description provided for @wattsValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} W'**
+  String wattsValue(String value);
+
+  /// No description provided for @kwhValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} kWh'**
+  String kwhValue(String value);
+
+  /// No description provided for @detailPower.
+  ///
+  /// In en, this message translates to:
+  /// **'Power'**
+  String get detailPower;
+
+  /// No description provided for @detailBrightness.
+  ///
+  /// In en, this message translates to:
+  /// **'Brightness'**
+  String get detailBrightness;
+
+  /// No description provided for @detailColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Colour'**
+  String get detailColor;
+
+  /// No description provided for @detailColorTemperature.
+  ///
+  /// In en, this message translates to:
+  /// **'White tone'**
+  String get detailColorTemperature;
+
+  /// No description provided for @tempWarm.
+  ///
+  /// In en, this message translates to:
+  /// **'Warm'**
+  String get tempWarm;
+
+  /// No description provided for @tempNeutral.
+  ///
+  /// In en, this message translates to:
+  /// **'Neutral'**
+  String get tempNeutral;
+
+  /// No description provided for @tempCool.
+  ///
+  /// In en, this message translates to:
+  /// **'Cool'**
+  String get tempCool;
+
+  /// No description provided for @tempDaylight.
+  ///
+  /// In en, this message translates to:
+  /// **'Daylight'**
+  String get tempDaylight;
+
+  /// No description provided for @detailPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Position'**
+  String get detailPosition;
+
+  /// No description provided for @actionOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get actionOpen;
+
+  /// No description provided for @actionClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get actionClose;
+
+  /// No description provided for @actionStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get actionStop;
+
+  /// No description provided for @detailSetpoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Target temperature'**
+  String get detailSetpoint;
+
+  /// No description provided for @thermostatHeatingTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Heating to'**
+  String get thermostatHeatingTo;
+
+  /// No description provided for @thermostatCoolingTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooling to'**
+  String get thermostatCoolingTo;
+
+  /// No description provided for @thermostatAutoTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeping at'**
+  String get thermostatAutoTo;
+
+  /// No description provided for @thermostatOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get thermostatOff;
+
+  /// No description provided for @modeHeating.
+  ///
+  /// In en, this message translates to:
+  /// **'Heating'**
+  String get modeHeating;
+
+  /// No description provided for @modeCooling.
+  ///
+  /// In en, this message translates to:
+  /// **'Cooling'**
+  String get modeCooling;
+
+  /// No description provided for @currentTemperature.
+  ///
+  /// In en, this message translates to:
+  /// **'Now {value}'**
+  String currentTemperature(String value);
+
+  /// No description provided for @detailFan.
+  ///
+  /// In en, this message translates to:
+  /// **'Fan'**
+  String get detailFan;
+
+  /// No description provided for @fanAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get fanAuto;
+
+  /// No description provided for @fanLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get fanLow;
+
+  /// No description provided for @fanMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get fanMedium;
+
+  /// No description provided for @fanHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get fanHigh;
+
+  /// No description provided for @detailLivePower.
+  ///
+  /// In en, this message translates to:
+  /// **'Power use'**
+  String get detailLivePower;
+
+  /// No description provided for @detailEnergy.
+  ///
+  /// In en, this message translates to:
+  /// **'Total energy'**
+  String get detailEnergy;
+
+  /// No description provided for @detailLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Door lock'**
+  String get detailLock;
+
+  /// No description provided for @detailTemperature.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature'**
+  String get detailTemperature;
+
+  /// No description provided for @detailHumidity.
+  ///
+  /// In en, this message translates to:
+  /// **'Humidity'**
+  String get detailHumidity;
+
+  /// No description provided for @detailMotion.
+  ///
+  /// In en, this message translates to:
+  /// **'Motion'**
+  String get detailMotion;
+
+  /// No description provided for @detailContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Door'**
+  String get detailContact;
+
+  /// No description provided for @detailCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get detailCamera;
+
+  /// No description provided for @cameraSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Live view arrives in a later release'**
+  String get cameraSoon;
+
+  /// No description provided for @offlineBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline. Showing the last known state.'**
+  String get offlineBanner;
+
+  /// No description provided for @pendingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending…'**
+  String get pendingLabel;
+
+  /// No description provided for @deviceInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'{model} · firmware {firmware}'**
+  String deviceInfo(String model, String firmware);
+
+  /// No description provided for @feedbackTimedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'{device} didn\'t respond. Your change was undone.'**
+  String feedbackTimedOut(String device);
+
+  /// No description provided for @feedbackBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'{device} is busy and rejected the change. It was undone.'**
+  String feedbackBusy(String device);
+
+  /// No description provided for @feedbackRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'{device} couldn\'t apply the change. It was undone.'**
+  String feedbackRejected(String device);
+
+  /// No description provided for @demoRoomLivingRoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Living Room'**
+  String get demoRoomLivingRoom;
+
+  /// No description provided for @demoRoomBedroom.
+  ///
+  /// In en, this message translates to:
+  /// **'Bedroom'**
+  String get demoRoomBedroom;
+
+  /// No description provided for @demoRoomKitchen.
+  ///
+  /// In en, this message translates to:
+  /// **'Kitchen'**
+  String get demoRoomKitchen;
+
+  /// No description provided for @demoRoomEntrance.
+  ///
+  /// In en, this message translates to:
+  /// **'Entrance'**
+  String get demoRoomEntrance;
+
+  /// No description provided for @demoCeilingLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Ceiling light'**
+  String get demoCeilingLight;
+
+  /// No description provided for @demoFloorLamp.
+  ///
+  /// In en, this message translates to:
+  /// **'Floor lamp'**
+  String get demoFloorLamp;
+
+  /// No description provided for @demoCurtain.
+  ///
+  /// In en, this message translates to:
+  /// **'Curtain'**
+  String get demoCurtain;
+
+  /// No description provided for @demoThermostat.
+  ///
+  /// In en, this message translates to:
+  /// **'Thermostat'**
+  String get demoThermostat;
+
+  /// No description provided for @demoReadingLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading light'**
+  String get demoReadingLight;
+
+  /// No description provided for @demoClimateSensor.
+  ///
+  /// In en, this message translates to:
+  /// **'Climate sensor'**
+  String get demoClimateSensor;
+
+  /// No description provided for @demoWallSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Wall switch'**
+  String get demoWallSwitch;
+
+  /// No description provided for @demoCoffeeMachine.
+  ///
+  /// In en, this message translates to:
+  /// **'Coffee machine'**
+  String get demoCoffeeMachine;
+
+  /// No description provided for @demoMotionSensor.
+  ///
+  /// In en, this message translates to:
+  /// **'Motion sensor'**
+  String get demoMotionSensor;
+
+  /// No description provided for @demoFrontDoorLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Front door lock'**
+  String get demoFrontDoorLock;
+
+  /// No description provided for @demoDoorSensor.
+  ///
+  /// In en, this message translates to:
+  /// **'Door sensor'**
+  String get demoDoorSensor;
+
+  /// No description provided for @demoDoorbellCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Doorbell camera'**
+  String get demoDoorbellCamera;
+
+  /// No description provided for @demoChannelCeiling.
+  ///
+  /// In en, this message translates to:
+  /// **'Ceiling'**
+  String get demoChannelCeiling;
+
+  /// No description provided for @demoChannelCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Counter'**
+  String get demoChannelCounter;
+
+  /// No description provided for @demoChannelHood.
+  ///
+  /// In en, this message translates to:
+  /// **'Hood'**
+  String get demoChannelHood;
+
+  /// No description provided for @demoSceneMovieNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Movie night'**
+  String get demoSceneMovieNight;
+
+  /// No description provided for @demoSceneGoodMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning'**
+  String get demoSceneGoodMorning;
+
+  /// No description provided for @demoSceneAway.
+  ///
+  /// In en, this message translates to:
+  /// **'Away'**
+  String get demoSceneAway;
+
+  /// No description provided for @modeAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto mode'**
+  String get modeAuto;
 }
 
 class _AppLocalizationsDelegate

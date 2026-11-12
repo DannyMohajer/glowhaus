@@ -1,5 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:glowhaus/app/di/injection.config.dart';
+import 'package:glowhaus/data/device_repository.dart';
+import 'package:glowhaus/data/home_repository.dart';
 import 'package:glowhaus/features/settings/data/simulation_control.dart';
 import 'package:glowhaus_transport/glowhaus_transport.dart';
 import 'package:injectable/injectable.dart';
@@ -25,6 +27,13 @@ abstract class AppModule {
 
   @lazySingleton
   Transport transport(SimulatedTransport simulated) => simulated;
+
+  @lazySingleton
+  HomeRepository get homeRepository => const HomeRepository(DemoHome.home);
+
+  @lazySingleton
+  DeviceRepository deviceRepository(Transport transport) =>
+      DeviceRepository(transport);
 
   @lazySingleton
   SimulationControl simulationControl(SimulatedTransport simulated) =>

@@ -40,6 +40,9 @@ abstract class SettingsState with _$SettingsState {
     @Default(false) bool reduceMotion,
     @Default(SettingsState.defaultLatencyMs) int latencyMs,
     @Default(0) double failureRate,
+
+    /// Native only: show the welcome screen at the next launch.
+    @Default(true) bool showWelcome,
   }) = _SettingsState;
 
   factory fromJson(Map<String, dynamic> json) => _$SettingsStateFromJson(json);

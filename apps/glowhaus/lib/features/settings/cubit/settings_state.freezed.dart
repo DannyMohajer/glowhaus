@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SettingsState {
 
- AppLanguage get language; ThemeMode get themeMode; AccentChoice get accent; bool get reduceMotion; int get latencyMs; double get failureRate;
+ AppLanguage get language; ThemeMode get themeMode; AccentChoice get accent; bool get reduceMotion; int get latencyMs; double get failureRate;/// Native only: show the welcome screen at the next launch.
+ bool get showWelcome;
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +31,20 @@ $SettingsStateCopyWith<SettingsState> get copyWith => _$SettingsStateCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as SettingsState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SettingsState&&(identical(other.language, _this.language) || other.language == _this.language)&&(identical(other.themeMode, _this.themeMode) || other.themeMode == _this.themeMode)&&(identical(other.accent, _this.accent) || other.accent == _this.accent)&&(identical(other.reduceMotion, _this.reduceMotion) || other.reduceMotion == _this.reduceMotion)&&(identical(other.latencyMs, _this.latencyMs) || other.latencyMs == _this.latencyMs)&&(identical(other.failureRate, _this.failureRate) || other.failureRate == _this.failureRate));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SettingsState&&(identical(other.language, _this.language) || other.language == _this.language)&&(identical(other.themeMode, _this.themeMode) || other.themeMode == _this.themeMode)&&(identical(other.accent, _this.accent) || other.accent == _this.accent)&&(identical(other.reduceMotion, _this.reduceMotion) || other.reduceMotion == _this.reduceMotion)&&(identical(other.latencyMs, _this.latencyMs) || other.latencyMs == _this.latencyMs)&&(identical(other.failureRate, _this.failureRate) || other.failureRate == _this.failureRate)&&(identical(other.showWelcome, _this.showWelcome) || other.showWelcome == _this.showWelcome));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as SettingsState;
-  return Object.hash(runtimeType,_this.language,_this.themeMode,_this.accent,_this.reduceMotion,_this.latencyMs,_this.failureRate);
+  return Object.hash(runtimeType,_this.language,_this.themeMode,_this.accent,_this.reduceMotion,_this.latencyMs,_this.failureRate,_this.showWelcome);
 }
 
 @override
 String toString() {
   final _this = this as SettingsState;
-  return 'SettingsState(language: ${_this.language}, themeMode: ${_this.themeMode}, accent: ${_this.accent}, reduceMotion: ${_this.reduceMotion}, latencyMs: ${_this.latencyMs}, failureRate: ${_this.failureRate})';
+  return 'SettingsState(language: ${_this.language}, themeMode: ${_this.themeMode}, accent: ${_this.accent}, reduceMotion: ${_this.reduceMotion}, latencyMs: ${_this.latencyMs}, failureRate: ${_this.failureRate}, showWelcome: ${_this.showWelcome})';
 }
 
 
@@ -54,7 +55,7 @@ abstract mixin class $SettingsStateCopyWith<$Res>  {
   factory $SettingsStateCopyWith(SettingsState value, $Res Function(SettingsState) _then) = _$SettingsStateCopyWithImpl;
 @useResult
 $Res call({
- AppLanguage language, ThemeMode themeMode, AccentChoice accent, bool reduceMotion, int latencyMs, double failureRate
+ AppLanguage language, ThemeMode themeMode, AccentChoice accent, bool reduceMotion, int latencyMs, double failureRate, bool showWelcome
 });
 
 
@@ -71,7 +72,7 @@ class _$SettingsStateCopyWithImpl<$Res>
 
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? language = null,Object? themeMode = null,Object? accent = null,Object? reduceMotion = null,Object? latencyMs = null,Object? failureRate = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? language = null,Object? themeMode = null,Object? accent = null,Object? reduceMotion = null,Object? latencyMs = null,Object? failureRate = null,Object? showWelcome = null,}) {
   return _then(SettingsState(
 language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
 as AppLanguage,themeMode: null == themeMode ? _self.themeMode : themeMode // ignore: cast_nullable_to_non_nullable
@@ -79,7 +80,8 @@ as ThemeMode,accent: null == accent ? _self.accent : accent // ignore: cast_null
 as AccentChoice,reduceMotion: null == reduceMotion ? _self.reduceMotion : reduceMotion // ignore: cast_nullable_to_non_nullable
 as bool,latencyMs: null == latencyMs ? _self.latencyMs : latencyMs // ignore: cast_nullable_to_non_nullable
 as int,failureRate: null == failureRate ? _self.failureRate : failureRate // ignore: cast_nullable_to_non_nullable
-as double,
+as double,showWelcome: null == showWelcome ? _self.showWelcome : showWelcome // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -164,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AppLanguage language,  ThemeMode themeMode,  AccentChoice accent,  bool reduceMotion,  int latencyMs,  double failureRate)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AppLanguage language,  ThemeMode themeMode,  AccentChoice accent,  bool reduceMotion,  int latencyMs,  double failureRate,  bool showWelcome)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SettingsState() when $default != null:
-return $default(_that.language,_that.themeMode,_that.accent,_that.reduceMotion,_that.latencyMs,_that.failureRate);case _:
+return $default(_that.language,_that.themeMode,_that.accent,_that.reduceMotion,_that.latencyMs,_that.failureRate,_that.showWelcome);case _:
   return orElse();
 
 }
@@ -185,10 +187,10 @@ return $default(_that.language,_that.themeMode,_that.accent,_that.reduceMotion,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AppLanguage language,  ThemeMode themeMode,  AccentChoice accent,  bool reduceMotion,  int latencyMs,  double failureRate)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AppLanguage language,  ThemeMode themeMode,  AccentChoice accent,  bool reduceMotion,  int latencyMs,  double failureRate,  bool showWelcome)  $default,) {final _that = this;
 switch (_that) {
 case _SettingsState():
-return $default(_that.language,_that.themeMode,_that.accent,_that.reduceMotion,_that.latencyMs,_that.failureRate);case _:
+return $default(_that.language,_that.themeMode,_that.accent,_that.reduceMotion,_that.latencyMs,_that.failureRate,_that.showWelcome);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,10 +207,10 @@ return $default(_that.language,_that.themeMode,_that.accent,_that.reduceMotion,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AppLanguage language,  ThemeMode themeMode,  AccentChoice accent,  bool reduceMotion,  int latencyMs,  double failureRate)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AppLanguage language,  ThemeMode themeMode,  AccentChoice accent,  bool reduceMotion,  int latencyMs,  double failureRate,  bool showWelcome)?  $default,) {final _that = this;
 switch (_that) {
 case _SettingsState() when $default != null:
-return $default(_that.language,_that.themeMode,_that.accent,_that.reduceMotion,_that.latencyMs,_that.failureRate);case _:
+return $default(_that.language,_that.themeMode,_that.accent,_that.reduceMotion,_that.latencyMs,_that.failureRate,_that.showWelcome);case _:
   return null;
 
 }
@@ -220,7 +222,7 @@ return $default(_that.language,_that.themeMode,_that.accent,_that.reduceMotion,_
 @JsonSerializable()
 
 class _SettingsState implements SettingsState {
-  const _SettingsState({this.language = AppLanguage.en, this.themeMode = ThemeMode.system, this.accent = AccentChoice.orange, this.reduceMotion = false, this.latencyMs = SettingsState.defaultLatencyMs, this.failureRate = 0});
+  const _SettingsState({this.language = AppLanguage.en, this.themeMode = ThemeMode.system, this.accent = AccentChoice.orange, this.reduceMotion = false, this.latencyMs = SettingsState.defaultLatencyMs, this.failureRate = 0, this.showWelcome = true});
   factory _SettingsState.fromJson(Map<String, dynamic> json) => _$SettingsStateFromJson(json);
 
 @override@JsonKey() final  AppLanguage language;
@@ -229,6 +231,8 @@ class _SettingsState implements SettingsState {
 @override@JsonKey() final  bool reduceMotion;
 @override@JsonKey() final  int latencyMs;
 @override@JsonKey() final  double failureRate;
+/// Native only: show the welcome screen at the next launch.
+@override@JsonKey() final  bool showWelcome;
 
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
@@ -243,18 +247,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SettingsState&&(identical(other.language, language) || other.language == language)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.accent, accent) || other.accent == accent)&&(identical(other.reduceMotion, reduceMotion) || other.reduceMotion == reduceMotion)&&(identical(other.latencyMs, latencyMs) || other.latencyMs == latencyMs)&&(identical(other.failureRate, failureRate) || other.failureRate == failureRate));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SettingsState&&(identical(other.language, language) || other.language == language)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.accent, accent) || other.accent == accent)&&(identical(other.reduceMotion, reduceMotion) || other.reduceMotion == reduceMotion)&&(identical(other.latencyMs, latencyMs) || other.latencyMs == latencyMs)&&(identical(other.failureRate, failureRate) || other.failureRate == failureRate)&&(identical(other.showWelcome, showWelcome) || other.showWelcome == showWelcome));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,language,themeMode,accent,reduceMotion,latencyMs,failureRate);
+    return Object.hash(runtimeType,language,themeMode,accent,reduceMotion,latencyMs,failureRate,showWelcome);
 }
 
 @override
 String toString() {
-    return 'SettingsState(language: $language, themeMode: $themeMode, accent: $accent, reduceMotion: $reduceMotion, latencyMs: $latencyMs, failureRate: $failureRate)';
+    return 'SettingsState(language: $language, themeMode: $themeMode, accent: $accent, reduceMotion: $reduceMotion, latencyMs: $latencyMs, failureRate: $failureRate, showWelcome: $showWelcome)';
 }
 
 
@@ -265,7 +269,7 @@ abstract mixin class _$SettingsStateCopyWith<$Res> implements $SettingsStateCopy
   factory _$SettingsStateCopyWith(_SettingsState value, $Res Function(_SettingsState) _then) = __$SettingsStateCopyWithImpl;
 @override @useResult
 $Res call({
- AppLanguage language, ThemeMode themeMode, AccentChoice accent, bool reduceMotion, int latencyMs, double failureRate
+ AppLanguage language, ThemeMode themeMode, AccentChoice accent, bool reduceMotion, int latencyMs, double failureRate, bool showWelcome
 });
 
 
@@ -282,7 +286,7 @@ class __$SettingsStateCopyWithImpl<$Res>
 
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? language = null,Object? themeMode = null,Object? accent = null,Object? reduceMotion = null,Object? latencyMs = null,Object? failureRate = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? language = null,Object? themeMode = null,Object? accent = null,Object? reduceMotion = null,Object? latencyMs = null,Object? failureRate = null,Object? showWelcome = null,}) {
   return _then(_SettingsState(
 language: null == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
 as AppLanguage,themeMode: null == themeMode ? _self.themeMode : themeMode // ignore: cast_nullable_to_non_nullable
@@ -290,7 +294,8 @@ as ThemeMode,accent: null == accent ? _self.accent : accent // ignore: cast_null
 as AccentChoice,reduceMotion: null == reduceMotion ? _self.reduceMotion : reduceMotion // ignore: cast_nullable_to_non_nullable
 as bool,latencyMs: null == latencyMs ? _self.latencyMs : latencyMs // ignore: cast_nullable_to_non_nullable
 as int,failureRate: null == failureRate ? _self.failureRate : failureRate // ignore: cast_nullable_to_non_nullable
-as double,
+as double,showWelcome: null == showWelcome ? _self.showWelcome : showWelcome // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
