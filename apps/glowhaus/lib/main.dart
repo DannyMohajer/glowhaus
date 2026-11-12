@@ -1,18 +1,15 @@
 import 'package:flutter/widgets.dart';
+import 'package:glowhaus/app/app.dart';
+import 'package:glowhaus/app/di/injection.dart';
+import 'package:glowhaus/app/router/app_router.dart';
+import 'package:glowhaus/features/settings/cubit/settings_cubit.dart';
 
-void main() {
-  runApp(const GlowhausApp());
-}
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await configureDependencies();
 
-/// Placeholder root widget. Replaced when the app shell is built.
-class GlowhausApp extends StatelessWidget {
-  const new({super.key});
+  final settings = getIt<SettingsCubit>();
+  await settings.init();
 
-  @override
-  Widget build(BuildContext context) {
-    return const Directionality(
-      textDirection: TextDirection.ltr,
-      child: Center(child: Text('Glowhaus')),
-    );
-  }
+  runApp(GlowhausApp(settings: settings, router: createRouter()));
 }

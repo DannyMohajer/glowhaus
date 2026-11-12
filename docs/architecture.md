@@ -155,12 +155,14 @@ One navigation system: `go_router`. The URL is the state.
 |---|---|---|
 | `/welcome` | full screen | full screen |
 | `/home` | dashboard | dashboard |
+| `/rooms` | rooms list | rooms list, hint |
 | `/rooms/:roomId` | room screen | rooms list, room |
 | `/rooms/:roomId/devices/:deviceId` | device detail | rooms list, room, device detail |
 | `/settings` | settings | settings |
 
 `AdaptiveScaffold` picks bottom navigation below 600 dp and a side rail above
-it; from 840 dp the room routes render as master-detail panes. Panes are driven
+it. The room routes all render the same `RoomsPanes` widget: one pane below
+600 dp, two from 600 dp, three from 1000 dp. Panes are driven
 by the same route parameters, so deep links, browser back and window resizing
 behave identically on every form factor.
 
