@@ -395,10 +395,16 @@ class AppLocalizationsFa extends AppLocalizations {
   String get thermostatOff => 'خاموش';
 
   @override
-  String get modeHeating => 'گرمایش';
+  String get detailMode => 'حالت';
 
   @override
-  String get modeCooling => 'سرمایش';
+  String get modeOff => 'خاموش';
+
+  @override
+  String get modeHeat => 'گرمایش';
+
+  @override
+  String get modeCool => 'سرمایش';
 
   @override
   String currentTemperature(String value) {
@@ -541,7 +547,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get demoSceneAway => 'بیرون از خانه';
 
   @override
-  String get modeAuto => 'حالت خودکار';
+  String get modeAuto => 'خودکار';
 
   @override
   String get listSeparator => '، ';

@@ -6,6 +6,23 @@ import 'package:glowhaus_ui/src/tokens/dimens.dart';
 import 'package:glowhaus_ui/src/tokens/icons.dart';
 import 'package:glowhaus_ui/src/tokens/typography.dart';
 
+/// How much a device asks for attention. Independent of what its switch
+/// shows: a locked door has its switch on but is [neutral].
+enum DeviceTone {
+  /// Idle or safe: off, locked, closed.
+  neutral,
+
+  /// Doing something: a light on, heating. Uses the device's active colour.
+  active,
+
+  /// Worth a look: unlocked, jammed, open.
+  attention,
+}
+
+/// Text and icons on the warning colour (dark in both themes; the warning
+/// yellow is too light for white).
+const Color _onWarning = Color(0xFF111111);
+
 class _IconDisc extends StatelessWidget {
   const new({
     required this.icon,
@@ -34,7 +51,11 @@ class _IconDisc extends StatelessWidget {
       child: Icon(
         icon,
         size: GlowSize.icon,
-        color: active ? glowOn(background) : colors.text,
+        color: !active
+            ? colors.text
+            : background == colors.warning
+            ? _onWarning
+            : glowOn(background),
       ),
     );
   }
@@ -43,7 +64,9 @@ class _IconDisc extends StatelessWidget {
 /// A device in a grid: icon, name, status line and an optional switch.
 ///
 /// States: [on] / off, [offline] (dimmed) and [pending] (command in flight).
-/// In the dark theme a device that is on gets a soft accent glow.
+/// [tone] sets the emphasis and defaults to active while [on]. In the dark
+/// theme an active device gets a soft accent glow; an attention tile gets a
+/// warning outline.
 class DeviceTile extends StatelessWidget {
   const new({
     required this.title,
@@ -56,6 +79,7 @@ class DeviceTile extends StatelessWidget {
     this.onToggle,
     this.activeColor,
     this.toggleSemanticLabel,
+    this.tone,
     super.key,
   });
 
@@ -76,12 +100,18 @@ class DeviceTile extends StatelessWidget {
   final Color? activeColor;
   final String? toggleSemanticLabel;
 
+  /// Emphasis; null means active while [on], neutral otherwise.
+  final DeviceTone? tone;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final type = context.type;
-    final lit = on && !offline;
-    final glow = lit && colors.isDark;
+    final emphasis = offline
+        ? DeviceTone.neutral
+        : tone ?? (on ? DeviceTone.active : DeviceTone.neutral);
+    final glow = emphasis == DeviceTone.active && colors.isDark;
+    final attention = emphasis == DeviceTone.attention;
 
     return GlowPressable(
       onTap: onTap,
@@ -93,6 +123,10 @@ class DeviceTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: glow ? colors.accentSoft : colors.surface,
           borderRadius: GlowRadius.tileAll,
+          border: Border.all(
+            color: attention ? colors.warning : Colors.transparent,
+            width: 1.5,
+          ),
           boxShadow: glow
               ? [
                   BoxShadow(
@@ -111,12 +145,21 @@ class DeviceTile extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  _IconDisc(icon: icon, active: lit, activeColor: activeColor),
+                  _IconDisc(
+                    icon: icon,
+                    active: emphasis != DeviceTone.neutral,
+                    activeColor: attention ? colors.warning : activeColor,
+                  ),
                   const Spacer(),
                   if (onToggle != null)
                     ToggleSwitch(
                       value: on,
                       pending: pending,
+                      // A calm tile whose switch is on (a locked door)
+                      // keeps the switch calm too.
+                      activeColor: emphasis == DeviceTone.neutral && on
+                          ? colors.textMuted
+                          : activeColor,
                       onChanged: offline ? null : onToggle,
                       semanticLabel: toggleSemanticLabel ?? title,
                     )
@@ -169,21 +212,33 @@ class RoomQuickControl extends StatelessWidget {
     required this.on,
     this.pending = false,
     this.onTap,
+    this.tone,
     super.key,
   });
 
   final IconData icon;
   final String label;
+
+  /// What a tap flips; announced as the toggled state.
   final bool on;
   final bool pending;
 
   /// Null renders the control as unavailable (device offline).
   final VoidCallback? onTap;
 
+  /// Emphasis; null means active while [on], neutral otherwise.
+  final DeviceTone? tone;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final foreground = on ? colors.onAccent : colors.text;
+    final emphasis = tone ?? (on ? DeviceTone.active : DeviceTone.neutral);
+    final (background, foreground) = switch (emphasis) {
+      // Small text sits on this, so it uses the strong accent.
+      DeviceTone.active => (colors.accentStrong, colors.onAccent),
+      DeviceTone.attention => (colors.warning, _onWarning),
+      DeviceTone.neutral => (colors.surfaceAlt, colors.text),
+    };
     return Opacity(
       opacity: onTap == null ? 0.5 : 1,
       child: GlowPressable(
@@ -200,8 +255,7 @@ class RoomQuickControl extends StatelessWidget {
             bottom: GlowSpace.x2,
           ),
           decoration: BoxDecoration(
-            // Small text sits on this, so it uses the strong accent.
-            color: on ? colors.accentStrong : colors.surfaceAlt,
+            color: background,
             borderRadius: GlowRadius.pillAll,
           ),
           child: Row(
@@ -346,6 +400,7 @@ class ModeRow extends StatelessWidget {
     this.subtitle,
     this.color,
     this.pending = false,
+    this.tone,
     super.key,
   });
 
@@ -359,11 +414,18 @@ class ModeRow extends StatelessWidget {
   final Color? color;
   final bool pending;
 
+  /// Emphasis of the icon; null means active while [value]. A neutral row
+  /// shows its switch in a muted colour.
+  final DeviceTone? tone;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final type = context.type;
-    final active = color ?? colors.accent;
+    final emphasis = tone ?? (value ? DeviceTone.active : DeviceTone.neutral);
+    final active = emphasis == DeviceTone.neutral
+        ? colors.textMuted
+        : color ?? colors.accent;
     return Container(
       padding: const EdgeInsetsDirectional.only(
         start: GlowSpace.x3,
@@ -378,7 +440,13 @@ class ModeRow extends StatelessWidget {
       child: MergeSemantics(
         child: Row(
           children: [
-            _IconDisc(icon: icon, active: value, activeColor: active),
+            _IconDisc(
+              icon: icon,
+              active: emphasis != DeviceTone.neutral,
+              activeColor: emphasis == DeviceTone.attention
+                  ? colors.warning
+                  : active,
+            ),
             const SizedBox(width: GlowSpace.x3),
             Expanded(
               child: Column(

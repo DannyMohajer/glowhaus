@@ -89,6 +89,34 @@ void main() {
     );
   });
 
+  test('locks and curtains never count as active', () {
+    Device single(CapabilityKind kind, CapabilityState state) => Device(
+      id: kind.name,
+      homeId: 'demo-home',
+      type: kind == CapabilityKind.lock ? DeviceType.lock : DeviceType.curtain,
+      name: kind.name,
+      capabilities: [Capability.of(kind)],
+      state: {kind.name: state},
+      availability: DeviceAvailability.online,
+    );
+    for (final locked in [true, false]) {
+      expect(
+        single(
+          CapabilityKind.lock,
+          CapabilityState.lock(locked: locked),
+        ).isActive,
+        isFalse,
+      );
+    }
+    expect(
+      single(
+        CapabilityKind.position,
+        const CapabilityState.position(position: 100, target: 100),
+      ).isActive,
+      isFalse,
+    );
+  });
+
   test('applyPatches is an immutable overlay', () {
     const patches = {
       'onOff': CapabilityPatch.onOff(on: false),

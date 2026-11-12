@@ -395,10 +395,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get thermostatOff => 'Kapalı';
 
   @override
-  String get modeHeating => 'Isıtma';
+  String get detailMode => 'Mod';
 
   @override
-  String get modeCooling => 'Soğutma';
+  String get modeOff => 'Kapalı';
+
+  @override
+  String get modeHeat => 'Isıtma';
+
+  @override
+  String get modeCool => 'Soğutma';
 
   @override
   String currentTemperature(String value) {
@@ -540,7 +546,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get demoSceneAway => 'Dışarıda';
 
   @override
-  String get modeAuto => 'Otomatik mod';
+  String get modeAuto => 'Otomatik';
 
   @override
   String get listSeparator => ' · ';

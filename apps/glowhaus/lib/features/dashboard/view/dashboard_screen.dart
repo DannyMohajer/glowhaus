@@ -234,6 +234,7 @@ class _RoomOverviewCard extends StatelessWidget {
             icon: deviceIcon(view.device),
             label: view.device.displayName(l10n),
             on: primaryToggle(view.device)!.on,
+            tone: deviceTone(view.device),
             pending: view.pending,
             onTap: view.device.isOffline
                 ? null
@@ -245,6 +246,9 @@ class _RoomOverviewCard extends StatelessWidget {
 }
 
 /// Static for now: scenes become interactive in a later milestone.
+///
+/// An inverse (black) card in the light theme; in the dark theme an inverse
+/// card would be a white block, so it uses the normal surface there.
 class _ScenesTeaser extends StatelessWidget {
   const new({required this.names});
 
@@ -255,8 +259,17 @@ class _ScenesTeaser extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final colors = context.colors;
     final type = context.type;
+    final inverse = !colors.isDark;
+    final foreground = inverse ? colors.onInverse : colors.text;
+    final muted = inverse
+        ? colors.onInverse.withValues(alpha: 0.72)
+        : colors.textMuted;
+    final outline = inverse
+        ? colors.onInverse.withValues(alpha: 0.28)
+        : colors.border;
     return GlowCard(
-      color: colors.inverse,
+      key: const ValueKey('scenes-card'),
+      color: inverse ? colors.inverse : colors.surface,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -270,17 +283,12 @@ class _ScenesTeaser extends StatelessWidget {
               const SizedBox(width: GlowSpace.x2),
               Text(
                 l10n.scenesTitle,
-                style: type.heading.copyWith(color: colors.onInverse),
+                style: type.heading.copyWith(color: foreground),
               ),
             ],
           ),
           const SizedBox(height: GlowSpace.x1),
-          Text(
-            l10n.scenesSoon,
-            style: type.caption.copyWith(
-              color: colors.onInverse.withValues(alpha: 0.72),
-            ),
-          ),
+          Text(l10n.scenesSoon, style: type.caption.copyWith(color: muted)),
           const SizedBox(height: GlowSpace.x4),
           Wrap(
             spacing: GlowSpace.x2,
@@ -294,15 +302,11 @@ class _ScenesTeaser extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     borderRadius: GlowRadius.pillAll,
-                    border: Border.all(
-                      color: colors.onInverse.withValues(alpha: 0.28),
-                    ),
+                    border: Border.all(color: outline),
                   ),
                   child: Text(
                     name,
-                    style: type.caption
-                        .weight(600)
-                        .copyWith(color: colors.onInverse),
+                    style: type.caption.weight(600).copyWith(color: foreground),
                   ),
                 ),
             ],

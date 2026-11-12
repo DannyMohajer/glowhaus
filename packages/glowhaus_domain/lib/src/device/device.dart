@@ -103,7 +103,9 @@ abstract class Device with _$Device {
   /// True if any on/off channel is on.
   bool get isOn => state.values.whereType<OnOffState>().any((s) => s.on);
 
-  /// Counts towards "active devices": reachable and doing something.
+  /// Counts towards "active devices": reachable and doing something (a
+  /// channel on, a thermostat running). Locks, curtains and sensors never
+  /// count: locked or open is a state, not activity.
   bool get isActive {
     if (isOffline) return false;
     final thermostat = firstState<ThermostatState>();

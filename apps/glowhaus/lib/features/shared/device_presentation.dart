@@ -107,14 +107,30 @@ PrimaryToggle? primaryToggle(Device device) {
 String joinParts(AppLocalizations l10n, Iterable<String> parts) =>
     parts.join(l10n.listSeparator);
 
-/// Whether the tile should look "lit".
-bool deviceLooksOn(Device device) {
+/// How much a device's tile asks for attention.
+///
+/// A lock is calm while locked and asks for attention when unlocked or
+/// jammed, although its switch is on while locked. A curtain's position is
+/// not "on". An open door asks for attention; motion counts as activity.
+DeviceTone deviceTone(Device device) {
+  if (device.isOffline) return DeviceTone.neutral;
+  final lock = device.firstState<LockState>();
+  if (lock != null) {
+    return lock.locked && !lock.jammed
+        ? DeviceTone.neutral
+        : DeviceTone.attention;
+  }
+  if (device.firstState<ContactSensorState>()?.open ?? false) {
+    return DeviceTone.attention;
+  }
   final toggle = primaryToggle(device);
-  if (toggle != null) return toggle.on;
-  final position = device.firstState<PositionState>();
-  if (position != null) return position.target > 0;
-  return (device.firstState<MotionSensorState>()?.motion ?? false) ||
-      (device.firstState<ContactSensorState>()?.open ?? false);
+  if (toggle != null) {
+    return toggle.on ? DeviceTone.active : DeviceTone.neutral;
+  }
+  if (device.firstState<MotionSensorState>()?.motion ?? false) {
+    return DeviceTone.active;
+  }
+  return DeviceTone.neutral;
 }
 
 IconData deviceIcon(Device device) => switch (device.type) {
@@ -153,7 +169,6 @@ Color? deviceActiveColor(GlowhausColors colors, Device device) =>
         device.firstState<ThermostatState>()?.mode == ThermostatMode.cool
             ? colors.cool
             : colors.heat,
-      DeviceType.curtain => colors.cool,
       _ => null,
     };
 

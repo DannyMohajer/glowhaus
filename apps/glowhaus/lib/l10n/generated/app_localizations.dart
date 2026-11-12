@@ -718,17 +718,29 @@ abstract class AppLocalizations {
   /// **'Off'**
   String get thermostatOff;
 
-  /// No description provided for @modeHeating.
+  /// No description provided for @detailMode.
   ///
   /// In en, this message translates to:
-  /// **'Heating'**
-  String get modeHeating;
+  /// **'Mode'**
+  String get detailMode;
 
-  /// No description provided for @modeCooling.
+  /// No description provided for @modeOff.
   ///
   /// In en, this message translates to:
-  /// **'Cooling'**
-  String get modeCooling;
+  /// **'Off'**
+  String get modeOff;
+
+  /// No description provided for @modeHeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Heat'**
+  String get modeHeat;
+
+  /// No description provided for @modeCool.
+  ///
+  /// In en, this message translates to:
+  /// **'Cool'**
+  String get modeCool;
 
   /// No description provided for @currentTemperature.
   ///
@@ -991,7 +1003,7 @@ abstract class AppLocalizations {
   /// No description provided for @modeAuto.
   ///
   /// In en, this message translates to:
-  /// **'Auto mode'**
+  /// **'Auto'**
   String get modeAuto;
 
   /// Joins short status parts, e.g. "4 devices · 2 on". Persian uses a comma because a middle dot reads like the Persian digit zero.

@@ -269,6 +269,10 @@ class _DeviceView extends StatelessWidget {
                   ? l10n.stateJammed
                   : (locked ? l10n.stateLocked : l10n.stateUnlocked),
               value: locked,
+              // Locked is the calm state; unlocked or jammed asks for a look.
+              tone: locked && !jammed
+                  ? DeviceTone.neutral
+                  : DeviceTone.attention,
               pending: pending,
               onChanged: enabled
                   ? (value) =>
@@ -737,50 +741,52 @@ class _ThermostatSection extends StatelessWidget {
                       style: type.body.numeric.weight(700),
                     ),
                   if (pending) const GlowSpinner(size: 14),
-                  if (modes.contains(ThermostatMode.auto))
-                    GlowChip(
-                      label: l10n.modeAuto,
-                      selected: mode == ThermostatMode.auto,
-                      onTap: enabled
-                          ? () => setMode(
-                              mode == ThermostatMode.auto
-                                  ? ThermostatMode.heat
-                                  : ThermostatMode.auto,
-                            )
-                          : null,
-                    ),
                 ],
               ),
             ],
           ),
         ),
         const SizedBox(height: GlowSpace.x3),
-        if (modes.contains(ThermostatMode.heat)) ...[
-          ModeRow(
-            key: const ValueKey('mode-heat'),
-            icon: GlowIcons.flame,
-            title: l10n.modeHeating,
-            value: mode == ThermostatMode.heat,
-            pending: pending && mode == ThermostatMode.heat,
-            color: colors.heat,
-            onChanged: enabled
-                ? (on) => setMode(on ? ThermostatMode.heat : ThermostatMode.off)
-                : null,
+        _Section(
+          title: l10n.detailMode,
+          child: GlowSegmented<ThermostatMode>(
+            key: const ValueKey('thermostat-mode'),
+            semanticLabel: l10n.detailMode,
+            selected: mode,
+            pending: pending,
+            onChanged: enabled ? setMode : null,
+            segments: [
+              // Always in this order, whatever order the device lists them.
+              for (final option in ThermostatMode.values)
+                if (modes.contains(option))
+                  switch (option) {
+                    ThermostatMode.off => GlowSegment(
+                      value: option,
+                      label: l10n.modeOff,
+                      icon: GlowIcons.power,
+                    ),
+                    ThermostatMode.heat => GlowSegment(
+                      value: option,
+                      label: l10n.modeHeat,
+                      icon: GlowIcons.flame,
+                      color: colors.heat,
+                    ),
+                    ThermostatMode.cool => GlowSegment(
+                      value: option,
+                      label: l10n.modeCool,
+                      icon: GlowIcons.snowflake,
+                      color: colors.cool,
+                    ),
+                    ThermostatMode.auto => GlowSegment(
+                      value: option,
+                      label: l10n.modeAuto,
+                      icon: GlowIcons.sunMoon,
+                      color: colors.accentStrong,
+                    ),
+                  },
+            ],
           ),
-          const SizedBox(height: GlowSpace.x2),
-        ],
-        if (modes.contains(ThermostatMode.cool))
-          ModeRow(
-            key: const ValueKey('mode-cool'),
-            icon: GlowIcons.snowflake,
-            title: l10n.modeCooling,
-            value: mode == ThermostatMode.cool,
-            pending: pending && mode == ThermostatMode.cool,
-            color: colors.cool,
-            onChanged: enabled
-                ? (on) => setMode(on ? ThermostatMode.cool : ThermostatMode.off)
-                : null,
-          ),
+        ),
         if (fan != null && (config?.fanModes.isNotEmpty ?? false)) ...[
           const SizedBox(height: GlowSpace.x3),
           _Section(
@@ -823,23 +829,26 @@ class _CameraPlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = context.colors;
+    // Like the scenes card: inverse in light, the normal surface in dark.
+    final inverse = !colors.isDark;
+    final foreground = inverse ? colors.onInverse : colors.text;
     return AspectRatio(
       aspectRatio: 16 / 9,
       child: Container(
         decoration: BoxDecoration(
-          color: colors.inverse,
+          color: inverse ? colors.inverse : colors.surface,
           borderRadius: GlowRadius.cardAll,
         ),
         padding: const EdgeInsets.all(GlowSpace.x5),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(GlowIcons.video, size: 32, color: colors.onInverse),
+            Icon(GlowIcons.video, size: 32, color: foreground),
             const SizedBox(height: GlowSpace.x3),
             Text(
               l10n.cameraSoon,
               textAlign: TextAlign.center,
-              style: context.type.body.copyWith(color: colors.onInverse),
+              style: context.type.body.copyWith(color: foreground),
             ),
           ],
         ),

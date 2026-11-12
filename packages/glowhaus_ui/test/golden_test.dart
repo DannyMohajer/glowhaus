@@ -19,6 +19,7 @@ typedef _Strings = ({
   String locked,
   String heating,
   String cooling,
+  List<String> modes,
   String heatingTo,
   String closed,
   String open,
@@ -40,6 +41,7 @@ const _Strings _en = (
   locked: 'Locking…',
   heating: 'Heating',
   cooling: 'Cooling',
+  modes: ['Off', 'Heat', 'Cool', 'Auto'],
   heatingTo: 'Heating to',
   closed: 'Closed',
   open: 'Open',
@@ -61,6 +63,7 @@ const _Strings _fa = (
   locked: 'در حال قفل شدن…',
   heating: 'گرمایش',
   cooling: 'سرمایش',
+  modes: ['خاموش', 'گرمایش', 'سرمایش', 'خودکار'],
   heatingTo: 'گرمایش تا',
   closed: 'بسته',
   open: 'باز',
@@ -86,6 +89,7 @@ class _Gallery extends StatelessWidget {
       required bool on,
       bool offline = false,
       bool pending = false,
+      DeviceTone? tone,
     }) => Expanded(
       child: DeviceTile(
         title: title,
@@ -94,6 +98,7 @@ class _Gallery extends StatelessWidget {
         on: on,
         offline: offline,
         pending: pending,
+        tone: tone,
         onToggle: (_) {},
       ),
     );
@@ -144,9 +149,10 @@ class _Gallery extends StatelessWidget {
                 onTap: () {},
               ),
               RoomQuickControl(
-                icon: GlowIcons.lock,
+                icon: GlowIcons.lockOpen,
                 label: s.lock,
                 on: false,
+                tone: DeviceTone.attention,
                 onTap: () {},
               ),
             ],
@@ -178,6 +184,7 @@ class _Gallery extends StatelessWidget {
                 icon: GlowIcons.lock,
                 on: true,
                 pending: true,
+                tone: DeviceTone.neutral,
               ),
               const SizedBox(width: GlowSpace.x3),
               tile(
@@ -213,12 +220,25 @@ class _Gallery extends StatelessWidget {
             onChanged: (_) {},
           ),
           const SizedBox(height: GlowSpace.x2),
-          ModeRow(
-            icon: GlowIcons.snowflake,
-            title: s.cooling,
-            value: false,
-            color: colors.cool,
+          GlowSegmented<int>(
+            selected: 1,
             onChanged: (_) {},
+            segments: [
+              GlowSegment(value: 0, label: s.modes[0], icon: GlowIcons.power),
+              GlowSegment(
+                value: 1,
+                label: s.modes[1],
+                icon: GlowIcons.flame,
+                color: colors.heat,
+              ),
+              GlowSegment(
+                value: 2,
+                label: s.modes[2],
+                icon: GlowIcons.snowflake,
+                color: colors.cool,
+              ),
+              GlowSegment(value: 3, label: s.modes[3], icon: GlowIcons.sunMoon),
+            ],
           ),
           gap,
           PositionSlider(
@@ -262,7 +282,7 @@ void main() {
     ('dark_fa_rtl', Brightness.dark, TextDirection.rtl, _fa),
   ]) {
     testWidgets('component gallery: $name', (tester) async {
-      tester.useSurface(const Size(420, 1380));
+      tester.useSurface(const Size(420, 1420));
       await tester.pumpWidget(
         host(
           _Gallery(strings),

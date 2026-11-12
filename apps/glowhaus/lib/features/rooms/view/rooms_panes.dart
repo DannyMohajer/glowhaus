@@ -239,7 +239,8 @@ class _RoomView extends StatelessWidget {
                                   ? l10n.pendingLabel
                                   : deviceStatus(readings, device),
                               icon: deviceIcon(device),
-                              on: deviceLooksOn(device),
+                              on: toggle?.on ?? false,
+                              tone: deviceTone(device),
                               offline: device.isOffline,
                               pending: view.pending,
                               activeColor: deviceActiveColor(colors, device),

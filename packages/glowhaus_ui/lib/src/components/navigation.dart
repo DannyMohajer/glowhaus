@@ -28,6 +28,14 @@ class GlowBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
+  static const double _pillHeight = 48;
+  static const double _gutter = GlowSpace.x2;
+  static const double _bottomMargin = GlowSpace.x3;
+
+  /// Height the bar takes above the system inset (gesture bar, home
+  /// indicator). Scrolling content under it reserves at least this much.
+  static const double height = _pillHeight + 2 * _gutter + _bottomMargin;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -36,12 +44,12 @@ class GlowBottomNav extends StatelessWidget {
         GlowSpace.x4,
         0,
         GlowSpace.x4,
-        GlowSpace.x3,
+        _bottomMargin,
       ),
       child: Center(
         heightFactor: 1,
         child: Container(
-          padding: const EdgeInsets.all(GlowSpace.x2),
+          padding: const EdgeInsets.all(_gutter),
           decoration: BoxDecoration(
             color: colors.surface,
             borderRadius: GlowRadius.pillAll,
@@ -95,7 +103,7 @@ class _NavPill extends StatelessWidget {
         duration: context.motion.toggle,
         curve: context.motion.curve,
         constraints: const BoxConstraints(
-          minHeight: 48,
+          minHeight: GlowBottomNav._pillHeight,
           minWidth: GlowSize.touch,
         ),
         padding: const EdgeInsets.symmetric(horizontal: GlowSpace.x3),

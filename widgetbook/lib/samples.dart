@@ -40,6 +40,13 @@ class Samples {
   String get disconnected => _pick('Offline', 'قطع', 'Bağlantı yok');
   String get heating => _pick('Heating', 'گرمایش', 'Isıtma');
   String get cooling => _pick('Cooling', 'سرمایش', 'Soğutma');
+  String get locked => _pick('Locked', 'قفل', 'Kilitli');
+  String get unlocked => _pick('Unlocked', 'باز', 'Kilit açık');
+  String get modeOff => _pick('Off', 'خاموش', 'Kapalı');
+  String get modeHeat => _pick('Heat', 'گرمایش', 'Isıtma');
+  String get modeCool => _pick('Cool', 'سرمایش', 'Soğutma');
+  String get modeAuto => _pick('Auto', 'خودکار', 'Otomatik');
+  String get mode => _pick('Mode', 'حالت', 'Mod');
   String get heatingTo => _pick('Heating to', 'گرمایش تا', 'Isıtma hedefi');
   String get coolingTo => _pick('Cooling to', 'سرمایش تا', 'Soğutma hedefi');
   String get temperature => _pick('Temperature', 'دما', 'Sıcaklık');

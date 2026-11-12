@@ -103,8 +103,10 @@
   "thermostatCoolingTo": "Soğutma hedefi",
   "thermostatAutoTo": "Sabit tutuluyor",
   "thermostatOff": "Kapalı",
-  "modeHeating": "Isıtma",
-  "modeCooling": "Soğutma",
+  "detailMode": "Mod",
+  "modeOff": "Kapalı",
+  "modeHeat": "Isıtma",
+  "modeCool": "Soğutma",
   "currentTemperature": "Şu an {value}",
   "detailFan": "Fan",
   "fanAuto": "Otomatik",
@@ -148,6 +150,6 @@
   "demoSceneMovieNight": "Film gecesi",
   "demoSceneGoodMorning": "Günaydın",
   "demoSceneAway": "Dışarıda",
-  "modeAuto": "Otomatik mod",
+  "modeAuto": "Otomatik",
   "listSeparator": " · "
 }

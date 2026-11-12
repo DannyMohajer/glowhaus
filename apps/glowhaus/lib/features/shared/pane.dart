@@ -1,15 +1,25 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:glowhaus/l10n/generated/app_localizations.dart';
 import 'package:glowhaus_ui/glowhaus_ui.dart';
 import 'package:go_router/go_router.dart';
 
-/// Space kept free at the bottom of scrolling content so the floating
-/// navigation bar on phones never covers the last item.
-double scrollBottomPadding(BuildContext context) =>
-    // On phones the body extends behind the floating navigation; the
-    // Scaffold reports its height plus the system inset (gesture bar, home
-    // indicator) as bottom padding. On wide layouts this is just the inset.
-    MediaQuery.paddingOf(context).bottom + GlowSpace.x6;
+/// Space kept free at the bottom of scrolling content so nothing ends up
+/// behind the floating navigation bar on phones.
+///
+/// On phones: the bar's height plus the system inset (gesture bar, home
+/// indicator), plus a gap. The Scaffold also reports the bar's measured
+/// height as bottom padding; the larger of the two wins, so a bar that grows
+/// (large text) is still cleared. On wider layouts: the inset plus the gap.
+double scrollBottomPadding(BuildContext context) {
+  final inset = MediaQuery.viewPaddingOf(context).bottom;
+  final reported = MediaQuery.paddingOf(context).bottom;
+  final navigation = GlowWindowSize.of(context) == GlowWindowSize.compact
+      ? inset + GlowBottomNav.height
+      : inset;
+  return math.max(navigation, reported) + GlowSpace.x6;
+}
 
 /// Title row of a pane, with a back button when the pane has no master pane
 /// next to it.

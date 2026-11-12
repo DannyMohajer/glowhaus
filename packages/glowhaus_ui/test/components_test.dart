@@ -57,6 +57,150 @@ void main() {
     });
   });
 
+  group('GlowSegmented', () {
+    Widget segmented({
+      required int selected,
+      ValueChanged<int>? onChanged,
+      TextDirection direction = TextDirection.ltr,
+    }) => host(
+      SizedBox(
+        width: 340,
+        child: GlowSegmented<int>(
+          selected: selected,
+          onChanged: onChanged,
+          semanticLabel: 'Mode',
+          segments: const [
+            GlowSegment(value: 0, label: 'Off', icon: GlowIcons.power),
+            GlowSegment(value: 1, label: 'Heat', icon: GlowIcons.flame),
+            GlowSegment(value: 2, label: 'Cool', icon: GlowIcons.snowflake),
+            GlowSegment(value: 3, label: 'Auto', icon: GlowIcons.sunMoon),
+          ],
+        ),
+      ),
+      direction: direction,
+    );
+
+    testWidgets('tapping another segment reports it; the selected one '
+        'does nothing', (tester) async {
+      final picked = <int>[];
+      await tester.pumpWidget(segmented(selected: 1, onChanged: picked.add));
+      await tester.tap(find.text('Cool'));
+      await tester.tap(find.text('Heat'));
+      expect(picked, [2]);
+    });
+
+    testWidgets('equal widths, touch-sized, mirrored in RTL', (tester) async {
+      await tester.pumpWidget(segmented(selected: 0, onChanged: (_) {}));
+      final widths = [
+        for (final label in ['Off', 'Heat', 'Cool', 'Auto'])
+          tester
+              .getSize(
+                find.ancestor(
+                  of: find.text(label),
+                  matching: find.byType(GlowPressable),
+                ),
+              )
+              .width,
+      ];
+      expect(widths.toSet(), hasLength(1));
+      final off = find.ancestor(
+        of: find.text('Off'),
+        matching: find.byType(GlowPressable),
+      );
+      expect(tester.getSize(off).height, greaterThanOrEqualTo(48));
+      final ltrOff = tester.getCenter(find.text('Off')).dx;
+
+      await tester.pumpWidget(
+        segmented(selected: 0, onChanged: (_) {}, direction: TextDirection.rtl),
+      );
+      expect(tester.getCenter(find.text('Off')).dx, greaterThan(ltrOff));
+    });
+
+    testWidgets('announces each option as a selected or unselected button', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(segmented(selected: 2, onChanged: (_) {}));
+      expect(
+        tester.getSemantics(find.text('Cool')),
+        matchesSemantics(
+          label: 'Cool',
+          isButton: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          hasSelectedState: true,
+          isSelected: true,
+          isFocusable: true,
+          hasTapAction: true,
+          hasFocusAction: true,
+        ),
+      );
+      expect(
+        tester.getSemantics(find.text('Heat')),
+        matchesSemantics(
+          label: 'Heat',
+          isButton: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          hasSelectedState: true,
+          isFocusable: true,
+          hasTapAction: true,
+          hasFocusAction: true,
+        ),
+      );
+      handle.dispose();
+    });
+
+    testWidgets('disabled without onChanged', (tester) async {
+      await tester.pumpWidget(segmented(selected: 0));
+      await tester.tap(find.text('Heat'));
+      expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.5);
+    });
+  });
+
+  group('DeviceTone', () {
+    testWidgets('a tile switch can be on while the tile stays calm', (
+      tester,
+    ) async {
+      final colors = GlowhausColors.light();
+      Future<Color?> disc(DeviceTone? tone, {required bool on}) async {
+        await tester.pumpWidget(
+          host(
+            SizedBox(
+              width: 200,
+              child: DeviceTile(
+                title: 'Front door',
+                subtitle: 'Locked',
+                icon: GlowIcons.lock,
+                on: on,
+                tone: tone,
+                onToggle: (_) {},
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final container = tester.widget<AnimatedContainer>(
+          find
+              .ancestor(
+                of: find.byIcon(GlowIcons.lock),
+                matching: find.byType(AnimatedContainer),
+              )
+              .first,
+        );
+        return (container.decoration! as BoxDecoration).color;
+      }
+
+      expect(await disc(null, on: true), colors.accent);
+      expect(await disc(DeviceTone.neutral, on: true), colors.surfaceAlt);
+      expect(await disc(DeviceTone.attention, on: false), colors.warning);
+      expect(
+        tester.widget<ToggleSwitch>(find.byType(ToggleSwitch)).value,
+        isFalse,
+      );
+    });
+  });
+
   group('touch targets and semantics', () {
     testWidgets('chip, icon button and quick control are at least 44 px', (
       tester,

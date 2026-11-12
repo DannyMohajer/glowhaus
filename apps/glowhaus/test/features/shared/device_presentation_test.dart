@@ -5,6 +5,7 @@ import 'package:glowhaus/features/shared/device_presentation.dart';
 import 'package:glowhaus/l10n/generated/app_localizations.dart';
 import 'package:glowhaus_domain/glowhaus_domain.dart';
 import 'package:glowhaus_transport/glowhaus_transport.dart';
+import 'package:glowhaus_ui/glowhaus_ui.dart' show DeviceTone;
 
 Device _demo(
   String id, {
@@ -181,12 +182,64 @@ void main() {
     });
   });
 
-  test('deviceLooksOn reflects what a person would call "on"', () {
-    expect(deviceLooksOn(_demo('lr-lamp')), isTrue);
-    expect(deviceLooksOn(_demo('br-reading')), isFalse);
-    expect(deviceLooksOn(_demo('lr-curtain')), isTrue, reason: 'open');
-    expect(deviceLooksOn(_demo('en-door')), isFalse, reason: 'closed');
-    expect(deviceLooksOn(_demo('en-camera')), isFalse);
+  group('deviceTone', () {
+    test('switchable devices are active while on', () {
+      expect(deviceTone(_demo('lr-lamp')), DeviceTone.active);
+      expect(deviceTone(_demo('br-reading')), DeviceTone.neutral);
+      expect(deviceTone(_demo('lr-thermostat')), DeviceTone.active);
+      expect(
+        deviceTone(_demo('lr-lamp', online: false)),
+        DeviceTone.neutral,
+        reason: 'offline',
+      );
+    });
+
+    test('a curtain position is not "on"', () {
+      expect(deviceTone(_demo('lr-curtain')), DeviceTone.neutral);
+      expect(
+        deviceTone(
+          _demo(
+            'lr-curtain',
+            state: const {
+              'position': CapabilityState.position(position: 100, target: 100),
+            },
+          ),
+        ),
+        DeviceTone.neutral,
+      );
+    });
+
+    test('locked is calm, unlocked or jammed asks for attention', () {
+      Device lock({required bool locked, bool jammed = false}) => _demo(
+        'en-lock',
+        state: {'lock': CapabilityState.lock(locked: locked, jammed: jammed)},
+      );
+      expect(deviceTone(lock(locked: true)), DeviceTone.neutral);
+      expect(deviceTone(lock(locked: false)), DeviceTone.attention);
+      expect(
+        deviceTone(lock(locked: false, jammed: true)),
+        DeviceTone.attention,
+      );
+      // The tile switch still shows "locked" as on.
+      expect(primaryToggle(lock(locked: true))!.on, isTrue);
+    });
+
+    test('an open door asks for attention; sensors are otherwise calm', () {
+      expect(deviceTone(_demo('en-door')), DeviceTone.neutral);
+      expect(
+        deviceTone(
+          _demo(
+            'en-door',
+            state: const {
+              'contactSensor': CapabilityState.contactSensor(open: true),
+            },
+          ),
+        ),
+        DeviceTone.attention,
+      );
+      expect(deviceTone(_demo('en-camera')), DeviceTone.neutral);
+      expect(deviceTone(_demo('br-climate')), DeviceTone.neutral);
+    });
   });
 
   test('every demo device and room kind has an icon and a type label', () {

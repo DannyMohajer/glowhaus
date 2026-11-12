@@ -49,28 +49,105 @@ void main() {
       expect(find.text('Movie night'), findsOneWidget);
     });
 
-    testWidgets('scrolled to the end, the last card clears the navigation', (
-      tester,
-    ) async {
-      // A phone with a system gesture bar / button bar below the app.
-      tester.view.padding = const FakeViewPadding(bottom: 48);
-      tester.view.viewPadding = const FakeViewPadding(bottom: 48);
+    for (final (screen, location) in [
+      ('dashboard', Routes.home),
+      ('room', Routes.room('living-room')),
+      ('thermostat', Routes.device('living-room', 'lr-thermostat')),
+      ('settings', Routes.settings),
+    ]) {
+      testWidgets('$screen: scrolled to the end, nothing is behind the nav', (
+        tester,
+      ) async {
+        // A phone with a system gesture bar / button bar below the app.
+        tester.view.padding = const FakeViewPadding(bottom: 48);
+        tester.view.viewPadding = const FakeViewPadding(bottom: 48);
+        await startHome();
+        await tester.pumpApp(location: location, home: home);
+
+        // Content scrolls behind the floating bar, so the list's bottom
+        // padding must cover the bar plus the system inset, plus a gap.
+        final nav = find.byType(GlowBottomNav);
+        final list = tester.widget<ListView>(find.byType(ListView).last);
+        final padding = list.padding!.resolve(TextDirection.ltr);
+        final covered = phone.height - tester.getRect(nav).top;
+        expect(covered, greaterThanOrEqualTo(GlowBottomNav.height));
+        expect(padding.bottom, greaterThanOrEqualTo(covered + GlowSpace.x4));
+
+        // And the last item really ends above the bar.
+        final scrollable = find
+            .descendant(
+              of: find.byType(ListView).last,
+              matching: find.byType(Scrollable),
+            )
+            .first;
+        final position = tester.state<ScrollableState>(scrollable).position;
+        position.jumpTo(position.maxScrollExtent);
+        await tester.pumpAndSettle();
+        final lastItem = find
+            .descendant(
+              of: find.byType(ListView).last,
+              matching: find.byType(RepaintBoundary),
+            )
+            .last;
+        expect(
+          tester.getRect(lastItem).bottom,
+          lessThanOrEqualTo(tester.getRect(nav).top),
+        );
+      });
+    }
+
+    testWidgets('the bottom navigation is compact', (tester) async {
       await startHome();
       await tester.pumpApp(location: Routes.home, home: home);
-
-      // Content scrolls behind the floating bar, so the list's bottom
-      // padding must cover the bar plus the system inset, plus a gap.
-      final nav = find.byType(GlowBottomNav);
-      final list = tester.widget<ListView>(find.byType(ListView).first);
-      final padding = list.padding!.resolve(TextDirection.ltr);
-      final covered = phone.height - tester.getRect(nav).top;
-      expect(padding.bottom, greaterThanOrEqualTo(covered + GlowSpace.x4));
-
       // The pill is as wide as its items, not the whole screen.
       final pill = find
-          .descendant(of: nav, matching: find.byType(Container))
+          .descendant(
+            of: find.byType(GlowBottomNav),
+            matching: find.byType(Container),
+          )
           .first;
       expect(tester.getSize(pill).width, lessThan(phone.width * 0.75));
+    });
+
+    testWidgets('dark theme: the scenes card uses the normal surface', (
+      tester,
+    ) async {
+      await startHome();
+      await tester.pumpApp(
+        location: Routes.home,
+        home: home,
+        settings: buildSettings(
+          saved: const SettingsState(themeMode: ThemeMode.dark),
+        ),
+      );
+      await tester.scrollUntilVisible(
+        find.byKey(const ValueKey('scenes-card')),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      final colors = GlowhausColors.dark();
+      final card = tester.widget<GlowCard>(
+        find.byKey(const ValueKey('scenes-card')),
+      );
+      expect(card.color, colors.surface);
+      final sparkles = tester.widget<Icon>(
+        find.descendant(
+          of: find.byKey(const ValueKey('scenes-card')),
+          matching: find.byIcon(GlowIcons.sparkles),
+        ),
+      );
+      expect(sparkles.color, colors.accent);
+    });
+
+    testWidgets('the front door lock is calm while locked', (tester) async {
+      await startHome();
+      await tester.pumpApp(location: Routes.home, home: home);
+      final control = tester.widget<RoomQuickControl>(
+        find.widgetWithText(RoomQuickControl, 'Front door lock'),
+      );
+      expect(control.on, isTrue, reason: 'locked');
+      expect(control.tone, DeviceTone.neutral);
+      expect(find.text('3 devices · 0 on'), findsOneWidget, reason: 'entrance');
     });
 
     testWidgets('room chips filter the cards', (tester) async {
@@ -341,7 +418,7 @@ void main() {
       });
     });
 
-    testWidgets('thermostat: dial, room temperature and mode rows', (
+    testWidgets('thermostat: dial, room temperature and mode control', (
       tester,
     ) async {
       await startHome();
@@ -356,13 +433,30 @@ void main() {
         reason: 'no separate tile',
       );
 
-      await tester.tap(
-        find.descendant(
-          of: find.byKey(const ValueKey('mode-cool')),
-          matching: find.byType(ToggleSwitch),
-        ),
+      final modes = tester.widget<GlowSegmented<ThermostatMode>>(
+        find.byKey(const ValueKey('thermostat-mode')),
       );
-      await tester.pumpEvents();
+      expect(modes.segments.map((s) => s.label), [
+        'Off',
+        'Heat',
+        'Cool',
+        'Auto',
+      ]);
+      expect(modes.selected, ThermostatMode.heat);
+      expect(find.byType(ModeRow), findsNothing, reason: 'no mode switches');
+      expect(find.text('Fan'), findsOneWidget, reason: 'fan stays separate');
+
+      Future<void> pick(String label) async {
+        await tester.tap(
+          find.descendant(
+            of: find.byKey(const ValueKey('thermostat-mode')),
+            matching: find.text(label),
+          ),
+        );
+        await tester.pumpEvents();
+      }
+
+      await pick('Cool');
       expect(home.transport.lastCommand.patches, {
         'thermostat': const CapabilityPatch.thermostat(
           mode: ThermostatMode.cool,

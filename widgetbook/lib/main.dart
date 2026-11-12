@@ -64,6 +64,7 @@ class GlowhausWidgetbook extends StatelessWidget {
             _component('TickDial', _tickDial),
             _component('PositionSlider', _positionSlider),
             _component('ModeRow', _modeRows),
+            _component('GlowSegmented', _segmented),
           ],
         ),
         WidgetbookFolder(
@@ -353,18 +354,29 @@ Widget _deviceTile(BuildContext context) {
           ),
         ),
         const SizedBox(width: GlowSpace.x3),
-        Expanded(
-          child: DeviceTile(
-            title: s.ceiling,
-            subtitle: s.off,
-            icon: GlowIcons.lightbulb,
-            on: false,
-            activeColor: context.colors.lamp,
-            onTap: () {},
-            onToggle: (_) {},
-          ),
-        ),
+        Expanded(child: _LockTile(s: s)),
       ],
+    ),
+  );
+}
+
+/// Locked is calm although its switch is on; unlocked asks for attention.
+class _LockTile extends StatelessWidget {
+  const new({required this.s});
+
+  final Samples s;
+
+  @override
+  Widget build(BuildContext context) => _Stateful<bool>(
+    initial: true,
+    builder: (context, locked, set) => DeviceTile(
+      title: s.lock,
+      subtitle: locked ? s.locked : s.unlocked,
+      icon: locked ? GlowIcons.lock : GlowIcons.lockOpen,
+      on: locked,
+      tone: locked ? DeviceTone.neutral : DeviceTone.attention,
+      onTap: () {},
+      onToggle: set,
     ),
   );
 }
@@ -395,7 +407,12 @@ Widget _roomCard(BuildContext context) {
           pending: true,
           onTap: () {},
         ),
-        RoomQuickControl(icon: GlowIcons.lock, label: s.lock, on: false),
+        RoomQuickControl(
+          icon: GlowIcons.lockOpen,
+          label: s.lock,
+          on: false,
+          tone: DeviceTone.attention,
+        ),
       ],
     ),
   );
@@ -468,6 +485,43 @@ Widget _modeRows(BuildContext context) {
           pending: pending && !heating,
           color: context.colors.cool,
           onChanged: (_) => set(false),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _segmented(BuildContext context) {
+  final s = Samples.of(context);
+  final colors = context.colors;
+  final pending = context.knobs.boolean(label: 'Pending');
+  final enabled = context.knobs.boolean(label: 'Enabled', initialValue: true);
+  return _Stateful<int>(
+    initial: 1,
+    builder: (context, mode, set) => GlowSegmented<int>(
+      selected: mode,
+      pending: pending,
+      semanticLabel: s.mode,
+      onChanged: enabled ? set : null,
+      segments: [
+        GlowSegment(value: 0, label: s.modeOff, icon: GlowIcons.power),
+        GlowSegment(
+          value: 1,
+          label: s.modeHeat,
+          icon: GlowIcons.flame,
+          color: colors.heat,
+        ),
+        GlowSegment(
+          value: 2,
+          label: s.modeCool,
+          icon: GlowIcons.snowflake,
+          color: colors.cool,
+        ),
+        GlowSegment(
+          value: 3,
+          label: s.modeAuto,
+          icon: GlowIcons.sunMoon,
+          color: colors.accentStrong,
         ),
       ],
     ),

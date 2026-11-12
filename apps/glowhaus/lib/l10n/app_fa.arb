@@ -103,8 +103,10 @@
   "thermostatCoolingTo": "سرمایش تا",
   "thermostatAutoTo": "نگه‌داشتن روی",
   "thermostatOff": "خاموش",
-  "modeHeating": "گرمایش",
-  "modeCooling": "سرمایش",
+  "detailMode": "حالت",
+  "modeOff": "خاموش",
+  "modeHeat": "گرمایش",
+  "modeCool": "سرمایش",
   "currentTemperature": "اکنون {value}",
   "detailFan": "فن",
   "fanAuto": "خودکار",
@@ -148,6 +150,6 @@
   "demoSceneMovieNight": "شب فیلم",
   "demoSceneGoodMorning": "صبح بخیر",
   "demoSceneAway": "بیرون از خانه",
-  "modeAuto": "حالت خودکار",
+  "modeAuto": "خودکار",
   "listSeparator": "، "
 }
