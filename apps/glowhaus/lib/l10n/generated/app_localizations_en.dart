@@ -543,4 +543,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get modeAuto => 'Auto mode';
+
+  @override
+  String get listSeparator => ' · ';
 }

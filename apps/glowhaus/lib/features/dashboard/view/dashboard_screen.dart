@@ -221,9 +221,10 @@ class _RoomOverviewCard extends StatelessWidget {
 
     return RoomCard(
       title: overview.room.displayName(l10n),
-      subtitle:
-          '${l10n.roomDeviceCount(overview.devices.length)} · '
-          '${l10n.roomOnCount(overview.activeCount)}',
+      subtitle: joinParts(l10n, [
+        l10n.roomDeviceCount(overview.devices.length),
+        l10n.roomOnCount(overview.activeCount),
+      ]),
       icon: roomIcon(overview.room.kind),
       meta: celsius == null ? null : readings.temperature(celsius),
       onTap: () => context.go(Routes.room(overview.room.id)),

@@ -66,7 +66,7 @@
   "stateOn": "روشن",
   "stateOff": "خاموش",
   "stateOffline": "آفلاین",
-  "stateOnLevel": "روشن · {percent}٪",
+  "stateOnLevel": "روشن، {percent}٪",
   "stateLocked": "قفل",
   "stateUnlocked": "باز",
   "stateJammed": "گیر کرده",
@@ -122,7 +122,7 @@
   "cameraSoon": "نمایش زنده در نسخه‌های بعدی اضافه می‌شود",
   "offlineBanner": "آفلاین. آخرین وضعیت شناخته‌شده نمایش داده می‌شود.",
   "pendingLabel": "در حال ارسال…",
-  "deviceInfo": "{model} · نسخه {firmware}",
+  "deviceInfo": "{model}، نسخه {firmware}",
   "feedbackTimedOut": "{device} پاسخ نداد. تغییر شما برگردانده شد.",
   "feedbackBusy": "{device} مشغول است و تغییر را نپذیرفت. تغییر برگردانده شد.",
   "feedbackRejected": "{device} نتوانست تغییر را اعمال کند. تغییر برگردانده شد.",
@@ -148,5 +148,6 @@
   "demoSceneMovieNight": "شب فیلم",
   "demoSceneGoodMorning": "صبح بخیر",
   "demoSceneAway": "بیرون از خانه",
-  "modeAuto": "حالت خودکار"
+  "modeAuto": "حالت خودکار",
+  "listSeparator": "، "
 }

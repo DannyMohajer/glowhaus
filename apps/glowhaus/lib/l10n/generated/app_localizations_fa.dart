@@ -261,7 +261,7 @@ class AppLocalizationsFa extends AppLocalizations {
         intl.NumberFormat.decimalPattern(localeName);
     final String percentString = percentNumberFormat.format(percent);
 
-    return 'روشن · $percentString٪';
+    return 'روشن، $percentString٪';
   }
 
   @override
@@ -456,7 +456,7 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String deviceInfo(String model, String firmware) {
-    return '$model · نسخه $firmware';
+    return '$model، نسخه $firmware';
   }
 
   @override
@@ -542,4 +542,7 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get modeAuto => 'حالت خودکار';
+
+  @override
+  String get listSeparator => '، ';
 }

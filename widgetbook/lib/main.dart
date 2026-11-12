@@ -339,7 +339,9 @@ Widget _deviceTile(BuildContext context) {
         Expanded(
           child: DeviceTile(
             title: s.lamp,
-            subtitle: offline ? s.offline : (on ? '${s.on} · 55%' : s.off),
+            subtitle: offline
+                ? s.offline
+                : (on ? '${s.on}${s.separator}55%' : s.off),
             icon: GlowIcons.lamp,
             on: on,
             offline: offline,

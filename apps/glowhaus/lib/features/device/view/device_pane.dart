@@ -85,7 +85,7 @@ class _DeviceView extends StatelessWidget {
               subtitle: [
                 if (room != null) room.displayName(l10n),
                 deviceStatus(readings, device),
-              ].join(' · '),
+              ].join(l10n.listSeparator),
               backTo: backTo,
               trailing: view.pending ? const _PendingBadge() : null,
             ),

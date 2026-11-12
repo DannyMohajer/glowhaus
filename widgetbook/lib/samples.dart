@@ -29,11 +29,12 @@ class Samples {
   String get ceiling => _pick('Ceiling light', 'چراغ سقفی', 'Tavan lambası');
   String get lock => _pick('Front door', 'در ورودی', 'Ön kapı');
   String get on => _pick('On', 'روشن', 'Açık');
+  String get separator => _pick(' · ', '، ', ' · ');
   String get off => _pick('Off', 'خاموش', 'Kapalı');
   String get offline => _pick('Offline', 'آفلاین', 'Çevrimdışı');
   String get livingRoom => _pick('Living Room', 'اتاق نشیمن', 'Oturma Odası');
   String get roomSummary =>
-      _pick('4 devices · 2 on', '۴ دستگاه · ۲ روشن', '4 cihaz · 2 açık');
+      _pick('4 devices · 2 on', '۴ دستگاه، ۲ روشن', '4 cihaz · 2 açık');
   String get connected => _pick('Connected', 'متصل', 'Bağlı');
   String get connecting => _pick('Connecting…', 'در حال اتصال…', 'Bağlanıyor…');
   String get disconnected => _pick('Offline', 'قطع', 'Bağlantı yok');

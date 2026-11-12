@@ -282,5 +282,9 @@
   "demoSceneMovieNight": "Movie night",
   "demoSceneGoodMorning": "Good morning",
   "demoSceneAway": "Away",
-  "modeAuto": "Auto mode"
+  "modeAuto": "Auto mode",
+  "listSeparator": " · ",
+  "@listSeparator": {
+    "description": "Joins short status parts, e.g. \"4 devices · 2 on\". Persian uses a comma because a middle dot reads like the Persian digit zero."
+  }
 }

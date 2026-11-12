@@ -103,6 +103,10 @@ PrimaryToggle? primaryToggle(Device device) {
   return null;
 }
 
+/// Joins short status parts with the language's separator.
+String joinParts(AppLocalizations l10n, Iterable<String> parts) =>
+    parts.join(l10n.listSeparator);
+
 /// Whether the tile should look "lit".
 bool deviceLooksOn(Device device) {
   final toggle = primaryToggle(device);
@@ -190,7 +194,7 @@ String deviceStatus(Readings readings, Device device) {
       ThermostatAction.cooling => l10n.stateCooling,
       ThermostatAction.idle => l10n.stateIdle,
     };
-    return '${readings.temperature(thermostat.setpoint)} · $action';
+    return joinParts(l10n, [readings.temperature(thermostat.setpoint), action]);
   }
 
   final lock = device.firstState<LockState>();
@@ -221,7 +225,7 @@ String deviceStatus(Readings readings, Device device) {
     if (!switches.single.on) return l10n.stateOff;
     final power = device.firstState<PowerMeterState>();
     if (power != null) {
-      return '${l10n.stateOn} · ${readings.watts(power.watts)}';
+      return joinParts(l10n, [l10n.stateOn, readings.watts(power.watts)]);
     }
     final brightness = device.firstState<BrightnessState>();
     return brightness == null
@@ -235,7 +239,7 @@ String deviceStatus(Readings readings, Device device) {
     final celsius = readings.temperature(temperature.celsius);
     return humidity == null
         ? celsius
-        : '$celsius · ${readings.percent(humidity.percent)}';
+        : joinParts(l10n, [celsius, readings.percent(humidity.percent)]);
   }
   final motion = device.firstState<MotionSensorState>();
   if (motion != null) {

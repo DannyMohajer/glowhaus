@@ -4,13 +4,13 @@
     {
       "name": "widgetbook",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8101", "--directory", "widgetbook/build/web"],
+      "runtimeArgs": ["-m", "http.server", "8101", "--directory", "build/site/widgetbook"],
       "port": 8101
     },
     {
       "name": "app",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8100", "--directory", "apps/glowhaus/build/web"],
+      "runtimeArgs": ["-m", "http.server", "8100", "--directory", "build/site"],
       "port": 8100
     }
   ]

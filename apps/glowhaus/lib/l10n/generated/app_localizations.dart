@@ -993,6 +993,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Auto mode'**
   String get modeAuto;
+
+  /// Joins short status parts, e.g. "4 devices · 2 on". Persian uses a comma because a middle dot reads like the Persian digit zero.
+  ///
+  /// In en, this message translates to:
+  /// **' · '**
+  String get listSeparator;
 }
 
 class _AppLocalizationsDelegate

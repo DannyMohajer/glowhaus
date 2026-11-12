@@ -85,9 +85,10 @@ class RoomsListPane extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: GlowSpace.x3),
                 child: RoomCard(
                   title: overview.room.displayName(l10n),
-                  subtitle:
-                      '${l10n.roomDeviceCount(overview.devices.length)} · '
-                      '${l10n.roomOnCount(overview.activeCount)}',
+                  subtitle: joinParts(l10n, [
+                    l10n.roomDeviceCount(overview.devices.length),
+                    l10n.roomOnCount(overview.activeCount),
+                  ]),
                   icon: roomIcon(overview.room.kind),
                   meta: switch (overview.celsius) {
                     final celsius? => readings.temperature(celsius),

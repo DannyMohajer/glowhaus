@@ -176,7 +176,7 @@ void main() {
     });
 
     test('Persian uses Persian digits', () {
-      expect(deviceStatus(Readings(fa), _demo('lr-ceiling')), 'روشن · ۷۰٪');
+      expect(deviceStatus(Readings(fa), _demo('lr-ceiling')), 'روشن، ۷۰٪');
       expect(Readings(fa).temperature(22.5), '۲۲٫۵°');
     });
   });

@@ -541,4 +541,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get modeAuto => 'Otomatik mod';
+
+  @override
+  String get listSeparator => ' · ';
 }

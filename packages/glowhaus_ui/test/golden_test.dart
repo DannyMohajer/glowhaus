@@ -54,7 +54,7 @@ const _Strings _fa = (
   welcome: 'به خانه خوش آمدی!',
   chips: ['همه', 'روشنایی', 'تهویه'],
   lamp: 'آباژور',
-  lampOn: 'روشن · ۵۵٪',
+  lampOn: 'روشن، ۵۵٪',
   off: 'خاموش',
   offline: 'آفلاین',
   lock: 'در ورودی',
@@ -66,7 +66,7 @@ const _Strings _fa = (
   open: 'باز',
   nav: ['خانه', 'اتاق‌ها', 'تنظیمات'],
   room: 'اتاق نشیمن',
-  roomSummary: '۴ دستگاه · ۲ روشن',
+  roomSummary: '۴ دستگاه، ۲ روشن',
   connected: 'متصل',
 );
 
