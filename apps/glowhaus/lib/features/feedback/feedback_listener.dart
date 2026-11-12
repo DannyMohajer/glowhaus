@@ -10,6 +10,7 @@ import 'package:glowhaus_ui/glowhaus_ui.dart';
 /// Explains a rolled-back command in plain words.
 String feedbackMessage(AppLocalizations l10n, CommandFailure failure) {
   final device = failure.device.displayName(l10n);
+  if (failure.unreachable) return l10n.feedbackUnreachable(device);
   if (failure.timedOut) return l10n.feedbackTimedOut(device);
   return failure.code == ProtocolErrorCode.busy
       ? l10n.feedbackBusy(device)
@@ -54,7 +55,7 @@ class FeedbackListener extends StatelessWidget {
               content: Row(
                 children: [
                   Icon(
-                    failure.timedOut
+                    failure.timedOut || failure.unreachable
                         ? GlowIcons.wifiOff
                         : GlowIcons.triangleAlert,
                     size: GlowSize.icon,

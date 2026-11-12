@@ -206,6 +206,18 @@ void main() {
     });
   });
 
+  test('QoS 1 can be delivered twice, the copy flagged duplicate', () async {
+    broker = InMemoryBroker(qos1DuplicateRate: 1, random: Random(1));
+    final app = await client('app');
+    await app.connection.subscribe('home/+/ack');
+    await app.connection.subscribe('discovery', qos: MqttQos.atMostOnce);
+    await app.connection.publishText('home/lamp/ack', 'ok');
+    await app.connection.publishText('discovery', 'q', qos: MqttQos.atMostOnce);
+    await app.settle();
+    expect(app.texts, ['home/lamp/ack=ok', 'home/lamp/ack=ok', 'discovery=q']);
+    expect(app.messages.map((m) => m.duplicate), [false, true, false]);
+  });
+
   test(r'wildcards and $ topics follow the spec', () async {
     final app = await client('app');
     await app.connection.subscribe('#');

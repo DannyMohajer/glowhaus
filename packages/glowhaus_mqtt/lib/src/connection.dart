@@ -29,6 +29,9 @@ enum MqttQos {
 /// [retained] is true only on a message delivered because of a new
 /// subscription (the broker's stored copy). A message forwarded live to an
 /// existing subscription always has it false, whatever the publisher set.
+///
+/// [duplicate] is the DUP flag: a QoS 1 redelivery. The first delivery may
+/// already have arrived, so receivers must not act on it twice.
 @immutable
 class MqttMessage {
   const new({
@@ -36,6 +39,7 @@ class MqttMessage {
     required this.payload,
     this.qos = MqttQos.atLeastOnce,
     this.retained = false,
+    this.duplicate = false,
   });
 
   /// Convenience for UTF-8 text payloads (all Glowhaus payloads are).
@@ -55,14 +59,23 @@ class MqttMessage {
   final Uint8List payload;
   final MqttQos qos;
   final bool retained;
+  final bool duplicate;
 
   /// The payload decoded as UTF-8. Throws on invalid bytes.
   String get text => utf8.decode(payload);
 
+  MqttMessage asDuplicate() => MqttMessage(
+    topic: topic,
+    payload: payload,
+    qos: qos,
+    retained: retained,
+    duplicate: true,
+  );
+
   @override
   String toString() =>
       'MqttMessage($topic, ${payload.length} bytes, qos ${qos.level}'
-      '${retained ? ', retained' : ''})';
+      '${retained ? ', retained' : ''}${duplicate ? ', dup' : ''})';
 }
 
 /// The message a broker publishes on a client's behalf when that client

@@ -850,6 +850,12 @@ abstract class AppLocalizations {
   /// **'{model} · firmware {firmware}'**
   String deviceInfo(String model, String firmware);
 
+  /// No description provided for @feedbackUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection. The change to {device} was undone.'**
+  String feedbackUnreachable(String device);
+
   /// No description provided for @feedbackTimedOut.
   ///
   /// In en, this message translates to:

@@ -60,6 +60,11 @@ class FakeTransport implements Transport {
     _answers[c.id]!.complete(CommandResult.failed(commandId: c.id, code: code));
   }
 
+  void unreachable([DeviceCommand? command]) {
+    final c = command ?? lastCommand;
+    _answers[c.id]!.complete(CommandResult.unreachable(commandId: c.id));
+  }
+
   void timeOut([DeviceCommand? command]) {
     final c = command ?? lastCommand;
     _answers[c.id]!.complete(CommandResult.timedOut(commandId: c.id));

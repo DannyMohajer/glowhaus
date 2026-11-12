@@ -125,6 +125,7 @@
   "offlineBanner": "Çevrimdışı. Bilinen son durum gösteriliyor.",
   "pendingLabel": "Gönderiliyor…",
   "deviceInfo": "{model} · yazılım {firmware}",
+  "feedbackUnreachable": "Bağlantı yok. {device} için yapılan değişiklik geri alındı.",
   "feedbackTimedOut": "{device} yanıt vermedi. Değişikliğin geri alındı.",
   "feedbackBusy": "{device} meşgul ve değişikliği reddetti. Değişiklik geri alındı.",
   "feedbackRejected": "{device} değişikliği uygulayamadı. Değişiklik geri alındı.",

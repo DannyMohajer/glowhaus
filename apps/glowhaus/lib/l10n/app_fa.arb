@@ -125,6 +125,7 @@
   "offlineBanner": "آفلاین. آخرین وضعیت شناخته‌شده نمایش داده می‌شود.",
   "pendingLabel": "در حال ارسال…",
   "deviceInfo": "{model}، نسخه {firmware}",
+  "feedbackUnreachable": "اتصال برقرار نیست. تغییر {device} لغو شد.",
   "feedbackTimedOut": "{device} پاسخ نداد. تغییر شما برگردانده شد.",
   "feedbackBusy": "{device} مشغول است و تغییر را نپذیرفت. تغییر برگردانده شد.",
   "feedbackRejected": "{device} نتوانست تغییر را اعمال کند. تغییر برگردانده شد.",

@@ -465,6 +465,11 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String feedbackUnreachable(String device) {
+    return 'Bağlantı yok. $device için yapılan değişiklik geri alındı.';
+  }
+
+  @override
   String feedbackTimedOut(String device) {
     return '$device yanıt vermedi. Değişikliğin geri alındı.';
   }

@@ -289,8 +289,17 @@ pending ─────────────────▶ acked
    │        ack ok:false
    ├─────────────────────▶ failed
    │        no ack within timeout (default 5 s)
-   └─────────────────────▶ timedOut
+   ├─────────────────────▶ timedOut
+   │        the app has no broker connection
+   └─────────────────────▶ unreachable
 ```
+
+`unreachable` is app-side only: the app was not connected when it wanted to
+send, or lost the broker while the command was pending. The device never saw
+such a command (a lost link cannot deliver a QoS 1 publish that the app had
+not finished sending, and anything the broker already had is answered by an
+ack that the app, once reconnected, no longer waits for). The app rolls back
+exactly as for `failed`.
 
 - While `pending`, an app MAY show the requested value optimistically.
 - An ack does **not** end the optimistic display. The app keeps showing the
@@ -298,8 +307,15 @@ pending ─────────────────▶ acked
   command asked for; only then is the reported state shown again. If no
   matching state arrives within 10 s of the ack, the app drops the optimistic
   value and shows whatever the device last reported.
-- On `failed` or `timedOut` it MUST fall back to the last state the device
-  reported.
+- On `failed`, `timedOut` or `unreachable` it MUST fall back to the last
+  state the device reported.
+- Losing the broker says nothing about the devices. The app keeps showing the
+  last reported state and availability of every device and marks the
+  *connection* as reconnecting; a device becomes `offline` only through its
+  own `availability` topic. On reconnect the app re-subscribes and re-queries;
+  the retained `state` and `availability` it then receives replace whatever
+  it was showing, including values of commands acked just before the link
+  dropped.
 - Acks are visible to every app in the home. An app ignores acks whose
   `commandId` it did not send.
 
@@ -639,6 +655,10 @@ a throwaway instance with no secrets and no real devices.
   and loss only for QoS 0. It is the broker behind the offline demo, the
   tests, and the in-browser device panel.
 - The payloads above map one to one to the protocol models in the same package.
+- `MqttTransport` in `packages/glowhaus_transport` is the app side of this
+  document over any `MqttConnection`: `MqttClientConnection` (the
+  `mqtt_client` package: TCP with TLS on native, WSS in the browser) or the
+  `InMemoryBroker`. It reconnects with exponential backoff and jitter.
 - `SimulatedTransport` does not use MQTT, but its devices follow the same
   rules (atomic commands, error codes, state after ack), so behaviour seen in
   the simulation matches a compliant device.

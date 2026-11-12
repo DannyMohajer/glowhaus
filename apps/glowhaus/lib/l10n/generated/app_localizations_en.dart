@@ -467,6 +467,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String feedbackUnreachable(String device) {
+    return 'No connection. The change to $device was undone.';
+  }
+
+  @override
   String feedbackTimedOut(String device) {
     return '$device didn\'t respond. Your change was undone.';
   }

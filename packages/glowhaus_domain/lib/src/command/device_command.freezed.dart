@@ -374,13 +374,14 @@ extension CommandResultPatterns on CommandResult {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( CommandAcked value)?  acked,TResult Function( CommandFailed value)?  failed,TResult Function( CommandTimedOut value)?  timedOut,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( CommandAcked value)?  acked,TResult Function( CommandFailed value)?  failed,TResult Function( CommandTimedOut value)?  timedOut,TResult Function( CommandUnreachable value)?  unreachable,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case CommandAcked() when acked != null:
 return acked(_that);case CommandFailed() when failed != null:
 return failed(_that);case CommandTimedOut() when timedOut != null:
-return timedOut(_that);case _:
+return timedOut(_that);case CommandUnreachable() when unreachable != null:
+return unreachable(_that);case _:
   return orElse();
 
 }
@@ -398,13 +399,14 @@ return timedOut(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( CommandAcked value)  acked,required TResult Function( CommandFailed value)  failed,required TResult Function( CommandTimedOut value)  timedOut,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( CommandAcked value)  acked,required TResult Function( CommandFailed value)  failed,required TResult Function( CommandTimedOut value)  timedOut,required TResult Function( CommandUnreachable value)  unreachable,}){
 final _that = this;
 switch (_that) {
 case CommandAcked():
 return acked(_that);case CommandFailed():
 return failed(_that);case CommandTimedOut():
-return timedOut(_that);}
+return timedOut(_that);case CommandUnreachable():
+return unreachable(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -418,13 +420,14 @@ return timedOut(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( CommandAcked value)?  acked,TResult? Function( CommandFailed value)?  failed,TResult? Function( CommandTimedOut value)?  timedOut,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( CommandAcked value)?  acked,TResult? Function( CommandFailed value)?  failed,TResult? Function( CommandTimedOut value)?  timedOut,TResult? Function( CommandUnreachable value)?  unreachable,}){
 final _that = this;
 switch (_that) {
 case CommandAcked() when acked != null:
 return acked(_that);case CommandFailed() when failed != null:
 return failed(_that);case CommandTimedOut() when timedOut != null:
-return timedOut(_that);case _:
+return timedOut(_that);case CommandUnreachable() when unreachable != null:
+return unreachable(_that);case _:
   return null;
 
 }
@@ -441,12 +444,13 @@ return timedOut(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String commandId)?  acked,TResult Function( String commandId,  ProtocolErrorCode code,  String? message)?  failed,TResult Function( String commandId)?  timedOut,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String commandId)?  acked,TResult Function( String commandId,  ProtocolErrorCode code,  String? message)?  failed,TResult Function( String commandId)?  timedOut,TResult Function( String commandId)?  unreachable,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case CommandAcked() when acked != null:
 return acked(_that.commandId);case CommandFailed() when failed != null:
 return failed(_that.commandId,_that.code,_that.message);case CommandTimedOut() when timedOut != null:
-return timedOut(_that.commandId);case _:
+return timedOut(_that.commandId);case CommandUnreachable() when unreachable != null:
+return unreachable(_that.commandId);case _:
   return orElse();
 
 }
@@ -464,12 +468,13 @@ return timedOut(_that.commandId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String commandId)  acked,required TResult Function( String commandId,  ProtocolErrorCode code,  String? message)  failed,required TResult Function( String commandId)  timedOut,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String commandId)  acked,required TResult Function( String commandId,  ProtocolErrorCode code,  String? message)  failed,required TResult Function( String commandId)  timedOut,required TResult Function( String commandId)  unreachable,}) {final _that = this;
 switch (_that) {
 case CommandAcked():
 return acked(_that.commandId);case CommandFailed():
 return failed(_that.commandId,_that.code,_that.message);case CommandTimedOut():
-return timedOut(_that.commandId);}
+return timedOut(_that.commandId);case CommandUnreachable():
+return unreachable(_that.commandId);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -483,12 +488,13 @@ return timedOut(_that.commandId);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String commandId)?  acked,TResult? Function( String commandId,  ProtocolErrorCode code,  String? message)?  failed,TResult? Function( String commandId)?  timedOut,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String commandId)?  acked,TResult? Function( String commandId,  ProtocolErrorCode code,  String? message)?  failed,TResult? Function( String commandId)?  timedOut,TResult? Function( String commandId)?  unreachable,}) {final _that = this;
 switch (_that) {
 case CommandAcked() when acked != null:
 return acked(_that.commandId);case CommandFailed() when failed != null:
 return failed(_that.commandId,_that.code,_that.message);case CommandTimedOut() when timedOut != null:
-return timedOut(_that.commandId);case _:
+return timedOut(_that.commandId);case CommandUnreachable() when unreachable != null:
+return unreachable(_that.commandId);case _:
   return null;
 
 }
@@ -696,6 +702,74 @@ class _$CommandTimedOutCopyWithImpl<$Res>
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? commandId = null,}) {
   return _then(CommandTimedOut(
+commandId: null == commandId ? _self.commandId : commandId // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class CommandUnreachable extends CommandResult {
+  const CommandUnreachable({required this.commandId}): super._();
+  
+
+@override final  String commandId;
+
+/// Create a copy of CommandResult
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CommandUnreachableCopyWith<CommandUnreachable> get copyWith => _$CommandUnreachableCopyWithImpl<CommandUnreachable>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is CommandUnreachable&&(identical(other.commandId, commandId) || other.commandId == commandId));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,commandId);
+}
+
+@override
+String toString() {
+    return 'CommandResult.unreachable(commandId: $commandId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $CommandUnreachableCopyWith<$Res> implements $CommandResultCopyWith<$Res> {
+  factory $CommandUnreachableCopyWith(CommandUnreachable value, $Res Function(CommandUnreachable) _then) = _$CommandUnreachableCopyWithImpl;
+@override @useResult
+$Res call({
+ String commandId
+});
+
+
+
+
+}
+/// @nodoc
+class _$CommandUnreachableCopyWithImpl<$Res>
+    implements $CommandUnreachableCopyWith<$Res> {
+  _$CommandUnreachableCopyWithImpl(this._self, this._then);
+
+  final CommandUnreachable _self;
+  final $Res Function(CommandUnreachable) _then;
+
+/// Create a copy of CommandResult
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? commandId = null,}) {
+  return _then(CommandUnreachable(
 commandId: null == commandId ? _self.commandId : commandId // ignore: cast_nullable_to_non_nullable
 as String,
   ));

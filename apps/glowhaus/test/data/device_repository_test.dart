@@ -222,6 +222,46 @@ void main() {
     });
 
     test(
+      'unreachable: rolls back and reports it as a connection problem',
+      () async {
+        final result = repository.send(_lamp, _off);
+        transport.unreachable();
+        expect(await result, isA<CommandUnreachable>());
+        expect(lampOn(), isTrue);
+        expect(lampPending(), isFalse);
+
+        await pumpEventQueue();
+        expect(failures.single.unreachable, isTrue);
+        expect(failures.single.timedOut, isFalse);
+        expect(failures.single.code, isNull);
+      },
+    );
+
+    test(
+      'losing the broker drops acked values waiting for their state',
+      () async {
+        final result = repository.send(_lamp, _off);
+        transport.ack();
+        await result;
+        expect(lampPending(), isTrue, reason: 'acked, waiting for state');
+
+        transport.setStatus(TransportStatus.reconnecting);
+        expect(lampPending(), isFalse);
+        expect(lampOn(), isTrue, reason: 'last reported state shows');
+        expect(failures, isEmpty, reason: 'nothing to apologise for');
+
+        // What the device reports after the reconnect is the truth.
+        transport
+          ..setStatus(TransportStatus.connected)
+          ..reportState(_lamp, {
+            ..._lampState,
+            'onOff': const CapabilityState.onOff(on: false),
+          });
+        expect(lampOn(), isFalse);
+      },
+    );
+
+    test(
       'rollback returns to the latest reported state, not the old one',
       () async {
         final result = repository.send(_lamp, _off);

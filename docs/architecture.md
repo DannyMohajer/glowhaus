@@ -28,7 +28,7 @@ graph TD
 |---|---|---|---|
 | `glowhaus_domain` | Dart only | `Home`, `Room`, `Device`, `Capability`, `Scene`, `User`/`Role`, command lifecycle, protocol payload models, the topic codec | Flutter imports, I/O, timers |
 | `glowhaus_mqtt` | Dart only | `MqttConnection` interface, QoS and topic matching, `InMemoryBroker` | Glowhaus topics or payloads, Flutter imports |
-| `glowhaus_transport` | `glowhaus_domain`, `glowhaus_mqtt` | `Transport` interface, `SimulatedTransport`, seeded demo home | Flutter imports, UI concepts |
+| `glowhaus_transport` | `glowhaus_domain`, `glowhaus_mqtt`, `mqtt_client` | `Transport` interface, `MqttTransport` (+ the `mqtt_client` adapter), `SimulatedTransport`, seeded demo home | Flutter imports, UI concepts |
 | `glowhaus_ui` | Flutter only | Tokens, themes, components | Domain models, blocs, strings that need translating |
 | `apps/glowhaus` | all three | Features (bloc + view), repositories, routing, DI, l10n | Topic strings, raw JSON handling |
 | `widgetbook` | `glowhaus_ui` | One use-case per component | App logic |
@@ -109,8 +109,8 @@ abstract interface class Transport {
   Future<void> connect();
   Future<void> disconnect();
 
-  /// Completes with acked, failed(error) or timedOut. Never throws for
-  /// device-level failures.
+  /// Completes with acked, failed(error), timedOut or unreachable (no
+  /// broker connection). Never throws for device-level failures.
   Future<CommandResult> send(DeviceCommand command, {Duration timeout});
 
   Future<void> dispose();
@@ -123,7 +123,7 @@ transports slot in without UI changes:
 | Transport | Milestone | How it fulfils the interface |
 |---|---|---|
 | `SimulatedTransport` | 1 | In-memory devices, configurable latency / failure rate / timeout rate |
-| `MqttTransport` | 3 | Uses `TopicCodec` and the protocol models over TCP (native) or WSS (web) |
+| `MqttTransport` | 3 | `TopicCodec` and the protocol models over an `MqttConnection`: the `mqtt_client` adapter (TCP + TLS on native, WSS on web) or the `InMemoryBroker`. Backoff reconnect; pending commands become `unreachable` when the link drops, devices keep their last known state |
 | `LocalTransport` | 6 | UDP discovery + local WebSocket, same payload models |
 
 Which transport is active is a DI decision (`get_it` + `injectable`

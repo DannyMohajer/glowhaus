@@ -29,7 +29,7 @@ abstract class DeviceCommand with _$DeviceCommand {
 }
 
 /// Where a command is in its lifecycle. `pending` is the only non-final one.
-enum CommandStatus { pending, acked, failed, timedOut }
+enum CommandStatus { pending, acked, failed, timedOut, unreachable }
 
 /// The final outcome of a command.
 @freezed
@@ -47,12 +47,18 @@ sealed class CommandResult with _$CommandResult {
   /// No ack arrived in time.
   const factory timedOut({required String commandId}) = CommandTimedOut;
 
+  /// The app had no connection to the broker, so the command was never
+  /// sent (or the connection dropped while it was pending). Only the app
+  /// side produces this; a device never sees such a command.
+  const factory unreachable({required String commandId}) = CommandUnreachable;
+
   const new _();
 
   CommandStatus get status => switch (this) {
     CommandAcked() => CommandStatus.acked,
     CommandFailed() => CommandStatus.failed,
     CommandTimedOut() => CommandStatus.timedOut,
+    CommandUnreachable() => CommandStatus.unreachable,
   };
 
   bool get isSuccess => this is CommandAcked;

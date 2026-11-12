@@ -239,6 +239,14 @@
       }
     }
   },
+  "feedbackUnreachable": "No connection. The change to {device} was undone.",
+  "@feedbackUnreachable": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
   "feedbackTimedOut": "{device} didn't respond. Your change was undone.",
   "@feedbackTimedOut": {
     "placeholders": {

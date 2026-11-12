@@ -42,10 +42,13 @@ class CommandFailure {
   /// The device as it is after the rollback.
   final Device device;
 
-  /// A [CommandFailed] or a [CommandTimedOut].
+  /// A [CommandFailed], a [CommandTimedOut] or a [CommandUnreachable].
   final CommandResult result;
 
   bool get timedOut => result is CommandTimedOut;
+
+  /// The app had no connection; the device never saw the command.
+  bool get unreachable => result is CommandUnreachable;
 
   ProtocolErrorCode? get code => switch (result) {
     CommandFailed(:final code) => code,
@@ -90,6 +93,7 @@ class DeviceRepository {
   final _views = StreamController<List<DeviceView>>.broadcast();
   final _failures = StreamController<CommandFailure>.broadcast();
   StreamSubscription<DeviceEvent>? _events;
+  StreamSubscription<TransportStatus>? _status;
 
   static String Function() _sequentialIds() {
     var counter = 0;
@@ -125,11 +129,13 @@ class DeviceRepository {
   /// Starts listening and connects. Safe to call more than once.
   Future<void> start() async {
     _events ??= _transport.events.listen(_onEvent);
+    _status ??= _transport.status.listen(_onStatus);
     await _transport.connect();
   }
 
   Future<void> dispose() async {
     await _events?.cancel();
+    await _status?.cancel();
     for (final pending in _pending) {
       pending.settleTimer?.cancel();
     }
@@ -178,6 +184,16 @@ class DeviceRepository {
       }
     }
     return result;
+  }
+
+  /// Losing the broker drops every optimistic value: commands still waiting
+  /// for an ack fail (the transport answers them with `unreachable`), and
+  /// acked ones stop waiting for their state. What the devices report after
+  /// the reconnect, retained on the broker, is the truth.
+  void _onStatus(TransportStatus status) {
+    if (status == TransportStatus.connected || _pending.isEmpty) return;
+    _pending.where((p) => p.acked).toList().forEach(_drop);
+    _publish();
   }
 
   void _onEvent(DeviceEvent event) {

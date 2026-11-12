@@ -466,6 +466,11 @@ class AppLocalizationsFa extends AppLocalizations {
   }
 
   @override
+  String feedbackUnreachable(String device) {
+    return 'اتصال برقرار نیست. تغییر $device لغو شد.';
+  }
+
+  @override
   String feedbackTimedOut(String device) {
     return '$device پاسخ نداد. تغییر شما برگردانده شد.';
   }

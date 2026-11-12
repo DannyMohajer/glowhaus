@@ -20,19 +20,33 @@ import 'package:meta/meta.dart';
 /// - delivered QoS is the lower of the publish QoS and the subscription's
 ///   QoS (the highest of several matching subscriptions);
 /// - only QoS 0 deliveries can be lost ([qos0LossRate]); QoS 1 and 2 always
-///   arrive. There is no redelivery, so a client never sees duplicates.
+///   arrive, and QoS 1 may arrive twice ([qos1DuplicateRate]), the second
+///   copy flagged `duplicate`, as a real broker redelivers after a lost
+///   PUBACK.
 ///
 /// Sessions are always clean: nothing is stored for a disconnected client.
 /// Everything is in process; the same object can serve the app and a device
 /// engine in one isolate (the offline demo) or in tests.
 class InMemoryBroker {
-  new({this.qos0LossRate = 0, this.latency = Duration.zero, Random? random})
-    : assert(qos0LossRate >= 0 && qos0LossRate <= 1, 'a probability'),
-      _random = random ?? Random();
+  new({
+    this.qos0LossRate = 0,
+    this.qos1DuplicateRate = 0,
+    this.latency = Duration.zero,
+    Random? random,
+  }) : assert(qos0LossRate >= 0 && qos0LossRate <= 1, 'a probability'),
+       assert(
+         qos1DuplicateRate >= 0 && qos1DuplicateRate <= 1,
+         'a probability',
+       ),
+       _random = random ?? Random();
 
   /// Probability that one QoS 0 delivery is dropped. Lets tests and the
   /// demo show that QoS 0 discovery messages are best effort.
   final double qos0LossRate;
+
+  /// Probability that one QoS 1 delivery arrives twice. Proves that devices
+  /// and apps handle redelivered commands and acks idempotently.
+  final double qos1DuplicateRate;
 
   /// Delay between a publish and its deliveries.
   final Duration latency;
@@ -131,6 +145,15 @@ class InMemoryBroker {
         _random.nextDouble() < qos0LossRate) {
       return;
     }
+    _send(session, message);
+    if (message.qos == MqttQos.atLeastOnce &&
+        qos1DuplicateRate > 0 &&
+        _random.nextDouble() < qos1DuplicateRate) {
+      _send(session, message.asDuplicate());
+    }
+  }
+
+  void _send(_Session session, MqttMessage message) {
     if (latency == Duration.zero) {
       session.connection._onMessage(message);
     } else {
