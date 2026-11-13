@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- MQTT to a real broker (the demo needs no network). -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:label="glowhaus"
         android:name="${applicationName}"

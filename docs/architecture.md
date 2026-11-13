@@ -1,8 +1,8 @@
 # Glowhaus architecture
 
 Glowhaus is a smart home demo app. The architecture has one job: keep the
-UI ignorant of *how* devices are reached, so the same screens work against an
-in-memory simulation today, a real MQTT broker in milestone 3, and local
+UI ignorant of *how* devices are reached, so the same screens work against
+the in-page demo, a real MQTT broker (both since milestone 3), and local
 (offline) control in milestone 6.
 
 ## Packages
@@ -276,6 +276,25 @@ silent tab's wills are told apart from a deliberate unplug by the missing
 with an in-process channel; only the `BroadcastChannel` adapter is web
 code.
 
+The panel and the two-tab mode exist only on the demo: on a real broker the
+devices are elsewhere (the simulator, or real hardware) and the rail hides
+the button. `#/devices` starts a separate, much smaller widget tree
+(`DevicesTabApp`: no repository, router or app state), and `#/demo` opens
+the app with the panel showing; both are read in `main.dart` before the
+router starts.
+
+Limits, on purpose:
+
+- A `BroadcastChannel` reaches only same-origin tabs of the same browser
+  profile. Two devices, or two browsers, need a real broker.
+- One devices tab at a time. The app tab hands its devices to the first
+  guest that joins and takes them back when no guest is left. A second
+  devices tab is not refused yet: it starts another copy of the twelve
+  devices from the demo's starting state, under the same ids.
+- A guest that goes silent is noticed after four of the host's sweeps
+  (about four seconds), not at once; until then its devices still count as
+  online.
+
 ## Names and translation
 
 Names are data. A room, device or scene shows its `name` exactly as typed, in
@@ -293,6 +312,9 @@ never translated, even if it happens to match a default.
 | Unit (`glowhaus_device`) | Devices checked on the wire against the protocol doc: payload shapes, acks, expiry, redelivery, retained set ignored, wills |
 | Unit (`glowhaus_transport`) | `MqttTransport`: acks, timeouts, duplicates, link loss, backoff, lost discovery; `SimulatedTransport`: latency, failure, timeout, state emission (fake clock + seeded RNG) |
 | Unit (app) | Every bloc and repository, including optimistic rollback and the late-apply note |
+| Unit (`glowhaus_mqtt`, bridge) | Host and guest over an in-process channel: sessions, wills when a guest leaves or goes silent, fake time |
+| Unit (`glowhaus_mqtt`, TLS) | A CA handed to one connection is trusted by that connection only: handshake with it, `untrusted` without it, the default context unchanged (throwaway openssl CA, local `SecureServerSocket`) |
+| Unit (`glowhaus_transport`, demo bridge) | Devices leave for a guest with their state, commands round-trip across, devices come back on goodbye and on silence |
 | Integration (CI job `broker`) | `MqttTransport` over the real `mqtt_client` adapter against Mosquitto and the simulator container; the ACLs: a device identity cannot write another device's topics, read its commands or reach another home |
 | Widget | `DeviceTile` states, `TickDial` drag, RTL dashboard |
 | Golden | Key components, light and dark |

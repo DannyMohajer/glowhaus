@@ -69,6 +69,29 @@ The camera stream is at `rtsp://localhost:8554/en-camera` (VLC, ffplay) and
 `http://localhost:8888/en-camera/` (HLS). The simulator announces that URL
 for the doorbell camera (`--camera-url`); the app plays it in milestone 7.
 
+## Connect the app
+
+In the app: Settings → Connection → My broker. The defaults match this
+stack:
+
+| Field | Value |
+|---|---|
+| Host | `localhost` (in LAN mode, the Mac's address) |
+| Port | empty: 8884 (WSS) on the web, 8883 (TLS) on native |
+| Path | `/mqtt` (web only) |
+| Home | `demo-home` |
+| Username | `demo-home.app` |
+| Password | the `demo-home.app:` line of `secrets/credentials` |
+| Extra CA | empty on this Mac; on a phone, see LAN mode below |
+
+The password stays in memory, so after a restart the app shows the broker's
+last-known devices and asks for it again. If the connection fails, the
+form says why: the broker cannot be reached, its certificate is not
+trusted, the login was refused, or the broker refused for another reason.
+Use a local build (`flutter run -d chrome`, or `tool/build_web.sh` and a
+local server) for the web app: browsers may block or prompt for a page
+on the public internet that opens a connection to `localhost`.
+
 ## Who may do what
 
 The broker allows nothing by default (`allow_anonymous false`, and an ACL
@@ -196,7 +219,7 @@ TLS on Android reads only the read-only system store in
 `/system/etc/security/cacerts` and ignores user certificates, and
 `network_security_config` does not apply to Dart sockets. Hand the CA to the
 app instead: `MqttEndpoint.trustedCertificatePem` adds it on top of the
-system roots, and the app's Connection settings (milestone 3, step 5) let
+system roots, and the app's Connection settings let
 you paste it. Debug builds can also take it at build time:
 
 ```bash

@@ -2,8 +2,8 @@
 
 A command-line tool that runs the demo home's twelve virtual devices against
 a real MQTT broker. It is the `glowhaus_device` engine (`VirtualHome`) on the
-`mqtt_client` adapter; the same engine runs the offline demo in the app and
-the in-browser device panel.
+`mqtt_client` adapter; the same engine runs the offline demo in the app,
+the in-browser device panel and the devices tab of the two-tab demo.
 
 ```bash
 dart run simulator/bin/simulator.dart --host localhost --no-tls

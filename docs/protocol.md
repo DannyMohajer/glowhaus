@@ -207,7 +207,9 @@ Topic: `glowhaus/{homeId}/{deviceId}/availability`, retained.
 - On connect the device publishes `{ "v": 1, "status": "online", "ts": ... }`.
 - The device registers a **last will** on the same topic, retained, QoS 1:
   `{ "v": 1, "status": "offline" }` (`ts` is optional, a will cannot know it).
-- Before a clean disconnect the device publishes the offline payload itself.
+- Before a clean disconnect the device publishes the offline payload itself,
+  and SHOULD include `ts`. Since a will has none, the difference tells a
+  deliberate goodbye from a lost connection.
 
 An app treats a device as `unknown` until it has received an availability
 message, then `online` or `offline`. State from an offline device is shown as
@@ -693,8 +695,28 @@ A real deployment MUST provide:
 The reference setup in `infra/` is Mosquitto 2 with a password file and an
 ACL file written per identity: usernames are `{homeId}.app` and
 `{homeId}.{deviceId}`. Its README shows the ACL, and CI runs a test that a
-device identity cannot publish to another device's topics. The public demo
-broker (if any) is a throwaway instance with no secrets and no real devices.
+device identity cannot publish to another device's topics, over plain MQTT
+and over TLS.
+
+Trust and secrets on the client side:
+
+- **A development CA is trusted for the broker connection only.** A client
+  that is handed an extra CA (such as the mkcert CA from `infra/`) MUST add
+  it to that connection's TLS context, never to the process or the system.
+  Glowhaus builds a separate `SecurityContext` per connection, with the
+  system roots plus the CA; a test shows that a connection given the CA
+  completes the handshake while one without it, and a plain socket on the
+  default context, are still rejected.
+- **The password is not stored.** The app saves the broker's address,
+  home and username, and keeps the password in memory only.
+- **The in-page broker has no authentication, by design.** The offline demo's
+  broker and devices live in the page itself. In two-tab mode the devices'
+  MQTT traffic crosses a `BroadcastChannel`, which only pages of the same
+  origin in the same browser profile can join, so it never leaves the
+  browser. Nothing about it is a model for a networked deployment.
+- A hosted demo broker, if one is added, is a throwaway instance with no
+  secrets and no real devices, and its public identity is limited by ACL to
+  demo homes.
 
 ## 13. In the Glowhaus codebase
 
@@ -706,7 +728,18 @@ broker (if any) is a throwaway instance with no secrets and no real devices.
   above that matter here: retained messages, wildcard matching, the last
   will on a dropped connection, QoS downgrade to the lower of the two sides,
   and loss only for QoS 0. It is the broker behind the offline demo, the
-  tests, and the in-browser device panel.
+  tests, and the in-browser device panel. `MqttClientConnection` waits for
+  the broker's SUBACK before a subscription counts, and reports why a
+  connect failed (`MqttConnectFailure`: unreachable, untrusted,
+  unauthorized, refused), which the app's Connection settings show.
+- `MqttTrafficLog` (same package) wraps any `MqttConnection` and records
+  what it sends and receives; the devices panel lists it.
+- `BridgeHost` and `BridgeGuest` (same package) carry MQTT client sessions
+  (connect with a will, subscribe, publish, messages) over any message
+  port. The two-tab demo uses a `BroadcastChannel`: the devices in the
+  second tab are MQTT clients of the app tab's in-memory broker. A guest
+  that goes silent is dropped, so its devices' wills fire as on a lost TCP
+  connection.
 - The payloads above map one to one to the protocol models in the same package.
 - `MqttTransport` in `packages/glowhaus_transport` is the app side of this
   document over any `MqttConnection`: `MqttClientConnection` (the
@@ -725,6 +758,11 @@ broker (if any) is a throwaway instance with no secrets and no real devices.
   `InMemoryBroker`, a `VirtualHome` of such devices and an `MqttTransport`
   in one isolate. Every tap in the offline demo is a real `set`, ack and
   retained `state`. Only the network is imitated.
+- `DemoBridgeHost` and `RemoteDemoHome` (`packages/glowhaus_transport`) move
+  the demo's devices to a second tab and back. They leave with a snapshot of
+  their state and come back from the broker's retained `state` and
+  `availability`; an `offline` without `ts` is a will (section 6), so a tab
+  that vanished without a goodbye gives its devices back online.
 - `MqttTransport` subscribes to `info` first, so 1.1 devices are known
   before their state arrives. For 1.0 devices, discovery is QoS 0:
   `MqttTransport` holds retained state and availability for a device until

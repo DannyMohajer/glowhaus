@@ -10,11 +10,18 @@ dashboard, room, device detail, settings), optimistic UI, EN/FA/TR, CI.
 
 All device controls polished; scenes UI.
 
-## 3. Real MQTT
+## 3. Real MQTT (done)
 
-`MqttTransport` (TCP on native, WSS on web), docker-compose (Mosquitto + Dart
-device simulator + MediaMTX RTSP test camera), acks / timeouts / reconnect,
-two-tab live demo, in-browser device panel for the portfolio.
+Protocol revision 1.1 (retained per-device `info`), a pure Dart device
+engine, `MqttTransport` (TLS on native, WSS on web) with acks, timeouts and
+reconnect, docker compose (Mosquitto with per-identity ACLs, the device
+simulator with a watchdog, a MediaMTX RTSP test camera), Connection settings
+for a real broker, the devices panel with live MQTT traffic (`#/demo`) and
+the two-tab demo over `BroadcastChannel`.
+
+Optional, later: the demo over the internet through a hosted broker, with a
+public demo identity limited by ACL to demo homes and a random home per
+visitor.
 
 ## 4. Scenarios and automations
 
