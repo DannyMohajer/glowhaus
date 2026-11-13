@@ -1348,6 +1348,18 @@ abstract class AppLocalizations {
   /// **'Try again'**
   String get devicesTabRetry;
 
+  /// Devices tab: another tab of this browser runs the demo devices
+  ///
+  /// In en, this message translates to:
+  /// **'Devices are already running in another tab.'**
+  String get devicesTabElsewhere;
+
+  /// Button: run the demo devices in this tab instead of the other one
+  ///
+  /// In en, this message translates to:
+  /// **'Take over'**
+  String get devicesTabTakeOver;
+
   /// No description provided for @devicesTabHint.
   ///
   /// In en, this message translates to:

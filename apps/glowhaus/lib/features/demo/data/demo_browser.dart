@@ -28,6 +28,23 @@ abstract interface class DemoBrowser {
   /// Calls [callback] when the page is being hidden for good (closed,
   /// reloaded, navigated away).
   void onPageHide(void Function() callback);
+
+  /// A lock that one tab of this site holds at a time (the Web Locks API),
+  /// or null where there is none.
+  TabLock? lock(String name);
+}
+
+/// A lock shared by the tabs of this site: at most one holds it.
+abstract interface class TabLock {
+  /// Takes the lock if no tab holds it, or with [steal] from the tab that
+  /// does. Completes with whether this tab holds it now.
+  Future<bool> acquire({bool steal = false});
+
+  /// Fires when another tab took the lock away (see [acquire]'s `steal`).
+  Stream<void> get lost;
+
+  /// Gives the lock up.
+  void release();
 }
 
 DemoBrowser createDemoBrowser() => platform.createDemoBrowser();

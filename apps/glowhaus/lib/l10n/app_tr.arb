@@ -208,5 +208,7 @@
   "devicesTabJoining": "Demoya bağlanıyor…",
   "devicesTabNoHost": "Bu tarayıcıda açık bir Glowhaus demosu yok. Başka bir sekmede aç ve tekrar dene.",
   "devicesTabRetry": "Tekrar dene",
+  "devicesTabElsewhere": "Cihazlar zaten başka bir sekmede çalışıyor.",
+  "devicesTabTakeOver": "Devral",
   "devicesTabHint": "Bu cihazlar diğer sekmendeki uygulamayla MQTT üzerinden konuşur. Bu sekmeyi kapatırsan geri dönerler."
 }

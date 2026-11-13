@@ -11,6 +11,7 @@ import 'package:glowhaus/features/demo/view/devices_panel.dart';
 import 'package:glowhaus_domain/glowhaus_domain.dart';
 import 'package:glowhaus_transport/glowhaus_transport.dart';
 import 'package:glowhaus_ui/glowhaus_ui.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../helpers/fakes.dart';
 
@@ -34,7 +35,13 @@ class _Browser implements DemoBrowser {
 
   @override
   void onPageHide(void Function() callback) {}
+
+  @override
+  TabLock? lock(String name) => null;
 }
+
+String _path(GoRouter router) =>
+    router.routerDelegate.currentConfiguration.uri.path;
 
 /// A demo that is never connected: the panel only needs its devices.
 SimulatedTransport _idleDemo() => SimulatedTransport(
@@ -154,14 +161,48 @@ void main() {
       expect(find.byType(DevicesPanel), findsNothing);
     });
 
-    testWidgets('/demo opens with the panel showing', (tester) async {
-      await tester.pumpApp(
+    testWidgets('desktop: /demo opens with the panel showing and keeps its '
+        'address; the address follows the panel', (tester) async {
+      final router = await tester.pumpApp(
         size: desktop,
-        location: Routes.home,
+        location: Routes.demo,
         demo: DemoSetup(demo: _idleDemo(), browser: _Browser()),
         panelOpen: true,
       );
+      await tester.pumpAndSettle();
       expect(find.byType(DevicesPanel), findsOneWidget);
+      expect(_path(router), Routes.demo);
+
+      await tester.tap(find.bySemanticsLabel('Close the devices panel'));
+      await tester.pumpAndSettle();
+      expect(_path(router), Routes.home);
+
+      await tester.tap(find.bySemanticsLabel('Devices'));
+      await tester.pumpAndSettle();
+      expect(_path(router), Routes.demo, reason: 'a link to share');
+
+      // Other pages keep their own address; the panel stays beside them.
+      router.go(Routes.settings);
+      await tester.pumpAndSettle();
+      expect(_path(router), Routes.settings);
+      expect(find.byType(DevicesPanel), findsOneWidget);
+    });
+
+    testWidgets('phone: /demo opens the sheet and keeps its address until '
+        'the sheet closes', (tester) async {
+      final router = await tester.pumpApp(
+        location: Routes.demo,
+        demo: DemoSetup(demo: _idleDemo(), browser: _Browser()),
+        panelOpen: true,
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(BottomSheet), findsOneWidget);
+      expect(_path(router), Routes.demo);
+
+      await tester.tap(find.bySemanticsLabel('Close the devices panel'));
+      await tester.pumpAndSettle();
+      expect(find.byType(DevicesPanel), findsNothing);
+      expect(_path(router), Routes.home);
     });
 
     testWidgets('phone: the dashboard chip opens the panel as a sheet', (

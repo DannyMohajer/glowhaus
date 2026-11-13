@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:glowhaus/app/app.dart';
@@ -17,6 +16,7 @@ import 'package:glowhaus/features/settings/cubit/settings_cubit.dart';
 import 'package:glowhaus/features/settings/cubit/settings_state.dart';
 import 'package:glowhaus/features/settings/data/language_preparer.dart';
 import 'package:glowhaus/features/settings/data/settings_store.dart';
+import 'package:glowhaus/features/shared/random_tag.dart';
 import 'package:glowhaus_transport/glowhaus_transport.dart';
 
 /// The BroadcastChannel the app tab and the devices tab share.
@@ -59,11 +59,7 @@ Future<void> main() async {
   final port = browser.channel(_demoChannel);
   final bridge = port == null
       ? null
-      : DemoBridgeHost(
-          simulated,
-          port,
-          hostId: 'app-${Random().nextInt(1 << 32).toRadixString(36)}',
-        );
+      : DemoBridgeHost(simulated, port, hostId: 'app-${randomTag()}');
 
   final atDemo = route == DemoSetup.demoRoute;
   runApp(
@@ -79,9 +75,11 @@ Future<void> main() async {
       ),
       panelOpen: atDemo,
       router: createRouter(
-        initialLocation: atDemo || !settings.shouldShowWelcome
-            ? Routes.home
-            : Routes.welcome,
+        initialLocation: atDemo
+            ? Routes.demo
+            : settings.shouldShowWelcome
+            ? Routes.welcome
+            : Routes.home,
       ),
     ),
   );

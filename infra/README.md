@@ -92,6 +92,20 @@ Use a local build (`flutter run -d chrome`, or `tool/build_web.sh` and a
 local server) for the web app: browsers may block or prompt for a page
 on the public internet that opens a connection to `localhost`.
 
+### Checked end to end on macOS
+
+`apps/glowhaus/integration_test/broker_tls_test.dart` runs inside the
+real macOS app (its sandbox, its network entitlement, the keychain's trust
+in the mkcert CA). It connects through the app's Connection settings code
+to `mqtts://localhost:8883`, waits for all twelve devices, and switches the
+reading light on and off, each change acked and reported back:
+
+```bash
+cd apps/glowhaus && flutter test integration_test/broker_tls_test.dart -d macos --dart-define=GLOWHAUS_TEST_PASSWORD="$(grep '^demo-home.app:' ../../infra/secrets/credentials | cut -d: -f2)"
+```
+
+Without the define it is skipped, so it never needs a secret in CI.
+
 ## Who may do what
 
 The broker allows nothing by default (`allow_anonymous false`, and an ACL

@@ -156,8 +156,9 @@ class _TappedConnection implements MqttConnection {
 
   @override
   Future<void> dispose() async {
-    await _forward.cancel();
-    await _messages.close();
+    // Not awaited, as in VirtualDevice.dispose.
+    unawaited(_forward.cancel());
+    unawaited(_messages.close());
     await _inner.dispose();
   }
 }

@@ -12,9 +12,9 @@ import 'package:go_router/go_router.dart';
 ///
 /// ```text
 /// /welcome
-/// /demo                                  home, devices panel open
 /// shell (bottom nav or side rail)
 ///   /home
+///   /demo                                 home with the devices panel open
 ///   /rooms                                rooms
 ///   /rooms/:roomId                        rooms | room
 ///   /rooms/:roomId/devices/:deviceId      rooms | room | device
@@ -27,8 +27,6 @@ GoRouter createRouter({String initialLocation = Routes.welcome}) => GoRouter(
   initialLocation: initialLocation,
   routes: [
     GoRoute(path: '/', redirect: (_, _) => Routes.welcome),
-    // main() opens the devices panel for this route; the page is home.
-    GoRoute(path: Routes.demo, redirect: (_, _) => Routes.home),
     GoRoute(path: Routes.welcome, builder: (_, _) => const WelcomeScreen()),
     StatefulShellRoute.indexedStack(
       builder: (_, _, navigationShell) =>
@@ -36,10 +34,10 @@ GoRouter createRouter({String initialLocation = Routes.welcome}) => GoRouter(
       branches: [
         StatefulShellBranch(
           routes: [
-            GoRoute(
-              path: Routes.home,
-              builder: (_, _) => const DashboardScreen(),
-            ),
+            GoRoute(path: Routes.home, pageBuilder: (_, _) => _dashboardPage),
+            // The same page, so the dashboard stays put while the address
+            // follows the devices panel (see AppShell).
+            GoRoute(path: Routes.demo, pageBuilder: (_, _) => _dashboardPage),
           ],
         ),
         StatefulShellBranch(
@@ -85,6 +83,11 @@ GoRouter createRouter({String initialLocation = Routes.welcome}) => GoRouter(
       ],
     ),
   ],
+);
+
+const Page<void> _dashboardPage = NoTransitionPage<void>(
+  key: ValueKey('dashboard'),
+  child: DashboardScreen(),
 );
 
 /// On phones each step is a page with a transition and a back gesture. On

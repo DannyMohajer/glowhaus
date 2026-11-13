@@ -417,5 +417,13 @@
   "devicesTabJoining": "Connecting to the demo…",
   "devicesTabNoHost": "No Glowhaus demo is open in this browser. Open it in another tab, then try again.",
   "devicesTabRetry": "Try again",
+  "devicesTabElsewhere": "Devices are already running in another tab.",
+  "@devicesTabElsewhere": {
+    "description": "Devices tab: another tab of this browser runs the demo devices"
+  },
+  "devicesTabTakeOver": "Take over",
+  "@devicesTabTakeOver": {
+    "description": "Button: run the demo devices in this tab instead of the other one"
+  },
   "devicesTabHint": "These devices talk MQTT to the app in your other tab. Close this tab and they go home."
 }

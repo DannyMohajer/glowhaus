@@ -20,24 +20,27 @@ class AppShell extends StatelessWidget {
     final panelOpen = demo && context.watch<DemoPanelCubit>().state;
     return FeedbackListener(
       child: DemoPanelLauncher(
-        child: AdaptiveScaffold(
-          railFooter: demo ? const DemoPanelRailButton() : null,
-          sidePanel: panelOpen
-              ? DemoDevicesPanel(onClose: context.read<DemoPanelCubit>().hide)
-              : null,
-          destinations: [
-            GlowNavItem(icon: GlowIcons.house, label: l10n.navHome),
-            GlowNavItem(icon: GlowIcons.layoutGrid, label: l10n.navRooms),
-            GlowNavItem(icon: GlowIcons.settings, label: l10n.navSettings),
-          ],
-          currentIndex: navigationShell.currentIndex,
-          // Tapping the current destination returns to its first page.
-          onDestinationSelected: (index) => navigationShell.goBranch(
-            index,
-            initialLocation: index == navigationShell.currentIndex,
+        child: DemoPanelAddress(
+          panelOpen: panelOpen,
+          child: AdaptiveScaffold(
+            railFooter: demo ? const DemoPanelRailButton() : null,
+            sidePanel: panelOpen
+                ? DemoDevicesPanel(onClose: context.read<DemoPanelCubit>().hide)
+                : null,
+            destinations: [
+              GlowNavItem(icon: GlowIcons.house, label: l10n.navHome),
+              GlowNavItem(icon: GlowIcons.layoutGrid, label: l10n.navRooms),
+              GlowNavItem(icon: GlowIcons.settings, label: l10n.navSettings),
+            ],
+            currentIndex: navigationShell.currentIndex,
+            // Tapping the current destination returns to its first page.
+            onDestinationSelected: (index) => navigationShell.goBranch(
+              index,
+              initialLocation: index == navigationShell.currentIndex,
+            ),
+            railHeader: const GlowLogoMark(),
+            body: navigationShell,
           ),
-          railHeader: const GlowLogoMark(),
-          body: navigationShell,
         ),
       ),
     );

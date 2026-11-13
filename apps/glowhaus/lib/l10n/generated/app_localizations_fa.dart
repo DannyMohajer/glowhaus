@@ -757,6 +757,13 @@ class AppLocalizationsFa extends AppLocalizations {
   String get devicesTabRetry => 'دوباره امتحان کن';
 
   @override
+  String get devicesTabElsewhere =>
+      'دستگاه‌ها همین حالا در زبانه‌ی دیگری اجرا می‌شوند.';
+
+  @override
+  String get devicesTabTakeOver => 'در اختیار گرفتن';
+
+  @override
   String get devicesTabHint =>
       'این دستگاه‌ها با برنامه در زبانه‌ی دیگرت از راه MQTT حرف می‌زنند. این زبانه را ببندی، به خانه برمی‌گردند.';
 }

@@ -757,6 +757,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get devicesTabRetry => 'Tekrar dene';
 
   @override
+  String get devicesTabElsewhere =>
+      'Cihazlar zaten başka bir sekmede çalışıyor.';
+
+  @override
+  String get devicesTabTakeOver => 'Devral';
+
+  @override
   String get devicesTabHint =>
       'Bu cihazlar diğer sekmendeki uygulamayla MQTT üzerinden konuşur. Bu sekmeyi kapatırsan geri dönerler.';
 }

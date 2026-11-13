@@ -118,6 +118,60 @@ void main() {
     });
   });
 
+  test('an evicted guest is told so, ends without wills and cannot '
+      'connect again', () {
+    fakeAsync((async) {
+      setUpBridge();
+      final watcher = broker.client();
+      final seen = <MqttMessage>[];
+      unawaited(
+        watcher
+            .connect(clientId: 'watcher')
+            .then((_) => watcher.subscribe('dev/+/availability'))
+            .then((_) => watcher.messages.listen(seen.add)),
+      );
+      final guest = BridgeGuest(port: hub.port(), guestId: 'tab-2');
+      unawaited(guest.join());
+      async.flushMicrotasks();
+      final device = guest.connection();
+      unawaited(
+        device.connect(
+          clientId: 'device-lamp',
+          will: MqttWill.text('dev/lamp/availability', 'offline', retain: true),
+        ),
+      );
+      async.flushMicrotasks();
+      expect(broker.connectedClientIds, contains('device-lamp'));
+
+      var evicted = false;
+      unawaited(guest.evicted.then((_) => evicted = true));
+      unawaited(host.evict('tab-2'));
+      async.flushMicrotasks();
+
+      expect(evicted, isTrue);
+      expect(host.guests, isEmpty);
+      expect(left, ['tab-2']);
+      expect(broker.connectedClientIds, isNot(contains('device-lamp')));
+      expect(seen, isEmpty, reason: 'a clean end publishes no will');
+      expect(device.currentState, MqttConnectionState.disconnected);
+
+      Object? error;
+      unawaited(
+        device.connect(clientId: 'device-lamp').catchError((Object e) {
+          error = e;
+        }),
+      );
+      async.flushMicrotasks();
+      expect(error, isA<MqttConnectionException>());
+
+      // Nothing more from the evicted guest reaches the host.
+      async.elapse(const Duration(seconds: 10));
+      expect(host.guests, isEmpty);
+      unawaited(host.close());
+      async.flushMicrotasks();
+    });
+  });
+
   test('a guest that goes silent is dropped and its will is published', () {
     fakeAsync((async) {
       setUpBridge();

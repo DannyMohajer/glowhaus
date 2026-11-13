@@ -155,8 +155,12 @@ class VirtualDevice {
     _online = false;
     _changed();
     _cancelTimers();
-    await _publishAvailability(AvailabilityStatus.offline);
-    await _connection.disconnect();
+    try {
+      await _publishAvailability(AvailabilityStatus.offline);
+      await _connection.disconnect();
+    } on MqttConnectionException {
+      // The link is already gone; there is nobody left to say goodbye to.
+    }
   }
 
   /// Someone used the device itself (its button, a wall switch). An
@@ -179,9 +183,12 @@ class VirtualDevice {
     if (_disposed) return;
     await goOffline();
     _disposed = true;
-    await _messages.cancel();
-    await _changes.close();
-    await _link.cancel();
+    // None of these is awaited: nothing here depends on them finishing,
+    // and a cancel can hand back a future of another zone, which keeps a
+    // test's fake clock from seeing the rest of the shutdown.
+    unawaited(_messages.cancel());
+    unawaited(_changes.close());
+    unawaited(_link.cancel());
     await _connection.dispose();
   }
 

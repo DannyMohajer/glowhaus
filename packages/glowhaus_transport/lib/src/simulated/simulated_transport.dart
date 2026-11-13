@@ -156,10 +156,17 @@ class SimulatedTransport implements Transport {
   }
 
   /// Takes the devices back after [releaseDevices], each from what the
-  /// broker last retained for it: its state, and whether it was online.
+  /// broker last retained for it (see [retainedSnapshots]).
   Future<void> reclaimDevices() async {
     if (!_devicesAway) return;
     _devicesAway = false;
+    await home.resume(retainedSnapshots());
+  }
+
+  /// Where the devices are according to the broker: each one's retained
+  /// state, and whether it was online. A device with nothing retained, or
+  /// something unreadable, is left out.
+  Map<String, DeviceSnapshot> retainedSnapshots() {
     const topics = TopicCodec();
     final from = <String, DeviceSnapshot>{};
     for (final device in home.devices.values) {
@@ -182,7 +189,7 @@ class SimulatedTransport implements Transport {
         // A malformed retained message: carry on from what it last had.
       }
     }
-    await home.resume(from);
+    return from;
   }
 
   /// Online, unless someone unplugged the device on purpose. An offline

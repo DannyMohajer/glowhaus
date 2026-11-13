@@ -31,9 +31,14 @@ class DemoBridgeHost {
   Stream<bool> get devicesAway => _away.stream;
 
   Future<Map<String, Object?>> _onJoin(String guestId) async {
+    // One devices tab at a time, and the newest wins: an older one is sent
+    // away first (its devices end cleanly), and the newcomer carries on
+    // from what the broker retained.
+    for (final other in _host.guests.where((id) => id != guestId).toList()) {
+      await _host.evict(other);
+    }
     final snapshot = demo.devicesAway
-        // A second devices tab: hand over what the broker knows.
-        ? const <String, DeviceSnapshot>{}
+        ? demo.retainedSnapshots()
         : await demo.releaseDevices();
     if (!_away.isClosed) _away.add(true);
     return {
@@ -60,7 +65,18 @@ class DemoBridgeHost {
 /// The devices tab of the demo: the twelve virtual devices, connected over a
 /// [BridgePort] to the broker in the app's tab.
 class RemoteDemoHome {
-  new _(this._guest, this.home, this.traffic);
+  new _(this._guest, this.home, this.traffic) {
+    unawaited(
+      _guest.evicted.then((_) async {
+        // Said at once; the devices here stop right after.
+        _evicted.complete();
+        await home.dispose();
+        await traffic.close();
+      }),
+    );
+  }
+
+  final _evicted = Completer<void>();
 
   /// Joins a [DemoBridgeHost] and starts the devices where the app's tab
   /// left them. Throws a [TimeoutException] when no app tab answers.
@@ -97,9 +113,18 @@ class RemoteDemoHome {
   final VirtualHome home;
   final MqttTrafficLog traffic;
 
+  /// Completes when a newer devices tab took over. The devices here have
+  /// lost their link by then and stop for good right after.
+  Future<void> get evicted => _evicted.future;
+
   /// Leaves cleanly, so the app's tab takes the devices back at once.
+  ///
+  /// The link goes first, so the devices end without a word of their own
+  /// (an `offline` with `ts` would read as unplugged), and they stop for
+  /// good: no reconnecting from a tab that left.
   Future<void> leave() async {
     await _guest.leave();
+    await home.dispose();
     await traffic.close();
   }
 }

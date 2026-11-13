@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,6 +7,7 @@ import 'package:glowhaus/features/demo/data/demo_browser.dart';
 import 'package:glowhaus/features/demo/view/demo_panel_host.dart';
 import 'package:glowhaus/features/demo/view/devices_panel.dart';
 import 'package:glowhaus/features/settings/cubit/settings_state.dart';
+import 'package:glowhaus/features/shared/random_tag.dart';
 import 'package:glowhaus/l10n/framework_localizations.dart';
 import 'package:glowhaus/l10n/generated/app_localizations.dart';
 import 'package:glowhaus_transport/glowhaus_transport.dart';
@@ -30,6 +30,9 @@ class DevicesTabApp extends StatelessWidget {
   final DemoBrowser browser;
   final String channelName;
   final SettingsState settings;
+
+  /// The Web Lock that decides which tab runs the devices.
+  static const String lockName = 'glowhaus-devices';
 
   Route<void> _route(RouteSettings? _) => MaterialPageRoute<void>(
     settings: const RouteSettings(name: DemoSetup.devicesRoute),
@@ -77,13 +80,16 @@ class _DevicesTab extends StatefulWidget {
   State<_DevicesTab> createState() => _DevicesTabState();
 }
 
+enum _Phase { joining, noHost, elsewhere, running }
+
 class _DevicesTabState extends State<_DevicesTab> {
-  final String _guestId =
-      'devices-${Random().nextInt(1 << 32).toRadixString(36)}';
+  final String _guestId = 'devices-${randomTag()}';
+  late final TabLock? _lock = widget.browser.lock(DevicesTabApp.lockName);
+  StreamSubscription<void>? _lockLost;
   RemoteDemoHome? _remote;
   DevicesPanelCubit? _panel;
   BridgePort? _port;
-  bool _failed = false;
+  _Phase _phase = _Phase.joining;
   Timer? _restoreRoute;
 
   @override
@@ -97,15 +103,27 @@ class _DevicesTabState extends State<_DevicesTab> {
     void restore() => widget.browser.showRoute(DemoSetup.devicesRoute);
     WidgetsBinding.instance.addPostFrameCallback((_) => restore());
     _restoreRoute = Timer(const Duration(seconds: 1), restore);
-    unawaited(_join());
+    // Another tab took over: stop here, and say goodbye so the app tab
+    // knows at once.
+    _lockLost = _lock?.lost.listen((_) => unawaited(_stop(sayGoodbye: true)));
+    unawaited(_start());
   }
 
-  Future<void> _join() async {
-    setState(() => _failed = false);
+  /// Runs the devices here if no other tab does, or, with [takeOver], in
+  /// place of the tab that does.
+  Future<void> _start({bool takeOver = false}) async {
+    setState(() => _phase = _Phase.joining);
+    final lock = _lock;
+    if (lock != null && !await lock.acquire(steal: takeOver)) {
+      if (mounted) setState(() => _phase = _Phase.elsewhere);
+      return;
+    }
+    if (!mounted) return;
     _port?.close();
     final port = _port = widget.browser.channel(widget.channelName);
     if (port == null) {
-      setState(() => _failed = true);
+      _lock?.release();
+      setState(() => _phase = _Phase.noHost);
       return;
     }
     try {
@@ -114,20 +132,37 @@ class _DevicesTabState extends State<_DevicesTab> {
         await remote.leave();
         return;
       }
+      // The app tab handed the devices to a newer devices tab.
+      unawaited(remote.evicted.then((_) => _stop(sayGoodbye: false)));
       setState(() {
         _remote = remote;
         _panel = DevicesPanelCubit(home: remote.home, traffic: remote.traffic);
+        _phase = _Phase.running;
       });
     } on TimeoutException {
-      if (mounted) setState(() => _failed = true);
+      _lock?.release();
+      if (mounted) setState(() => _phase = _Phase.noHost);
     }
+  }
+
+  Future<void> _stop({required bool sayGoodbye}) async {
+    final remote = _remote;
+    final panel = _panel;
+    _remote = null;
+    _panel = null;
+    _lock?.release();
+    if (mounted) setState(() => _phase = _Phase.elsewhere);
+    if (sayGoodbye) await remote?.leave();
+    await panel?.close();
   }
 
   @override
   void dispose() {
     _restoreRoute?.cancel();
+    unawaited(_lockLost?.cancel());
     unawaited(_panel?.close());
     unawaited(_remote?.leave());
+    _lock?.release();
     _port?.close();
     super.dispose();
   }
@@ -157,23 +192,24 @@ class _DevicesTabState extends State<_DevicesTab> {
                         const SizedBox(height: GlowSpace.x4),
                         Semantics(
                           liveRegion: true,
-                          child: Text(
-                            _failed
-                                ? l10n.devicesTabNoHost
-                                : l10n.devicesTabJoining,
-                            style: context.type.body,
-                          ),
+                          child: Text(switch (_phase) {
+                            _Phase.noHost => l10n.devicesTabNoHost,
+                            _Phase.elsewhere => l10n.devicesTabElsewhere,
+                            _ => l10n.devicesTabJoining,
+                          }, style: context.type.body),
                         ),
-                        if (_failed) ...[
-                          const SizedBox(height: GlowSpace.x5),
-                          GlowButton(
+                        const SizedBox(height: GlowSpace.x5),
+                        switch (_phase) {
+                          _Phase.noHost => GlowButton(
                             label: l10n.devicesTabRetry,
-                            onTap: () => unawaited(_join()),
+                            onTap: () => unawaited(_start()),
                           ),
-                        ] else ...[
-                          const SizedBox(height: GlowSpace.x5),
-                          const Center(child: GlowSpinner(size: 24)),
-                        ],
+                          _Phase.elsewhere => GlowButton(
+                            label: l10n.devicesTabTakeOver,
+                            onTap: () => unawaited(_start(takeOver: true)),
+                          ),
+                          _ => const Center(child: GlowSpinner(size: 24)),
+                        },
                       ],
                     ),
                   ),

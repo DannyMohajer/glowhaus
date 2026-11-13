@@ -66,13 +66,13 @@ class _Tabs {
   final away = <bool>[];
   late _Port guestPort;
 
-  RemoteDemoHome join() {
+  RemoteDemoHome join({String guestId = 'devices-tab'}) {
     guestPort = hub.port();
     RemoteDemoHome? remote;
     unawaited(
       RemoteDemoHome.join(
         guestPort,
-        guestId: 'devices-tab',
+        guestId: guestId,
         ambientInterval: null,
       ).then((r) => remote = r),
     );
@@ -214,6 +214,54 @@ void main() {
           .where((e) => e.deviceId == 'lr-lamp')
           .last;
       expect(lastAvailability.availability, DeviceAvailability.online);
+      unawaited(tabs.close());
+      async.flushMicrotasks();
+    });
+  });
+
+  test('a second devices tab takes over: the first is sent away, the second '
+      'carries on from the broker, no device runs twice', () {
+    fakeAsync((async) {
+      final tabs = _Tabs(async);
+      final first = tabs.join(guestId: 'tab-1');
+      unawaited(first.home.device('lr-lamp')!.pressLocal(_lampOn));
+      unawaited(first.home.setOnline('kt-switch', online: false));
+      async.elapse(const Duration(milliseconds: 200));
+      var firstEvicted = false;
+      unawaited(first.evicted.then((_) => firstEvicted = true));
+
+      final second = tabs.join(guestId: 'tab-2');
+      async.elapse(const Duration(milliseconds: 100));
+      expect(firstEvicted, isTrue);
+      expect(
+        first.home.devices.values.where((d) => d.online),
+        isEmpty,
+        reason: 'the first tab stopped its devices',
+      );
+      expect(tabs.away, isNot(contains(false)), reason: 'never came home');
+      expect(tabs.demo.home.devices.values.where((d) => d.online), isEmpty);
+
+      final lamp = second.home.device('lr-lamp')!;
+      expect(lamp.online, isTrue);
+      expect(_isOn(lamp.state), isTrue, reason: 'from the retained state');
+      expect(second.home.device('kt-switch')!.online, isFalse);
+      expect(second.home.device('kt-motion')!.online, isFalse);
+      expect(
+        tabs.demo.broker.connectedClientIds.where(
+          (id) => id.contains('lr-lamp'),
+        ),
+        hasLength(1),
+      );
+
+      expect(_isOn(second.home.stateOf('br-reading')), isFalse);
+      expect(tabs.send('br-reading', _lampOn), isA<CommandAcked>());
+      expect(_isOn(second.home.stateOf('br-reading')), isTrue);
+      expect(_isOn(first.home.stateOf('br-reading')), isFalse);
+
+      unawaited(second.leave());
+      async.elapse(const Duration(milliseconds: 200));
+      expect(tabs.away.last, isFalse);
+      expect(_isOn(tabs.demo.home.stateOf('lr-lamp')), isTrue);
       unawaited(tabs.close());
       async.flushMicrotasks();
     });

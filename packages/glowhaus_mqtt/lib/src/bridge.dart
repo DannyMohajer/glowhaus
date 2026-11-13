@@ -69,6 +69,15 @@ class BridgeHost {
     }
   }
 
+  /// Sends [guestId] away: it is told so, and its connections end cleanly
+  /// (no wills), as if it had said goodbye. For handing the devices to a
+  /// newer guest.
+  Future<void> evict(String guestId) async {
+    if (!_guests.containsKey(guestId)) return;
+    _post(guestId, {'t': 'evict'});
+    await _leave(guestId, graceful: true);
+  }
+
   Future<void> _onMessage(Map<String, Object?> message) async {
     final from = message['from'];
     if (from is! String) return;
@@ -227,6 +236,7 @@ class BridgeGuest {
 
   late final StreamSubscription<Map<String, Object?>> _subscription;
   final _welcome = Completer<Map<String, Object?>>();
+  final _evicted = Completer<void>();
   final Map<String, _BridgeConnection> _connections = {};
   Timer? _beat;
   String? _hostId;
@@ -246,6 +256,11 @@ class BridgeGuest {
     return welcome;
   }
 
+  /// Completes when the host sends this guest away for a newer one (see
+  /// [BridgeHost.evict]). Its connections are closed by then and cannot
+  /// connect again.
+  Future<void> get evicted => _evicted.future;
+
   /// A connection to the host's broker. Usable after [join].
   MqttConnection connection() {
     final c = '${_next++}';
@@ -259,7 +274,7 @@ class BridgeGuest {
     for (final connection in _connections.values.toList()) {
       connection._dropped();
     }
-    await _subscription.cancel();
+    unawaited(_subscription.cancel());
   }
 
   void _onMessage(Map<String, Object?> message) {
@@ -271,6 +286,14 @@ class BridgeGuest {
       return;
     }
     if (from != _hostId) return;
+    if (message['t'] == 'evict') {
+      _beat?.cancel();
+      if (!_evicted.isCompleted) _evicted.complete();
+      for (final connection in _connections.values.toList()) {
+        connection._dropped();
+      }
+      return;
+    }
     final connection = _connections[message['c']];
     if (connection == null) return;
     switch (message['t']) {
@@ -333,6 +356,9 @@ class _BridgeConnection implements MqttConnection {
   }) async {
     if (_guest._hostId == null) {
       throw const MqttConnectionException('bridge not joined');
+    }
+    if (_guest._evicted.isCompleted) {
+      throw const MqttConnectionException('sent away by the bridge host');
     }
     if (_current == MqttConnectionState.connected) return;
     _set(MqttConnectionState.connecting);
@@ -403,8 +429,9 @@ class _BridgeConnection implements MqttConnection {
   Future<void> dispose() async {
     await disconnect();
     _guest._connections.remove(_c);
-    await _state.close();
-    await _messages.close();
+    // Not awaited, as in the traffic tap.
+    unawaited(_state.close());
+    unawaited(_messages.close());
   }
 
   void _checkConnected() {

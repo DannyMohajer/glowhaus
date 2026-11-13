@@ -757,6 +757,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get devicesTabRetry => 'Try again';
 
   @override
+  String get devicesTabElsewhere =>
+      'Devices are already running in another tab.';
+
+  @override
+  String get devicesTabTakeOver => 'Take over';
+
+  @override
   String get devicesTabHint =>
       'These devices talk MQTT to the app in your other tab. Close this tab and they go home.';
 }

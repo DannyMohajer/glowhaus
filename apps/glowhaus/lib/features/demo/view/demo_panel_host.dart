@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:glowhaus/app/router/routes.dart';
 import 'package:glowhaus/features/connection/cubit/connection_settings_cubit.dart';
 import 'package:glowhaus/features/connection/data/connection_settings.dart';
 import 'package:glowhaus/features/demo/cubit/devices_panel_cubit.dart';
@@ -10,6 +11,7 @@ import 'package:glowhaus/features/demo/view/devices_panel.dart';
 import 'package:glowhaus/l10n/generated/app_localizations.dart';
 import 'package:glowhaus_transport/glowhaus_transport.dart';
 import 'package:glowhaus_ui/glowhaus_ui.dart';
+import 'package:go_router/go_router.dart';
 
 /// The demo's device side, when this app runs the demo home: its devices,
 /// the browser (for the second tab), and whether they are away in it.
@@ -67,9 +69,15 @@ void openDevicesPanel(BuildContext context) {
   final setup = context.read<DemoSetup>();
   final colors = context.colors;
   final height = MediaQuery.sizeOf(context).height;
+  final router = GoRouter.maybeOf(context);
+  // The address says what is showing, so it can be shared: `#/demo` while
+  // the sheet is open over the dashboard.
+  if (router != null && _path(router) == Routes.home) router.go(Routes.demo);
   unawaited(
     showModalBottomSheet<void>(
       context: context,
+      // Above the shell, so the address change underneath leaves it alone.
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: colors.surface,
@@ -88,8 +96,49 @@ void openDevicesPanel(BuildContext context) {
           ),
         ),
       ),
-    ),
+    ).whenComplete(() {
+      if (router != null && _path(router) == Routes.demo) {
+        router.go(Routes.home);
+      }
+    }),
   );
+}
+
+String _path(GoRouter router) =>
+    router.routerDelegate.currentConfiguration.uri.path;
+
+/// Keeps the address in step with the side panel on wide windows: `#/demo`
+/// while the dashboard shows with the panel open, `#/home` without it. Other
+/// pages keep their own address; the panel stays open beside them.
+class DemoPanelAddress extends StatefulWidget {
+  const new({required this.panelOpen, required this.child, super.key});
+
+  final bool panelOpen;
+  final Widget child;
+
+  @override
+  State<DemoPanelAddress> createState() => _DemoPanelAddressState();
+}
+
+class _DemoPanelAddressState extends State<DemoPanelAddress> {
+  @override
+  Widget build(BuildContext context) {
+    if (GlowWindowSize.of(context) == GlowWindowSize.expanded &&
+        demoPanelAvailable(context)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _sync());
+    }
+    return widget.child;
+  }
+
+  void _sync() {
+    if (!mounted) return;
+    final router = GoRouter.maybeOf(context);
+    if (router == null) return;
+    final path = _path(router);
+    if (path != Routes.home && path != Routes.demo) return;
+    final wanted = widget.panelOpen ? Routes.demo : Routes.home;
+    if (path != wanted) router.go(wanted);
+  }
 }
 
 /// The round "Devices" button for the side rail.

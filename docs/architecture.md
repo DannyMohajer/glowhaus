@@ -253,7 +253,20 @@ Other decisions:
   framework references those icons in widgets we never show, and the app sets
   `uses-material-design: false` to avoid shipping the font. Expected.
 - Hash URLs (go_router's default on web) so a reload inside the iframe or on
-  Pages never hits a 404.
+  Pages never hits a 404. `#/demo` is a real route (the dashboard) whose
+  address follows the devices panel, so the link can be shared.
+- **Every build under its own path.** GitHub Pages sends
+  `Cache-Control: max-age=600` for every file and cannot be told otherwise,
+  and Flutter's file names never change, so a returning visitor could get
+  an old `main.dart.*` (or an old `.mjs` with a new `.wasm`). `build_web.sh`
+  moves everything a build loads (bootstrap, `main.dart.*`, deferred parts,
+  assets, engine) to `b/<id>/`, where `<id>` is a hash of the build. The
+  root `flutter_bootstrap.js` is a small loader that fetches `build.json`
+  with `cache: 'no-store'` and starts that build, so even a cached
+  `index.html` and loader start the newest one. No service worker is
+  registered (Widgetbook's default registration is removed); Flutter's
+  self-removing `flutter_service_worker.js` stays at the root for browsers
+  that once installed an old one.
 
 ## The demo's device side
 
@@ -279,18 +292,22 @@ code.
 The panel and the two-tab mode exist only on the demo: on a real broker the
 devices are elsewhere (the simulator, or real hardware) and the rail hides
 the button. `#/devices` starts a separate, much smaller widget tree
-(`DevicesTabApp`: no repository, router or app state), and `#/demo` opens
-the app with the panel showing; both are read in `main.dart` before the
-router starts.
+(`DevicesTabApp`: no repository, router or app state), read in `main.dart`
+before the router starts. `#/demo` is the dashboard with the panel open:
+on wide windows the address follows the panel (`DemoPanelAddress`), on
+phones it is `#/demo` while the sheet is up.
 
 Limits, on purpose:
 
 - A `BroadcastChannel` reaches only same-origin tabs of the same browser
   profile. Two devices, or two browsers, need a real broker.
-- One devices tab at a time. The app tab hands its devices to the first
-  guest that joins and takes them back when no guest is left. A second
-  devices tab is not refused yet: it starts another copy of the twelve
-  devices from the demo's starting state, under the same ids.
+- One devices tab at a time. A devices tab first takes the
+  `glowhaus-devices` Web Lock; if another tab holds it, it says so and
+  offers "Take over", which steals the lock, and the other tab stops its
+  devices and says goodbye. The bridge enforces the same rule without the
+  lock: when a guest joins while another has the devices, the host evicts
+  the older one first (its connections end cleanly, no wills) and the
+  newcomer starts from the broker's retained state.
 - A guest that goes silent is noticed after four of the host's sweeps
   (about four seconds), not at once; until then its devices still count as
   online.

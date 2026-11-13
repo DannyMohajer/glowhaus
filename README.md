@@ -148,9 +148,9 @@ caveats: [infra/README.md](infra/README.md).
 - **Two-tab mode is same-browser only.** A `BroadcastChannel` reaches tabs
   of the same origin in the same browser profile, nothing else: not another
   browser, not a private window, not another device. Across devices you
-  need a real broker (the Docker stack today, a hosted one later). Open one
-  devices tab at a time: a second one is not refused yet and starts another
-  copy of the devices.
+  need a real broker (the Docker stack today, a hosted one later). One tab
+  runs the devices at a time (a Web Lock decides); another devices tab
+  offers to take over.
 - **The Wasm build cannot load code lazily.** The broker form and the
   `mqtt_client` adapter are deferred imports, so the JS build fetches them
   (53 KB gzip) only when someone opens the broker settings. Flutter 3.47
@@ -231,7 +231,10 @@ The web build is made to be embedded, for example in a portfolio page:
 
 Use the plain address and a phone-sized frame (390 × 844) for the app alone.
 It uses hash URLs, so reloads inside the frame never 404, and it loads
-nothing from third-party hosts. A first visit downloads about 2.6 MB gzip
+nothing from third-party hosts. Each build lives under its own `b/<id>/`
+path and a tiny loader asks `build.json` (never cached) which one is
+current, so a returning visitor gets a new deploy on the next load even
+though GitHub Pages caches every file for ten minutes. A first visit downloads about 2.6 MB gzip
 on Chrome and Edge (Wasm), 3.0 MB on the JS fallback; see the
 [web build budget](docs/architecture.md#web-build-budget).
 

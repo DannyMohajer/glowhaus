@@ -23,4 +23,7 @@ class _NoBrowser implements DemoBrowser {
 
   @override
   void onPageHide(void Function() callback) {}
+
+  @override
+  TabLock? lock(String name) => null;
 }
