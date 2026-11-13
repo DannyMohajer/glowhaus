@@ -30,6 +30,9 @@ class MqttClientConnection implements MqttConnection {
   MqttConnectionState _current = MqttConnectionState.disconnected;
   bool _disposed = false;
 
+  /// Subscribes waiting for the broker's SUBACK, by filter.
+  final _subscribing = <String, Completer<void>>{};
+
   @override
   MqttConnectionState get currentState => _current;
 
@@ -67,7 +70,9 @@ class MqttClientConnection implements MqttConnection {
     }
     client
       ..connectionMessage = message
-      ..onDisconnected = () => _onDisconnected(client);
+      ..onDisconnected = (() => _onDisconnected(client))
+      ..onSubscribed = _onSubscribed
+      ..onSubscribeFail = _onSubscribeFail;
     _client = client;
 
     mqtt.MqttClientConnectionStatus? status;
@@ -90,13 +95,30 @@ class MqttClientConnection implements MqttConnection {
   }
 
   @override
+  /// Completes once the broker has acknowledged the subscription, so that
+  /// anything published after it returns is delivered. Returning on send
+  /// instead loses messages that race the SUBSCRIBE, which over TLS or a
+  /// slow link is easy to hit.
   Future<void> subscribe(
     String filter, {
     MqttQos qos = MqttQos.atLeastOnce,
   }) async {
-    final subscription = _connected().subscribe(filter, _toClientQos(qos));
+    final client = _connected();
+    if (client.getSubscriptionsStatus(filter) ==
+        mqtt.MqttSubscriptionStatus.active) {
+      return;
+    }
+    final acked = _subscribing.putIfAbsent(filter, Completer<void>.new);
+    final subscription = client.subscribe(filter, _toClientQos(qos));
     if (subscription == null) {
+      _subscribing.remove(filter);
       throw MqttConnectionException('subscribe refused: $filter');
+    }
+    try {
+      await acked.future.timeout(connectTimeout);
+    } on TimeoutException {
+      _subscribing.remove(filter);
+      throw MqttConnectionException('no SUBACK for $filter');
     }
   }
 
@@ -126,6 +148,7 @@ class MqttClientConnection implements MqttConnection {
     final client = _client;
     if (client == null) return;
     _client = null;
+    _failPendingSubscribes();
     await _updates?.cancel();
     _updates = null;
     client
@@ -152,9 +175,26 @@ class MqttClientConnection implements MqttConnection {
     return client;
   }
 
+  void _onSubscribed(String filter) => _subscribing.remove(filter)?.complete();
+
+  void _onSubscribeFail(String filter) => _subscribing
+      .remove(filter)
+      ?.completeError(MqttConnectionException('subscribe refused: $filter'));
+
+  void _failPendingSubscribes() {
+    final pending = _subscribing.values.toList();
+    _subscribing.clear();
+    for (final completer in pending) {
+      completer.completeError(
+        const MqttConnectionException('disconnected before SUBACK'),
+      );
+    }
+  }
+
   void _onDisconnected(mqtt.MqttClient client) {
     if (_client != client) return;
     _client = null;
+    _failPendingSubscribes();
     unawaited(_updates?.cancel());
     _updates = null;
     _setState(MqttConnectionState.disconnected);

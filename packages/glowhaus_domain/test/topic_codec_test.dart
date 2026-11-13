@@ -20,6 +20,7 @@ void main() {
           DeviceChannel.state: 'glowhaus/demo-home/lr-lamp/state',
           DeviceChannel.ack: 'glowhaus/demo-home/lr-lamp/ack',
           DeviceChannel.availability: 'glowhaus/demo-home/lr-lamp/availability',
+          DeviceChannel.info: 'glowhaus/demo-home/lr-lamp/info',
         },
       );
     });

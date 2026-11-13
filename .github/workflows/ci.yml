@@ -85,6 +85,14 @@ jobs:
       # and the simulator, the latter built from infra/simulator/Dockerfile.
       - name: Passwords
         run: infra/scripts/make-users.sh
+      # A runner has no keychain: --no-install leaves every trust store
+      # alone and the TLS test trusts infra/certs/ca.crt explicitly.
+      - name: Certificates
+        run: |
+          sudo apt-get install -y --no-install-recommends mkcert
+          infra/scripts/make-certs.sh --no-install
+      # --wait also waits for the simulator's healthcheck: at least one
+      # device connected (see "Watchdog" in infra/README.md).
       - name: Broker and simulator
         run: docker compose -f infra/docker-compose.yml up -d --build --wait mosquitto simulator
 
@@ -92,9 +100,16 @@ jobs:
       # and the twelve devices in the container, plus the ACL tests: a
       # device identity cannot write another device's topics, read its
       # commands, or reach another home.
-      - name: Protocol and ACL tests
+      - name: Protocol and ACL tests, plain MQTT
         env:
           GLOWHAUS_BROKER_HOST: 127.0.0.1
+        run: dart test test/broker_test.dart
+        working-directory: packages/glowhaus_transport
+      - name: Protocol and ACL tests, MQTT over TLS
+        env:
+          GLOWHAUS_BROKER_HOST: localhost
+          GLOWHAUS_BROKER_MODE: tls
+          GLOWHAUS_BROKER_CA: ../../infra/certs/ca.crt
         run: dart test test/broker_test.dart
         working-directory: packages/glowhaus_transport
 

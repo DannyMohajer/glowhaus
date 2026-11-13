@@ -546,11 +546,11 @@ void main() {
         h.events.clear();
         unawaited(h.transport.setDeviceOnline('lr-lamp', online: true));
         h.async.flushMicrotasks();
-        // Section 6 / 5.1: online, state, and an announce on (re)connect.
+        // Section 6 / 5.1: online and state on reconnect. The device's info
+        // and announce repeat an unchanged descriptor, which is not news.
         expect(h.events.map((e) => e.runtimeType), [
           DeviceAvailabilityChanged,
           DeviceStateChanged,
-          DeviceAnnounced,
         ]);
         expect(
           (h.events.first as DeviceAvailabilityChanged).availability,

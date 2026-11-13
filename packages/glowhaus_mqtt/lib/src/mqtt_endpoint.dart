@@ -13,11 +13,21 @@ class MqttEndpoint {
     this.tls = true,
     this.webSocket = false,
     this.path = '/mqtt',
+    this.trustedCertificatePem,
   });
 
   /// MQTT over TLS on 8883, the native default.
-  const new tcp(String host, {int port = 8883, bool tls = true})
-    : this(host: host, port: port, tls: tls);
+  const new tcp(
+    String host, {
+    int port = 8883,
+    bool tls = true,
+    String? trustedCertificatePem,
+  }) : this(
+         host: host,
+         port: port,
+         tls: tls,
+         trustedCertificatePem: trustedCertificatePem,
+       );
 
   /// MQTT over secure WebSocket, what a browser needs.
   const new webSocketSecure(
@@ -34,6 +44,15 @@ class MqttEndpoint {
   /// WebSocket path on the broker; ignored for TCP.
   final String path;
 
+  /// A certificate authority to trust for this broker, in PEM, on top of the
+  /// platform's own roots. Native TLS over TCP only.
+  ///
+  /// For development brokers whose CA the platform does not see: Dart on
+  /// Android reads only the read-only system store, never user-installed
+  /// certificates, so a phone needs the mkcert CA handed over this way.
+  /// Browsers ignore it; they trust what the operating system trusts.
+  final String? trustedCertificatePem;
+
   /// The URL form `mqtt_client` wants for WebSocket connections.
   String get webSocketUrl => '${tls ? 'wss' : 'ws'}://$host$path';
 
@@ -49,8 +68,10 @@ class MqttEndpoint {
       other.port == port &&
       other.tls == tls &&
       other.webSocket == webSocket &&
-      other.path == path;
+      other.path == path &&
+      other.trustedCertificatePem == trustedCertificatePem;
 
   @override
-  int get hashCode => Object.hash(host, port, tls, webSocket, path);
+  int get hashCode =>
+      Object.hash(host, port, tls, webSocket, path, trustedCertificatePem);
 }

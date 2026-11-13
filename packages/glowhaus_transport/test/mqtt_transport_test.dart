@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:glowhaus_domain/glowhaus_domain.dart';
@@ -86,12 +87,16 @@ class _BrokerLamp {
     retain: true,
   );
 
+  /// Discovery queries this device has answered.
+  int queries = 0;
+
   Future<void> _onMessage(MqttMessage message) async {
     final topic = _topics.parse(message.topic);
     if (topic is DiscoveryTopic) {
       // Section 4: ignore what cannot be parsed.
       final json = jsonDecode(message.text);
       if (json is Map<String, dynamic> && json['type'] == 'query') {
+        queries++;
         await _announce();
       }
       return;
@@ -404,12 +409,13 @@ void main() {
         expect(h.transport.currentStatus, TransportStatus.connected);
         expect(h.transport.reconnectAttempts, 0);
         // The device is still known, so the retained state and availability
-        // pass straight through; the announce answers the new query last.
+        // pass straight through. Its announce answers the new query, but an
+        // unchanged descriptor is not reported twice.
         expect(h.eventTypes.sublist(before), [
           DeviceStateChanged,
           DeviceAvailabilityChanged,
-          DeviceAnnounced,
         ]);
+        expect(h.lamp.queries, greaterThan(1), reason: 're-queried');
         expect(
           (h.events[before] as DeviceStateChanged).state['onOff'],
           const CapabilityState.onOff(on: true),
@@ -562,5 +568,115 @@ void main() {
       expect(delay.inMilliseconds, inInclusiveRange(500, 1500));
     }
     expect(policy.delay(10, random).inSeconds, inInclusiveRange(15, 45));
+  });
+
+  group('revision 1.1: retained info', () {
+    const motion = DeviceDescriptor(
+      id: 'kt-motion',
+      type: DeviceType.sensor,
+      name: 'Motion sensor',
+      capabilities: [
+        Capability(id: 'motionSensor', kind: CapabilityKind.motionSensor),
+      ],
+    );
+
+    /// What a 1.1 device leaves behind when it has been online once and is
+    /// now unplugged: info and an offline availability, both retained, and
+    /// nobody left to answer a query.
+    Future<void> leaveOfflineDevice(InMemoryBroker broker) async {
+      final device = broker.client();
+      await device.connect(clientId: 'device-kt-motion');
+      await device.publishText(
+        _topics.device(_home, motion.id, DeviceChannel.info),
+        jsonEncode(const InfoPayload(ts: 1, device: motion).toJson()),
+        retain: true,
+      );
+      await device.publishText(
+        _topics.device(_home, motion.id, DeviceChannel.availability),
+        jsonEncode(
+          const AvailabilityPayload(status: AvailabilityStatus.offline)
+              .toJson(),
+        ),
+        retain: true,
+      );
+      await device.disconnect();
+    }
+
+    test('an app that connects later still learns an offline device', () {
+      fakeAsync((async) {
+        final broker = InMemoryBroker();
+        unawaited(leaveOfflineDevice(broker));
+        async.flushMicrotasks();
+
+        final h = _Harness(async, broker: broker)..connect();
+        expect(h.eventTypes, [DeviceAnnounced, DeviceAvailabilityChanged]);
+        expect((h.events.first as DeviceAnnounced).descriptor, motion);
+        expect(
+          (h.events.last as DeviceAvailabilityChanged).availability,
+          DeviceAvailability.offline,
+        );
+
+        // Known from its info, so there is nothing to keep querying for.
+        async.elapse(const Duration(minutes: 2));
+        expect(h.transport.discoveryRetries, 0);
+        unawaited(h.transport.dispose());
+        async.flushMicrotasks();
+      });
+    });
+
+    test('an emptied info removes the device', () {
+      fakeAsync((async) {
+        final broker = InMemoryBroker();
+        unawaited(leaveOfflineDevice(broker));
+        async.flushMicrotasks();
+        final h = _Harness(async, broker: broker)..connect();
+        h.events.clear();
+
+        final remover = broker.client();
+        unawaited(
+          remover
+              .connect(clientId: 'remover')
+              .then(
+                (_) => remover.publish(
+                  _topics.device(_home, motion.id, DeviceChannel.info),
+                  Uint8List(0),
+                  retain: true,
+                ),
+              ),
+        );
+        async.flushMicrotasks();
+        expect(h.events.single, isA<DeviceRemoved>());
+        expect(
+          broker.retained(_topics.device(_home, motion.id, DeviceChannel.info)),
+          isNull,
+          reason: 'and the broker no longer keeps it',
+        );
+        unawaited(h.transport.dispose());
+        async.flushMicrotasks();
+      });
+    });
+
+    test("an info on one device's topic about another is ignored", () {
+      fakeAsync((async) {
+        final broker = InMemoryBroker();
+        final h = _Harness(async, broker: broker)..connect();
+        final other = broker.client();
+        unawaited(
+          other
+              .connect(clientId: 'other')
+              .then(
+                (_) => other.publishText(
+                  _topics.device(_home, 'lr-lamp', DeviceChannel.info),
+                  jsonEncode(const InfoPayload(ts: 1, device: motion).toJson()),
+                  retain: true,
+                ),
+              ),
+        );
+        async.flushMicrotasks();
+        expect(h.events, isEmpty);
+        unawaited(h.transport.dispose());
+        async.flushMicrotasks();
+      });
+    });
   });
 }

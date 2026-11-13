@@ -4,9 +4,9 @@ Everything the app needs to run against a real network, on one machine:
 
 | Service | Image | What | Ports on the host |
 |---|---|---|---|
-| `mosquitto` | `eclipse-mosquitto:2` | MQTT broker, password + ACL per identity | 1883 plain (loopback only), 8883 TLS, 8884 WSS |
-| `simulator` | built from [`simulator/Dockerfile`](simulator/Dockerfile) | the demo home's twelve devices ([`../simulator`](../simulator)) | none |
-| `camera` | `bluenviron/mediamtx:latest-ffmpeg` | an RTSP test pattern as the doorbell camera | 8554 RTSP, 8888 HLS |
+| `mosquitto` | `eclipse-mosquitto:2` | MQTT broker, password + ACL per identity | 1883 plain, 8883 TLS, 8884 WSS, all on loopback by default |
+| `simulator` | built from [`simulator/Dockerfile`](simulator/Dockerfile) | the demo home's twelve devices ([`../simulator`](../simulator)), with a watchdog | none |
+| `camera` | `bluenviron/mediamtx:latest-ffmpeg` | an RTSP test pattern as the doorbell camera | 8554 RTSP, 8888 HLS, loopback by default |
 
 ## Setup on a Mac
 
@@ -20,15 +20,7 @@ brew install mkcert mosquitto
 
 Open Docker Desktop once so the daemon runs. `mosquitto` from Homebrew is
 only for its `mosquitto_passwd` and `mosquitto_sub` / `mosquitto_pub` tools;
-the broker itself runs in Docker. Then, once:
-
-```bash
-mkcert -install
-```
-
-That puts a certificate authority that exists only on this machine into your
-keychain, so Safari, Chrome and native apps trust the broker's certificate.
-It asks for your password; it is yours to run.
+the broker itself runs in Docker.
 
 ## Start
 
@@ -51,15 +43,21 @@ broker reads. The simulator mounts the same file and each device logs in as
 itself. The line starting `demo-home.app:` is what you type into the app.
 
 `make-certs.sh` makes a certificate for `localhost`, `127.0.0.1` and `::1`
-with mkcert and turns on the TLS and WSS listeners. Pass your Mac's LAN name
-or IP as extra arguments for a phone on the same Wi-Fi:
+with mkcert and turns on the TLS and WSS listeners. The first time, it runs
+`mkcert -install`, which puts a certificate authority that exists only on
+this machine into your keychain and asks for your password. Later runs skip
+that step.
 
-```bash
-infra/scripts/make-certs.sh "$(hostname)" 192.168.1.20
-```
+The script sets `TRUST_STORES=system`, so mkcert installs into the macOS
+keychain only. That covers Safari, Chrome, Edge, curl, and Dart and Flutter
+on macOS. Without it, mkcert also tries Firefox's NSS store and Java's
+`cacerts`, which need `certutil` and a JDK and otherwise end in warnings.
+Firefox can read the keychain instead: set
+`security.enterprise_roots.enabled` to `true` in `about:config`.
+`--no-install` skips the trust store entirely and is what CI uses.
 
 Without `make-certs.sh` the broker still runs, with plain MQTT on
-`127.0.0.1:1883` only. That is what CI uses.
+`127.0.0.1:1883` only.
 
 Check it from the host:
 
@@ -86,6 +84,7 @@ user demo-home.lr-lamp
 topic write glowhaus/demo-home/lr-lamp/state
 topic write glowhaus/demo-home/lr-lamp/ack
 topic write glowhaus/demo-home/lr-lamp/availability
+topic write glowhaus/demo-home/lr-lamp/info
 topic read glowhaus/demo-home/lr-lamp/set
 topic readwrite glowhaus/demo-home/discovery
 ```
@@ -93,7 +92,7 @@ topic readwrite glowhaus/demo-home/discovery
 | Identity | May | May not |
 |---|---|---|
 | `<homeId>.app` | everything under `glowhaus/<homeId>/` | touch any other home |
-| `<homeId>.<deviceId>` | publish its own `state`, `ack`, `availability`; read its own `set`; publish and read the home's `discovery` | publish on another device's topics (a forged state or ack is dropped), subscribe to another device's `set`, touch any other home |
+| `<homeId>.<deviceId>` | publish its own `state`, `ack`, `availability`, `info`; read its own `set`; publish and read the home's `discovery` | publish on another device's topics (a forged state, ack or info is dropped), subscribe to another device's `set`, touch any other home |
 
 The last will goes through the same rules when the broker would publish
 it (on an ungraceful disconnect), so a will on another device's
@@ -103,24 +102,25 @@ delivers.
 
 The CI job `broker` proves this against the real thing:
 [`packages/glowhaus_transport/test/broker_test.dart`](../packages/glowhaus_transport/test/broker_test.dart)
-connects as `demo-home.lr-lamp` and shows that its forged state and ack on
-`lr-ceiling` never reach the app, that it never receives `kt-motion`'s
+connects as `demo-home.lr-lamp` and shows that its forged state, ack and
+info on `lr-ceiling` never reach the app, that it never receives `kt-motion`'s
 commands, that nothing crosses into `other-home`, and that a will on another
 device's availability is never published, while the same actions on its own
 topics work. The same job runs `MqttTransport` over the real `mqtt_client` adapter
-against the simulator container: all twelve devices announce with retained
-state, and a command is acked and reflected in `state`.
+against the simulator container: all twelve devices are known, the offline
+motion sensor included, the online ones with retained state, and a command
+is acked and reflected in `state`. The job runs the file twice, over plain
+MQTT and over TLS with `infra/certs/ca.crt` as the only trusted CA.
+Locally, `GLOWHAUS_BROKER_MODE=wss` runs it over secure WebSocket too.
 
-### Known gap: offline devices and a new app session
+### Offline devices and a new app session
 
-An announce is QoS 0 on the shared `discovery` topic and is not retained.
-`kt-motion` is offline in the demo: it announced once when the simulator
-started, then disconnected. An app that connects later gets its retained
-`state` and `availability` but no answer to its query, so it never learns
-what the device is. The in-memory demo does not show this because the app
-connects before the devices start. The fix is a protocol change (a retained
-per-device announce) and is proposed for the next step rather than slipped
-into this one.
+Fixed in protocol revision 1.1. Announces share the `discovery` topic, so
+they cannot be retained, and an offline device cannot answer a query. Every
+device therefore also keeps its descriptor on its own retained `info`
+topic. An app that connects while `kt-motion` is unplugged still learns
+what it is the moment it subscribes. See section 5.4 of
+[`docs/protocol.md`](../docs/protocol.md).
 
 ### Adding a home
 
@@ -143,16 +143,80 @@ Restart the broker afterwards. Run the simulator for it with
 | Simulator container | `mqtt://mosquitto:1883`, inside the compose network |
 | Tools on the host, CI | `mqtt://127.0.0.1:1883` |
 
-Plain 1883 is published on the host's loopback address only, so nothing on
-the LAN can use it. The simulator container uses it because the compose
-network is private to the machine. Everything that crosses a network uses
-TLS.
+Every port is published on the host's loopback address by default, so
+nothing on the LAN can reach the broker or the camera. Plain 1883 stays on
+loopback even in LAN mode. The simulator container uses it because the
+compose network is private to the machine.
 
-The iOS simulator and the Android emulator do not share the Mac's keychain,
-so the mkcert CA is not trusted there. They can reach the broker without
-TLS: `localhost:1883` from the iOS simulator and `10.0.2.2:1883` from the
-Android emulator, both of which end on the host's loopback. A real phone
-needs TLS and the mkcert CA installed on it (`mkcert -CAROOT` has the file).
+The iOS simulator and the Android emulator have their own trust stores, so
+the mkcert CA is not trusted there. They can reach the broker without TLS:
+`localhost:1883` from the iOS simulator and `10.0.2.2:1883` from the Android
+emulator, both of which end on the host's loopback.
+
+Check TLS from the host:
+
+```bash
+mosquitto_sub -h localhost -p 8883 --cafile infra/certs/ca.crt -u demo-home.app -P "$(grep '^demo-home.app:' infra/secrets/credentials | cut -d: -f2)" -t 'glowhaus/demo-home/+/availability' -v
+```
+
+## LAN mode: a real phone on the same Wi-Fi
+
+LAN mode is opt-in. It publishes TLS 8883, WSS 8884 and the camera on every
+interface of the Mac, and makes the certificate cover the Mac's LAN address.
+
+```bash
+infra/scripts/make-certs.sh --lan
+```
+
+```bash
+GLOWHAUS_BIND=0.0.0.0 GLOWHAUS_CAMERA_HOST=192.168.1.20 docker compose -f infra/docker-compose.yml up -d
+```
+
+`--lan` adds the first address it finds on `en0` to `en2` and
+`<LocalHostName>.local` to the certificate, and prints the address. Use that
+address for `GLOWHAUS_CAMERA_HOST`, so the camera URL the doorbell announces
+works from the phone. macOS may ask whether Docker may accept incoming
+connections; allow it. Go back to loopback with a plain
+`docker compose -f infra/docker-compose.yml up -d`.
+
+The phone has to trust the mkcert CA. Its file is `infra/certs/ca.crt`, the
+same as `"$(mkcert -CAROOT)/rootCA.pem"`. It is a development CA: anyone
+holding its key, which stays on this Mac, can impersonate any site to a
+device that trusts it. Remove it from the phone when you are done.
+
+**Android, web app in Chrome.** Copy `ca.crt` to the phone. Open Settings,
+then Security and privacy, More security settings, Encryption and
+credentials, Install a certificate, CA certificate, and pick the file. The
+wording differs a little between vendors; searching Settings for "CA
+certificate" finds it. Chrome trusts user-installed CAs, so
+`wss://192.168.1.20:8884/mqtt` works from the web build.
+
+**Android, native Flutter app.** A user-installed CA is not enough. Dart's
+TLS on Android reads only the read-only system store in
+`/system/etc/security/cacerts` and ignores user certificates, and
+`network_security_config` does not apply to Dart sockets. Hand the CA to the
+app instead: `MqttEndpoint.trustedCertificatePem` adds it on top of the
+system roots, and the app's Connection settings (milestone 3, step 5) let
+you paste it. Debug builds can also take it at build time:
+
+```bash
+flutter run --dart-define=GLOWHAUS_DEV_CA="$(base64 -i infra/certs/ca.crt)"
+```
+
+**iPhone.** AirDrop `ca.crt` to the phone and install the profile under
+Settings, General, VPN and Device Management. Then turn on full trust for it
+under Settings, General, About, Certificate Trust Settings. Safari and the
+native app both use the system trust store, so nothing else is needed.
+
+## Watchdog
+
+The simulator writes a heartbeat every 5 seconds with the number of
+connected devices. The compose healthcheck runs
+`/simulator --check-health` on it, so the container is healthy only while at
+least one device is connected, and `docker compose up --wait` returns only
+then. If no device has been connected for two minutes, the simulator logs
+why and exits with status 1, and `restart: on-failure` starts it again.
+Change the limit with `--watchdog <seconds>`; `0` turns it off.
 
 ## Reset
 

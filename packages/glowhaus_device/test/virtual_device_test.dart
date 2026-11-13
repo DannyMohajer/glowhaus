@@ -198,6 +198,28 @@ const _lampOff = {
 };
 
 void main() {
+  test('revision 1.1: every device leaves its descriptor retained', () {
+    _run((wire, home) {
+      for (final spec in DemoHome.devices()) {
+        final id = spec.descriptor.id;
+        final retained = wire.broker.retained(
+          _topics.device(_home, id, DeviceChannel.info),
+        );
+        expect(retained, isNotNull, reason: '$id has a retained info');
+        final info = InfoPayload.fromJson(
+          jsonDecode(retained!.text) as Map<String, dynamic>,
+        );
+        expect(info.device, spec.descriptor);
+        expect(retained.qos, MqttQos.atLeastOnce);
+      }
+      expect(
+        home.device('kt-motion')!.online,
+        isFalse,
+        reason: 'the offline motion sensor still left its info behind',
+      );
+    });
+  });
+
   test('on connect: will registered, online + state retained, announce', () {
     _run((wire, home) {
       // Twelve devices: eleven online, the motion sensor announced then
@@ -476,6 +498,53 @@ void main() {
       expect(wire.availability('lr-lamp').last, 'online');
 
       unawaited(device.dispose());
+      unawaited(broker.close());
+      async.flushMicrotasks();
+    });
+  });
+
+  test('a device that boots before its broker keeps trying', () {
+    fakeAsync((async) {
+      final broker = InMemoryBroker();
+      final wire = _Wire(async, broker)..connect();
+      VirtualDevice device(String id, _FlakyConnection connection) =>
+          VirtualDevice(
+            homeId: _home,
+            spec: DemoHome.devices().firstWhere((d) => d.descriptor.id == id),
+            connection: connection,
+            random: Random(2),
+            clock: wire.now,
+          );
+      final lampLink = _FlakyConnection(broker.client())..refuse = true;
+      final motionLink = _FlakyConnection(broker.client())..refuse = true;
+      final lamp = device('lr-lamp', lampLink);
+      final motion = device('kt-motion', motionLink);
+
+      var started = 0;
+      unawaited(lamp.start().then((_) => started++));
+      unawaited(motion.start().then((_) => started++));
+      async.flushMicrotasks();
+      expect(started, 2, reason: 'start does not throw on a missing broker');
+      expect(lamp.online, isFalse);
+
+      async.elapse(const Duration(seconds: 4));
+      expect(lamp.reconnectAttempts, greaterThan(0));
+      lampLink.refuse = false;
+      motionLink.refuse = false;
+      async.elapse(const Duration(seconds: 10));
+
+      expect(lamp.online, isTrue);
+      expect(wire.availability('lr-lamp').last, 'online');
+      expect(motion.online, isFalse, reason: 'an offline spec stays offline');
+      expect(wire.availability('kt-motion').last, 'offline');
+      expect(
+        wire.on('kt-motion', DeviceChannel.availability),
+        isNotEmpty,
+        reason: 'but it did get through once to say so',
+      );
+
+      unawaited(lamp.dispose());
+      unawaited(motion.dispose());
       unawaited(broker.close());
       async.flushMicrotasks();
     });

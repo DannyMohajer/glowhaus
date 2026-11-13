@@ -126,6 +126,29 @@ Map<String, dynamic> _$DiscoveryByeToJson(DiscoveryBye instance) =>
       'type': instance.$type,
     };
 
+_InfoPayload _$InfoPayloadFromJson(Map<String, dynamic> json) => $checkedCreate(
+  '_InfoPayload',
+  json,
+  ($checkedConvert) {
+    final val = _InfoPayload(
+      ts: $checkedConvert('ts', (v) => (v as num).toInt()),
+      device: $checkedConvert(
+        'device',
+        (v) => DeviceDescriptor.fromJson(v as Map<String, dynamic>),
+      ),
+      v: $checkedConvert('v', (v) => (v as num?)?.toInt() ?? Protocol.version),
+    );
+    return val;
+  },
+);
+
+Map<String, dynamic> _$InfoPayloadToJson(_InfoPayload instance) =>
+    <String, dynamic>{
+      'ts': instance.ts,
+      'device': instance.device.toJson(),
+      'v': instance.v,
+    };
+
 _AvailabilityPayload _$AvailabilityPayloadFromJson(Map<String, dynamic> json) =>
     $checkedCreate('_AvailabilityPayload', json, ($checkedConvert) {
       final val = _AvailabilityPayload(

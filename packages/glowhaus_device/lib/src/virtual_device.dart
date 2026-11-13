@@ -11,8 +11,8 @@ import 'package:glowhaus_mqtt/glowhaus_mqtt.dart';
 /// doing what `docs/protocol.md` asks of a device.
 ///
 /// - connects with a clean session and a retained last will
-///   (`availability: offline`), then publishes `online`, its state and an
-///   announce;
+///   (`availability: offline`), then publishes its retained `info`
+///   (revision 1.1), `online`, its state and an announce;
 /// - answers every discovery query with an announce after a short random
 ///   delay (section 5.2);
 /// - ignores retained `set` messages, rejects expired ones, acks every
@@ -100,12 +100,25 @@ class VirtualDevice {
 
   /// Brings the device up, or, for a spec that starts offline, announces it
   /// once and leaves it offline (as a device that was known, then unplugged).
+  ///
+  /// A broker that is not there yet is not an error: like a real device after
+  /// a power cut, it keeps trying with the same backoff as after a drop.
   Future<void> start() async {
+    try {
+      await _boot();
+    } on MqttConnectionException {
+      _scheduleRetry(_boot);
+    }
+  }
+
+  Future<void> _boot() async {
     if (spec.online) {
       await goOnline();
       return;
     }
     await _connect();
+    _reconnectAttempts = 0;
+    await _publishInfo();
     await _announce();
     await _publishAvailability(AvailabilityStatus.offline);
     await _connection.disconnect();
@@ -119,6 +132,7 @@ class VirtualDevice {
     await _connect();
     _reconnectAttempts = 0;
     _online = true;
+    await _publishInfo();
     await _publishAvailability(AvailabilityStatus.online);
     await _publishState();
     await _announce();
@@ -176,6 +190,14 @@ class VirtualDevice {
     qos: MqttQos.atMostOnce,
   );
 
+  /// Revision 1.1: the descriptor, retained, so an app that connects later
+  /// knows this device even while it is offline.
+  Future<void> _publishInfo() => _connection.publishText(
+    _topic(DeviceChannel.info),
+    jsonEncode(InfoPayload(ts: _ts, device: spec.descriptor).toJson()),
+    retain: true,
+  );
+
   Future<void> _publishAvailability(AvailabilityStatus status) =>
       _connection.publishText(
         _topic(DeviceChannel.availability),
@@ -198,11 +220,11 @@ class VirtualDevice {
     if (state == MqttConnectionState.disconnected && _online) {
       _online = false;
       _cancelTimers();
-      _scheduleReconnect();
+      _scheduleRetry(goOnline);
     }
   }
 
-  void _scheduleReconnect() {
+  void _scheduleRetry(Future<void> Function() attempt) {
     if (_disposed || _reconnectTimer != null) return;
     final exponent = min(_reconnectAttempts, 10);
     final base = min(
@@ -214,9 +236,9 @@ class VirtualDevice {
       _reconnectTimer = null;
       _reconnectAttempts++;
       try {
-        await goOnline();
+        await attempt();
       } on MqttConnectionException {
-        _scheduleReconnect();
+        _scheduleRetry(attempt);
       }
     });
   }

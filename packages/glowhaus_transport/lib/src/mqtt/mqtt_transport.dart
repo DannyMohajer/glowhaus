@@ -12,8 +12,9 @@ import 'package:glowhaus_transport/src/transport.dart';
 ///
 /// What it does with the connection:
 ///
-/// - subscribes to the home's `state`, `ack` and `availability` at QoS 1 and
-///   `discovery` at QoS 0, then sends a discovery query;
+/// - subscribes to the home's retained `info` (revision 1.1) first, then
+///   `state`, `ack` and `availability` at QoS 1 and `discovery` at QoS 0,
+///   then sends a discovery query for devices that predate 1.1;
 /// - publishes commands as non-retained QoS 1 `set` messages and answers
 ///   [send] from the matching ack, or `timedOut` when none arrives;
 /// - reconnects with [ReconnectPolicy] backoff when the link drops,
@@ -23,9 +24,11 @@ import 'package:glowhaus_transport/src/transport.dart';
 ///   availability topic (its last will) says so; losing the broker means
 ///   the app shows what it last knew.
 ///
-/// State and availability that arrive before the device's announce (retained
-/// messages are delivered as soon as the app subscribes, the announce only
-/// after the query) are held until the announce, then emitted in order.
+/// A retained `info` tells the app what a device is the moment it subscribes,
+/// online or not, and counts as an announce. An empty retained `info` means
+/// the device was removed. State and availability that arrive before a
+/// device is known (a 1.0 device: its announce only follows the query) are
+/// held until the announce, then emitted in order.
 /// Discovery is QoS 0, so the query or an announce can be lost: while any
 /// device has retained messages but no announce, the query is repeated with
 /// backoff ([discoveryRetryDelay] doubling up to 30 s, [maxDiscoveryRetries]
@@ -205,7 +208,10 @@ class MqttTransport implements Transport {
   }
 
   Future<void> _subscribeAll() async {
+    // info first: its retained messages arrive before any state, so a 1.1
+    // device is known by the time its state comes in.
     for (final channel in [
+      DeviceChannel.info,
       DeviceChannel.state,
       DeviceChannel.ack,
       DeviceChannel.availability,
@@ -266,6 +272,13 @@ class MqttTransport implements Transport {
   void _onMessage(MqttMessage message) {
     final topic = _topics.parse(message.topic);
     if (topic == null || topic.homeId != homeId) return;
+    if (message.payload.isEmpty &&
+        topic is DeviceTopic &&
+        topic.channel == DeviceChannel.info) {
+      // A cleared info: the device was removed (section 5.4).
+      _forget(topic.deviceId);
+      return;
+    }
     final Map<String, dynamic> json;
     try {
       final decoded = jsonDecode(message.text);
@@ -289,6 +302,10 @@ class MqttTransport implements Transport {
               _onState(deviceId, StatePayload.fromJson(json));
             case DeviceChannel.availability:
               _onAvailability(deviceId, AvailabilityPayload.fromJson(json));
+            case DeviceChannel.info:
+              final info = InfoPayload.fromJson(json);
+              // A device's info is about that device and no other.
+              if (info.device.id == deviceId) _onDescriptor(info.device);
             case DeviceChannel.set:
               // Apps do not subscribe to set; ignore if a broker echoes one.
               break;
@@ -303,20 +320,31 @@ class MqttTransport implements Transport {
   void _onDiscovery(DiscoveryMessage message) {
     switch (message) {
       case DiscoveryAnnounce(:final device):
-        _descriptors[device.id] = device;
-        _emit(DeviceAnnounced(homeId: homeId, descriptor: device));
-        final availability = _availabilityBeforeAnnounce.remove(device.id);
-        if (availability != null) _onAvailability(device.id, availability);
-        final state = _stateBeforeAnnounce.remove(device.id);
-        if (state != null) _onState(device.id, state);
+        _onDescriptor(device);
       case DiscoveryBye(:final deviceId):
-        _descriptors.remove(deviceId);
-        _stateBeforeAnnounce.remove(deviceId);
-        _availabilityBeforeAnnounce.remove(deviceId);
-        _emit(DeviceRemoved(homeId: homeId, deviceId: deviceId));
+        _forget(deviceId);
       case DiscoveryQuery():
         break;
     }
+  }
+
+  void _onDescriptor(DeviceDescriptor device) {
+    // A 1.1 device both keeps a retained info and answers queries; the
+    // second copy of an unchanged descriptor says nothing new.
+    if (_descriptors[device.id] == device) return;
+    _descriptors[device.id] = device;
+    _emit(DeviceAnnounced(homeId: homeId, descriptor: device));
+    final availability = _availabilityBeforeAnnounce.remove(device.id);
+    if (availability != null) _onAvailability(device.id, availability);
+    final state = _stateBeforeAnnounce.remove(device.id);
+    if (state != null) _onState(device.id, state);
+  }
+
+  void _forget(String deviceId) {
+    _stateBeforeAnnounce.remove(deviceId);
+    _availabilityBeforeAnnounce.remove(deviceId);
+    if (_descriptors.remove(deviceId) == null) return;
+    _emit(DeviceRemoved(homeId: homeId, deviceId: deviceId));
   }
 
   void _onAck(AckPayload ack) {

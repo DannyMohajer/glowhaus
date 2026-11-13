@@ -14,6 +14,10 @@ abstract final class Protocol {
   /// Value of the `v` field.
   static const int version = 1;
 
+  /// Revision of the document within [version]. Revisions only add what
+  /// older receivers can ignore (section 4), so `v` stays the same.
+  static const String revision = '1.1';
+
   /// Devices reject commands whose `ts` is older than this (`expired`).
   static const Duration commandMaxAge = Duration(seconds: 10);
 
@@ -72,6 +76,20 @@ sealed class DiscoveryMessage with _$DiscoveryMessage {
 
   factory fromJson(Map<String, dynamic> json) =>
       _$DiscoveryMessageFromJson(json);
+}
+
+/// Payload of the retained `info` topic (revision 1.1): what the device is,
+/// kept by the broker so an app learns about every device as soon as it
+/// subscribes, online or not. The same descriptor an announce carries.
+@freezed
+abstract class InfoPayload with _$InfoPayload {
+  const factory({
+    required int ts,
+    required DeviceDescriptor device,
+    @Default(Protocol.version) int v,
+  }) = _InfoPayload;
+
+  factory fromJson(Map<String, dynamic> json) => _$InfoPayloadFromJson(json);
 }
 
 enum AvailabilityStatus { online, offline }

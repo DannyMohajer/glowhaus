@@ -1,10 +1,15 @@
-# Glowhaus protocol, version 1
+# Glowhaus protocol, version 1 (revision 1.1)
 
 This document specifies how Glowhaus apps and devices talk over MQTT. It is
 written so that you can build a compatible device (or app) without reading any
 Glowhaus source code.
 
 The key words MUST, SHOULD and MAY are used as in RFC 2119.
+
+| Revision | Change |
+|---|---|
+| 1.0 | First published version |
+| 1.1 | Retained per-device `info` topic (section 5.4), so an app learns every device as soon as it subscribes, offline ones included. Additive: `v` stays `1` (section 4), and a 1.0 app or device simply never uses the topic |
 
 ## 1. Overview
 
@@ -48,6 +53,7 @@ Timestamps (`ts`) are integer milliseconds since the Unix epoch, UTC.
 | `glowhaus/{homeId}/{deviceId}/ack` | device to app | 1 | no | Command results |
 | `glowhaus/{homeId}/{deviceId}/state` | device to app | 1 | **yes** | Full current state |
 | `glowhaus/{homeId}/{deviceId}/availability` | device to app | 1 | **yes** | Online / offline (last will) |
+| `glowhaus/{homeId}/{deviceId}/info` | device to app | 1 | **yes** | What the device is (1.1, section 5.4) |
 
 QoS, in detail:
 
@@ -55,8 +61,9 @@ QoS, in detail:
   command may therefore be delivered twice; section 8.1 says how a device
   stays idempotent. An ack may be delivered twice; an app ignores an ack for
   a command that is no longer pending.
-- `state` and `availability` are QoS 1 and retained, so a client that
-  connects later gets the latest value at once and a lost publish is retried.
+- `state`, `availability` and `info` are QoS 1 and retained, so a client
+  that connects later gets the latest value at once and a lost publish is
+  retried.
 - `discovery` is QoS 0: best effort. Announces repeat (on connect, on every
   query), so losing one costs nothing; a lost query is answered by the next
   one. Subscribe with QoS 0 as well; a subscription at a higher QoS gains
@@ -69,7 +76,7 @@ QoS, in detail:
 
 Typical subscriptions:
 
-- App: `glowhaus/{homeId}/discovery` and `glowhaus/{homeId}/+/state`, `.../+/ack`, `.../+/availability`.
+- App: `glowhaus/{homeId}/+/info` first, then `.../+/state`, `.../+/ack`, `.../+/availability` and `glowhaus/{homeId}/discovery`.
 - Device: `glowhaus/{homeId}/{deviceId}/set` and `glowhaus/{homeId}/discovery`.
 
 Rules:
@@ -152,6 +159,10 @@ that has just connected asks for them:
 Every device MUST answer with an `announce`, after a random delay of 0 to
 500 ms to avoid a burst.
 
+Since revision 1.1 an app learns 1.1 devices from their retained `info`
+(section 5.4), which also covers devices that are offline right now and so
+cannot answer. An app still sends the query, for 1.0 devices.
+
 ### 5.3 `bye` (device)
 
 Published when a device is removed from the home (factory reset, unpairing):
@@ -161,7 +172,33 @@ Published when a device is removed from the home (factory reset, unpairing):
 ```
 
 The device MUST also clear its retained messages by publishing empty retained
-payloads to its `state` and `availability` topics.
+payloads to its `state`, `availability` and (1.1) `info` topics.
+
+### 5.4 `info` (device, revision 1.1)
+
+Topic: `glowhaus/{homeId}/{deviceId}/info`, QoS 1, retained. The `device`
+object is exactly the one an announce carries (section 5.1):
+
+```json
+{ "v": 1, "ts": 1794500000000, "device": { "id": "lr-lamp", "type": "light", "name": "Floor lamp", "capabilities": [ { "id": "onOff", "kind": "onOff" } ] } }
+```
+
+Why: announces share one topic, so they cannot be retained, and a device
+that is offline cannot answer a query. Without `info` an app that connects
+while a device is unplugged gets its retained `state` and `availability` but
+never learns what the device is.
+
+- A 1.1 device MUST publish `info` after every connect, before its
+  `availability` and `state`, and again whenever its descriptor changes.
+  It keeps announcing as well (sections 5.1 and 5.2), for 1.0 apps.
+- `device.id` MUST equal `{deviceId}` in the topic. An app MUST ignore an
+  `info` whose `device.id` differs.
+- An app subscribes to `+/info` before `state` and `availability`, so the
+  broker's retained `info` arrives first, and treats an `info` exactly like
+  an announce. An `info` or announce that repeats a descriptor the app
+  already has is not news.
+- An empty retained payload on `info` (a removed device clearing it, section
+  5.3) means the device is gone, the same as `bye`.
 
 ## 6. Availability
 
@@ -616,17 +653,20 @@ Sensors have no writable fields. Any command gets `read_only`.
 
 1. Connect with a clean session and a retained last will of
    `{"v":1,"status":"offline"}` on your `availability` topic.
-2. Publish `online` to `availability` (retained).
-3. Publish an `announce` to `discovery`.
+2. Publish your `info` (retained, 1.1).
+3. Publish `online` to `availability` (retained).
 4. Publish your full `state` (retained).
-5. Subscribe to your `set` topic and to `discovery`.
-6. On `query`: wait 0 to 500 ms, then announce again.
-7. On `set`: ignore it if retained; reject with `expired` if `ts` is older
+5. Publish an `announce` to `discovery`.
+6. Subscribe to your `set` topic and to `discovery`.
+7. On `query`: wait 0 to 500 ms, then announce again.
+8. On `set`: ignore it if retained; reject with `expired` if `ts` is older
    than 10 s; validate everything, apply all or nothing, ack within 2 s, then
    publish state. Re-ack duplicate `commandId`s without re-applying.
-8. On any local change: publish state.
-9. On removal: publish `bye`, then empty retained payloads to `state` and
-   `availability`.
+9. On any local change: publish state.
+10. On removal: publish `bye`, then empty retained payloads to `state`,
+    `availability` and `info`.
+11. If the broker is not there, at boot or after a drop, keep trying with
+    growing pauses. A device has nobody to ask for help.
 
 ## 12. Security
 
@@ -641,11 +681,11 @@ A real deployment MUST provide:
   certificate), scoped to one home. Nothing is shared between homes.
 - **Topic ACLs bound to identity**, not to patterns a client fills in:
   - the app identity of a home may read and write `glowhaus/{homeId}/#`;
-  - a device identity may publish only its own `state`, `ack` and
-    `availability`, subscribe only to its own `set`, and publish and
+  - a device identity may publish only its own `state`, `ack`,
+    `availability` and `info`, subscribe only to its own `set`, and publish and
     subscribe on the home's `discovery`;
   - nothing else. In particular a device cannot forge another device's
-    state or acks, cannot read another device's commands, and no identity
+    state, acks or info, cannot read another device's commands, and no identity
     reaches another home.
 - The broker MUST apply the same rules to the last will, so a will on
   another device's `availability` is never published.
@@ -685,6 +725,9 @@ broker (if any) is a throwaway instance with no secrets and no real devices.
   `InMemoryBroker`, a `VirtualHome` of such devices and an `MqttTransport`
   in one isolate. Every tap in the offline demo is a real `set`, ack and
   retained `state`. Only the network is imitated.
-- Discovery is QoS 0. `MqttTransport` holds retained state and availability
-  for a device until its announce arrives, and while any device is in that
-  position repeats the query (3 s, then doubling, up to 8 times).
+- `MqttTransport` subscribes to `info` first, so 1.1 devices are known
+  before their state arrives. For 1.0 devices, discovery is QoS 0:
+  `MqttTransport` holds retained state and availability for a device until
+  its announce arrives, and while any device is in that position repeats
+  the query (3 s, then doubling, up to 8 times). `VirtualDevice` publishes
+  `info` on every connect, offline-at-boot devices included.

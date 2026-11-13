@@ -10,10 +10,12 @@ services:
   mosquitto:
     image: eclipse-mosquitto:2
     ports:
-      # Plain MQTT: loopback only. TLS and WSS are reachable from the LAN.
+      # Plain MQTT is loopback only, always. TLS and WSS follow GLOWHAUS_BIND:
+      # loopback by default, GLOWHAUS_BIND=0.0.0.0 for LAN mode (a real phone
+      # on the same Wi-Fi; see infra/README.md).
       - "127.0.0.1:1883:1883"
-      - "8883:8883"
-      - "8884:8884"
+      - "${GLOWHAUS_BIND:-127.0.0.1}:8883:8883"
+      - "${GLOWHAUS_BIND:-127.0.0.1}:8884:8884"
     volumes:
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - ./mosquitto/acl.conf:/mosquitto/config/acl.conf:ro
@@ -39,22 +41,35 @@ services:
     volumes:
       - ./secrets/credentials:/run/glowhaus/credentials:ro
     # Inside the compose network the broker is one hop away; plain MQTT is
-    # fine there. From outside, only TLS and WSS are exposed.
+    # fine there. From outside, only TLS and WSS are reachable.
     command:
       - --host=mosquitto
       - --no-tls
       - --home=demo-home
       - --credentials=/run/glowhaus/credentials
-      - --camera-url=rtsp://localhost:8554/en-camera
+      - --camera-url=rtsp://${GLOWHAUS_CAMERA_HOST:-localhost}:8554/en-camera
+      - --health-file=/run/health/heartbeat
+    # Watchdog: the simulator exits after two minutes with no device
+    # connected and this policy starts it again. The healthcheck reads its
+    # heartbeat, so `up --wait` returns only once devices are connected.
     restart: on-failure
+    tmpfs:
+      - /run/health
+    healthcheck:
+      test: ["CMD", "/simulator", "--check-health", "/run/health/heartbeat"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+      start_interval: 2s
 
   camera:
     # MediaMTX with ffmpeg: an RTSP test pattern standing in for the doorbell
     # camera (rtsp://localhost:8554/en-camera, HLS on http://localhost:8888).
     image: bluenviron/mediamtx:latest-ffmpeg
     ports:
-      - "8554:8554"
-      - "8888:8888"
+      - "${GLOWHAUS_BIND:-127.0.0.1}:8554:8554"
+      - "${GLOWHAUS_BIND:-127.0.0.1}:8888:8888"
     volumes:
       - ./mediamtx/mediamtx.yml:/mediamtx.yml:ro
 

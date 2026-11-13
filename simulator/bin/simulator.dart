@@ -15,6 +15,7 @@ Usage: dart run simulator/bin/simulator.dart [options]
   --host <host>        Broker host (default: localhost)
   --port <port>        Broker port (default: 8883, or 1883 with --no-tls)
   --no-tls             Plain MQTT instead of MQTT over TLS
+  --ca-file <pem>      Also trust this CA, e.g. infra/certs/ca.crt
   --home <id>          Home id (default: ${DemoHome.homeId})
   --credentials <file> "username:password" per line; each device logs in as
                        <home>.<deviceId> (what infra/scripts/make-users.sh writes)
@@ -24,6 +25,12 @@ Usage: dart run simulator/bin/simulator.dart [options]
   --latency <ms>       Mean command latency (default: 250)
   --failure-rate <p>   Share of commands rejected as busy, 0..1 (default: 0)
   --timeout-rate <p>   Share of commands lost on the way, 0..1 (default: 0)
+  --watchdog <s>       Exit with status 1 after this many seconds with no
+                       device connected, so a supervisor restarts it
+                       (default: 120; 0 turns it off)
+  --health-file <path> Write a heartbeat here every 5 s (for a healthcheck)
+  --check-health <path> Exit 0 if that heartbeat is fresh and at least one
+                       device is connected, 1 otherwise; then quit
   --help               This text
 
 The devices follow docs/protocol.md: a retained last will, retained state,
@@ -37,11 +44,20 @@ Future<void> main(List<String> arguments) async {
     stdout.write(_usage);
     return;
   }
+  final healthToCheck = args.option('check-health');
+  if (healthToCheck != null) {
+    exitCode = _healthy(File(healthToCheck)) ? 0 : 1;
+    return;
+  }
   final tls = !args.flag('no-tls');
+  final caFile = args.option('ca-file');
   final endpoint = MqttEndpoint(
     host: args.option('host') ?? 'localhost',
     port: int.parse(args.option('port') ?? (tls ? '8883' : '1883')),
     tls: tls,
+    trustedCertificatePem: caFile == null
+        ? null
+        : File(caFile).readAsStringSync(),
   );
   final homeId = args.option('home') ?? DemoHome.homeId;
   final logins = _logins(args, homeId);
@@ -67,14 +83,19 @@ Future<void> main(List<String> arguments) async {
   );
 
   stdout.writeln('Glowhaus simulator: home "$homeId" on $endpoint');
-  try {
-    await home.start();
-  } on MqttConnectionException catch (error) {
-    stderr.writeln('Could not connect: ${error.message}');
-    exitCode = 1;
-    return;
-  }
-  stdout.writeln('${home.devices.length} devices up. Press Ctrl-C to stop.');
+  // Devices that cannot reach the broker keep retrying with backoff, as real
+  // ones would; their connection log shows why.
+  await home.start();
+  stdout.writeln(
+    '${home.devices.length} devices started. Press Ctrl-C to stop.',
+  );
+
+  final healthFile = args.option('health-file');
+  final watchdog = _Watchdog(
+    connected: () => home.devices.values.where((d) => d.online).length,
+    limit: Duration(seconds: int.parse(args.option('watchdog') ?? '120')),
+    heartbeat: healthFile == null ? null : File(healthFile),
+  )..start();
 
   final stop = Completer<void>();
   for (final signal in [ProcessSignal.sigint, ProcessSignal.sigterm]) {
@@ -83,8 +104,57 @@ Future<void> main(List<String> arguments) async {
     });
   }
   await stop.future;
+  watchdog.stop();
   stdout.writeln('Stopping: devices say goodbye.');
   await home.dispose();
+}
+
+/// Notices a simulator that is alive but no longer doing anything: no device
+/// connected for [limit] (a broker that never came back, a stuck client).
+/// Exiting lets the supervisor (compose's restart policy) start it afresh.
+/// The heartbeat file feeds the container healthcheck.
+class _Watchdog {
+  new({required this.connected, required this.limit, this.heartbeat});
+
+  static const Duration tick = Duration(seconds: 5);
+
+  final int Function() connected;
+  final Duration limit;
+  final File? heartbeat;
+  Timer? _timer;
+  DateTime _lastConnected = DateTime.now();
+
+  void start() => _timer = Timer.periodic(tick, (_) => _check());
+
+  void stop() => _timer?.cancel();
+
+  void _check() {
+    final now = DateTime.now();
+    final count = connected();
+    if (count > 0) _lastConnected = now;
+    heartbeat?.writeAsStringSync('${now.millisecondsSinceEpoch} $count\n');
+    if (limit > Duration.zero && now.difference(_lastConnected) > limit) {
+      stderr.writeln(
+        'Watchdog: no device connected for ${limit.inSeconds} s; exiting so '
+        'the supervisor restarts the simulator.',
+      );
+      exit(1);
+    }
+  }
+}
+
+/// What `--check-health` reports: a heartbeat younger than three ticks that
+/// counts at least one connected device.
+bool _healthy(File heartbeat) {
+  try {
+    final [stamp, count] = heartbeat.readAsStringSync().trim().split(' ');
+    final age = DateTime.now().difference(
+      DateTime.fromMillisecondsSinceEpoch(int.parse(stamp)),
+    );
+    return age < _Watchdog.tick * 3 && int.parse(count) > 0;
+  } on Object {
+    return false;
+  }
 }
 
 /// Which login a device uses: one shared `--username`, or its own line in

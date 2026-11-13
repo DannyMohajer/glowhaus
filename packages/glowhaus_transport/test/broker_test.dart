@@ -5,6 +5,13 @@
 //   docker compose -f infra/docker-compose.yml up -d --build mosquitto simulator
 //   GLOWHAUS_BROKER_HOST=127.0.0.1 dart test test/broker_test.dart
 //
+// GLOWHAUS_BROKER_MODE picks the listener: plain (1883, the default), tls
+// (MQTT over TLS on 8883) or wss (MQTT over secure WebSocket on 8884), both
+// after infra/scripts/make-certs.sh. With tls, GLOWHAUS_BROKER_CA names a CA
+// file to trust instead of the system store (CI has no keychain); use host
+// localhost, which the certificate covers. GLOWHAUS_BROKER_PORT overrides
+// the port.
+//
 // Without GLOWHAUS_BROKER_HOST every test here is skipped.
 @Timeout(Duration(minutes: 2))
 library;
@@ -20,6 +27,31 @@ import 'package:test/test.dart';
 const String _home = DemoHome.homeId;
 const TopicCodec _topics = TopicCodec();
 
+MqttEndpoint _endpoint(String host, Map<String, String> env) {
+  final mode = env['GLOWHAUS_BROKER_MODE'] ?? 'plain';
+  final port = env['GLOWHAUS_BROKER_PORT'];
+  final caFile = env['GLOWHAUS_BROKER_CA'];
+  return switch (mode) {
+    'plain' => MqttEndpoint(
+      host: host,
+      port: int.parse(port ?? '1883'),
+      tls: false,
+    ),
+    'tls' => MqttEndpoint.tcp(
+      host,
+      port: int.parse(port ?? '8883'),
+      trustedCertificatePem: caFile == null
+          ? null
+          : File(caFile).readAsStringSync(),
+    ),
+    'wss' => MqttEndpoint.webSocketSecure(
+      host,
+      port: int.parse(port ?? '8884'),
+    ),
+    _ => throw ArgumentError.value(mode, 'GLOWHAUS_BROKER_MODE'),
+  };
+}
+
 /// Long enough for a slow CI runner, short enough to notice a denial.
 const Duration _silence = Duration(seconds: 2);
 
@@ -33,11 +65,7 @@ void main() {
     );
     return;
   }
-  final endpoint = MqttEndpoint(
-    host: host,
-    port: int.parse(Platform.environment['GLOWHAUS_BROKER_PORT'] ?? '1883'),
-    tls: false,
-  );
+  final endpoint = _endpoint(host, Platform.environment);
   final logins = _Credentials.load();
 
   MqttClientConnection connection() => MqttClientConnection(endpoint);
@@ -59,33 +87,37 @@ void main() {
 
     tearDown(() => transport.dispose());
 
-    test('every online demo device announces, with retained state', () async {
-      await transport.connect();
-      expect(transport.currentStatus, TransportStatus.connected);
-      // kt-motion is offline in the demo: it announced once, before this
-      // app session existed, and a QoS 0 announce is not retained. Over a
-      // real broker a new session therefore does not see it. See the
-      // "Known gap" note in infra/README.md.
-      final expected = {
-        for (final d in DemoHome.devices())
-          if (d.online) d.descriptor.id,
-      };
-      await _until(
-        () =>
-            events.whereType<DeviceAnnounced>().map((e) => e.deviceId).toSet(),
-        containsAll(expected),
-        reason: 'the simulator answers the query for every online device',
-      );
-      await _until(
-        () => events
-            .whereType<DeviceStateChanged>()
-            .map((e) => e.deviceId)
-            .toSet()
-            .containsAll(expected),
-        isTrue,
-        reason: 'retained state for every online device',
-      );
-    });
+    test(
+      'every demo device is known, online or not, with retained state',
+      () async {
+        await transport.connect();
+        expect(transport.currentStatus, TransportStatus.connected);
+        // kt-motion is offline in the demo: it connected once, before this app
+        // session existed. Its retained info (revision 1.1) is how a new
+        // session still learns what it is.
+        await _until(
+          () => events
+              .whereType<DeviceAnnounced>()
+              .map((e) => e.deviceId)
+              .toSet(),
+          containsAll([for (final d in DemoHome.devices()) d.descriptor.id]),
+          reason: 'retained info for every device, offline ones included',
+        );
+        final expected = {
+          for (final d in DemoHome.devices())
+            if (d.online) d.descriptor.id,
+        };
+        await _until(
+          () => events
+              .whereType<DeviceStateChanged>()
+              .map((e) => e.deviceId)
+              .toSet()
+              .containsAll(expected),
+          isTrue,
+          reason: 'retained state for every online device',
+        );
+      },
+    );
 
     test('a command is acked and the new state comes back', () async {
       await transport.connect();
@@ -143,38 +175,50 @@ void main() {
       await lamp.dispose();
     });
 
-    test("a device cannot publish another device's ack or state", () async {
-      await app.subscribe(_topics.allDevicesFilter(_home, DeviceChannel.ack));
-      await app.subscribe(
-        _topics.device(_home, 'lr-ceiling', DeviceChannel.state),
-      );
-      final retainedCeiling = await app.next(
-        (m) => m.topic.endsWith('lr-ceiling/state'),
-      );
-      expect(retainedCeiling.retained, isTrue, reason: 'the real one');
+    test(
+      "a device cannot publish another device's ack, state or info",
+      () async {
+        await app.subscribe(_topics.allDevicesFilter(_home, DeviceChannel.ack));
+        await app.subscribe(
+          _topics.device(_home, 'lr-ceiling', DeviceChannel.info),
+        );
+        await app.subscribe(
+          _topics.device(_home, 'lr-ceiling', DeviceChannel.state),
+        );
+        final retainedCeiling = await app.next(
+          (m) => m.topic.endsWith('lr-ceiling/state'),
+        );
+        expect(retainedCeiling.retained, isTrue, reason: 'the real one');
 
-      // Forged: the lamp's identity on the ceiling light's topics.
-      await lamp.publish(
-        _topics.device(_home, 'lr-ceiling', DeviceChannel.ack),
-        '{"forged":true}',
-      );
-      await lamp.publish(
-        _topics.device(_home, 'lr-ceiling', DeviceChannel.state),
-        '{"forged":true}',
-      );
-      // Its own ack: allowed. It arrives after the forged ones would have.
-      await lamp.publish(
-        _topics.device(_home, 'lr-lamp', DeviceChannel.ack),
-        '{"own":true}',
-      );
-      final own = await app.next((m) => m.text == '{"own":true}');
-      expect(own.topic, _topics.device(_home, 'lr-lamp', DeviceChannel.ack));
-      expect(
-        app.received.where((m) => m.text == '{"forged":true}'),
-        isEmpty,
-        reason: 'the broker dropped both forged messages',
-      );
-    });
+        // Forged: the lamp's identity on the ceiling light's topics.
+        await lamp.publish(
+          _topics.device(_home, 'lr-ceiling', DeviceChannel.ack),
+          '{"forged":true}',
+        );
+        await lamp.publish(
+          _topics.device(_home, 'lr-ceiling', DeviceChannel.state),
+          '{"forged":true}',
+        );
+        // Not retained: should the ACL ever let it through, it fails this test
+        // without overwriting the ceiling light's real info.
+        await lamp.publish(
+          _topics.device(_home, 'lr-ceiling', DeviceChannel.info),
+          '{"forged":true}',
+        );
+        // Its own ack: allowed. It arrives after the forged ones would have.
+        await lamp.publish(
+          _topics.device(_home, 'lr-lamp', DeviceChannel.ack),
+          '{"own":true}',
+        );
+        final own = await app.next((m) => m.text == '{"own":true}');
+        expect(own.topic, _topics.device(_home, 'lr-lamp', DeviceChannel.ack));
+        expect(
+          app.received.where((m) => m.text == '{"forged":true}'),
+          isEmpty,
+          reason: 'the broker dropped every forged message',
+        );
+      },
+    );
 
     test("a device cannot read another device's commands", () async {
       await lamp.subscribe(

@@ -43,6 +43,7 @@ if [ $# -gt 0 ]; then
         echo "topic write glowhaus/$home/$device/state"
         echo "topic write glowhaus/$home/$device/ack"
         echo "topic write glowhaus/$home/$device/availability"
+        echo "topic write glowhaus/$home/$device/info"
         echo "topic read glowhaus/$home/$device/set"
         echo "topic readwrite glowhaus/$home/discovery"
       done

@@ -106,6 +106,21 @@ void main() {
     });
   });
 
+  group('info (revision 1.1)', () {
+    test('carries the same descriptor as an announce, and round-trips', () {
+      final info = InfoPayload.fromJson(
+        _json('''
+{ "v": 1, "ts": 1794500000000,
+  "device": { "id": "lr-lamp", "type": "light", "name": "Floor lamp",
+    "capabilities": [ { "id": "onOff", "kind": "onOff" } ] } }'''),
+      );
+      expect(info.device.id, 'lr-lamp');
+      expect(info.device.capabilities.single.kind, CapabilityKind.onOff);
+      expect(InfoPayload.fromJson(_wire(info.toJson())), info);
+      expect(info.toJson()['v'], Protocol.version);
+    });
+  });
+
   group('availability', () {
     test('online with ts', () {
       final payload = AvailabilityPayload.fromJson(

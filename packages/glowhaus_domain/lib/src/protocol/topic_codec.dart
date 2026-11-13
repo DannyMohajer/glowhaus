@@ -2,7 +2,8 @@ import 'package:glowhaus_domain/src/ids.dart';
 import 'package:meta/meta.dart';
 
 /// The per-device topics.
-enum DeviceChannel { set, state, ack, availability }
+/// The per-device topics. `info` was added in protocol revision 1.1.
+enum DeviceChannel { set, state, ack, availability, info }
 
 /// A parsed Glowhaus topic.
 @immutable
