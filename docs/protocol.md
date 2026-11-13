@@ -659,6 +659,19 @@ a throwaway instance with no secrets and no real devices.
   document over any `MqttConnection`: `MqttClientConnection` (the
   `mqtt_client` package: TCP with TLS on native, WSS in the browser) or the
   `InMemoryBroker`. It reconnects with exponential backoff and jitter.
-- `SimulatedTransport` does not use MQTT, but its devices follow the same
-  rules (atomic commands, error codes, state after ack), so behaviour seen in
-  the simulation matches a compliant device.
+- `packages/glowhaus_device` is the device side: `DeviceModel` implements
+  section 8 with no I/O (atomic commands, the error codes, expiry, a memory
+  of the last 8 command ids); `VirtualDevice` puts a model on an
+  `MqttConnection` and does sections 5 to 7 (announce on connect and on
+  query with jitter, retained availability with a last will, retained
+  state, retained `set` ignored). It depends on `glowhaus_domain` and
+  `glowhaus_mqtt` only, never on the app or the transport: it is the proof
+  that this document is enough to build a device. `simulator/` runs it
+  against a real broker.
+- `SimulatedTransport` is not a simulation of the protocol: it is an
+  `InMemoryBroker`, a `VirtualHome` of such devices and an `MqttTransport`
+  in one isolate. Every tap in the offline demo is a real `set`, ack and
+  retained `state`. Only the network is imitated.
+- Discovery is QoS 0. `MqttTransport` holds retained state and availability
+  for a device until its announce arrives, and while any device is in that
+  position repeats the query (3 s, then doubling, up to 8 times).

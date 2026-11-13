@@ -1,5 +1,5 @@
+import 'package:glowhaus_device/glowhaus_device.dart';
 import 'package:glowhaus_domain/glowhaus_domain.dart';
-import 'package:glowhaus_transport/glowhaus_transport.dart';
 import 'package:test/test.dart';
 
 void main() {

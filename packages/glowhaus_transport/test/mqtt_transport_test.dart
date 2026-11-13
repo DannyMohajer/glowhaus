@@ -16,10 +16,10 @@ final _epoch = DateTime.utc(2026, 11, 13, 12);
 /// announces on query, acks every command and reports its state. It is the
 /// other side of the conversation, written only from docs/protocol.md.
 class _BrokerLamp {
-  new(this.broker, {this.clock});
+  new(this.broker, {this.clock, this.id = 'lr-lamp'});
 
   final InMemoryBroker broker;
-  final String id = 'lr-lamp';
+  final String id;
   DateTime Function()? clock;
   late final MqttConnection connection = broker.client();
   final seenCommandIds = <String>[];
@@ -502,6 +502,54 @@ void main() {
       async.flushMicrotasks();
       final change = h.events.last as DeviceAvailabilityChanged;
       expect(change.availability, DeviceAvailability.offline);
+    });
+  });
+
+  test('lost discovery (QoS 0): the query is repeated until every device '
+      'with retained state has announced', () {
+    fakeAsync((async) {
+      // Three in ten QoS 0 messages vanish: queries and announces alike.
+      final broker = InMemoryBroker(qos0LossRate: 0.3, random: Random(11));
+      final h = _Harness(async, broker: broker);
+      final lamps = [
+        for (final id in ['lr-a', 'lr-b', 'lr-c', 'lr-d', 'lr-e'])
+          _BrokerLamp(broker, clock: h.now, id: id),
+      ];
+      for (final lamp in lamps) {
+        unawaited(lamp.start());
+      }
+      async.flushMicrotasks();
+      h.connect();
+
+      Set<String> announced() => {
+        for (final e in h.events.whereType<DeviceAnnounced>()) e.deviceId,
+      };
+      expect(announced().length, lessThan(5), reason: 'some announce was lost');
+
+      // Retries at 3 s, 6 s, 12 s, 24 s, 30 s ... until nothing is missing.
+      async.elapse(const Duration(minutes: 3));
+      expect(announced(), {'lr-a', 'lr-b', 'lr-c', 'lr-d', 'lr-e'});
+      expect(h.transport.discoveryRetries, greaterThan(0));
+      expect(h.transport.discoveryRetries, lessThanOrEqualTo(8));
+      // Every device got its retained state and availability too.
+      for (final id in ['lr-a', 'lr-b', 'lr-c', 'lr-d', 'lr-e']) {
+        expect(
+          h.events.whereType<DeviceStateChanged>().map((e) => e.deviceId),
+          contains(id),
+        );
+      }
+      // Once everything is known, the retries stop.
+      final retries = h.transport.discoveryRetries;
+      async.elapse(const Duration(minutes: 3));
+      expect(h.transport.discoveryRetries, retries);
+    });
+  });
+
+  test('no retained messages, no retry', () {
+    fakeAsync((async) {
+      final h = _Harness(async)..connect();
+      async.elapse(const Duration(minutes: 2));
+      expect(h.transport.discoveryRetries, 0);
     });
   });
 

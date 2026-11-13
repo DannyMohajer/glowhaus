@@ -12,8 +12,10 @@ graph TD
   app["apps/glowhaus<br/>Flutter app"]
   wb["widgetbook<br/>component catalog"]
   ui["packages/glowhaus_ui<br/>design system (Flutter)"]
-  transport["packages/glowhaus_transport<br/>Transport + SimulatedTransport (pure Dart)"]
-  mqtt["packages/glowhaus_mqtt<br/>MqttConnection + InMemoryBroker (pure Dart)"]
+  transport["packages/glowhaus_transport<br/>Transport, MqttTransport, SimulatedTransport (pure Dart)"]
+  device["packages/glowhaus_device<br/>device engine + demo home (pure Dart)"]
+  sim["simulator<br/>CLI: demo home on a real broker"]
+  mqtt["packages/glowhaus_mqtt<br/>MqttConnection, mqtt_client adapter, InMemoryBroker (pure Dart)"]
   domain["packages/glowhaus_domain<br/>models + protocol (pure Dart)"]
 
   app --> ui
@@ -22,13 +24,20 @@ graph TD
   wb --> ui
   transport --> domain
   transport --> mqtt
+  transport --> device
+  device --> domain
+  device --> mqtt
+  sim --> device
+  sim --> mqtt
 ```
 
 | Package | Depends on | Contains | Must never contain |
 |---|---|---|---|
 | `glowhaus_domain` | Dart only | `Home`, `Room`, `Device`, `Capability`, `Scene`, `User`/`Role`, command lifecycle, protocol payload models, the topic codec | Flutter imports, I/O, timers |
-| `glowhaus_mqtt` | Dart only | `MqttConnection` interface, QoS and topic matching, `InMemoryBroker` | Glowhaus topics or payloads, Flutter imports |
-| `glowhaus_transport` | `glowhaus_domain`, `glowhaus_mqtt`, `mqtt_client` | `Transport` interface, `MqttTransport` (+ the `mqtt_client` adapter), `SimulatedTransport`, seeded demo home | Flutter imports, UI concepts |
+| `glowhaus_mqtt` | `mqtt_client` | `MqttConnection` interface, QoS and topic matching, `MqttClientConnection` (TCP + TLS native, WSS web), `InMemoryBroker` | Glowhaus topics or payloads, Flutter imports |
+| `glowhaus_device` | `glowhaus_domain`, `glowhaus_mqtt` | `DeviceModel` (behaviour, no I/O), `VirtualDevice` / `VirtualHome` (the protocol's device side on an `MqttConnection`), `DemoHome` seed | The app, the transport package: it proves the protocol doc is enough to build a device |
+| `glowhaus_transport` | `glowhaus_domain`, `glowhaus_mqtt`, `glowhaus_device` | `Transport` interface, `MqttTransport`, `SimulatedTransport` (= `InMemoryBroker` + `VirtualHome` + `MqttTransport`) | Flutter imports, UI concepts |
+| `simulator` | `glowhaus_device`, `glowhaus_mqtt` | CLI that runs the demo home against a real broker | App or transport code |
 | `glowhaus_ui` | Flutter only | Tokens, themes, components | Domain models, blocs, strings that need translating |
 | `apps/glowhaus` | all three | Features (bloc + view), repositories, routing, DI, l10n | Topic strings, raw JSON handling |
 | `widgetbook` | `glowhaus_ui` | One use-case per component | App logic |
@@ -122,7 +131,7 @@ transports slot in without UI changes:
 
 | Transport | Milestone | How it fulfils the interface |
 |---|---|---|
-| `SimulatedTransport` | 1 | In-memory devices, configurable latency / failure rate / timeout rate |
+| `SimulatedTransport` | 1, rebuilt in 3 | An `InMemoryBroker`, a `VirtualHome` of real device engines on it, and an `MqttTransport` for the app: the real protocol end to end in one isolate, with configurable latency / failure rate / lost commands |
 | `MqttTransport` | 3 | `TopicCodec` and the protocol models over an `MqttConnection`: the `mqtt_client` adapter (TCP + TLS on native, WSS on web) or the `InMemoryBroker`. Backoff reconnect; pending commands become `unreachable` when the link drops, devices keep their last known state |
 | `LocalTransport` | 6 | UDP discovery + local WebSocket, same payload models |
 
@@ -240,7 +249,9 @@ never translated, even if it happens to match a default.
 | Level | What |
 |---|---|
 | Unit (`glowhaus_domain`) | Topic codec, payload round trips, capability logic |
-| Unit (`glowhaus_transport`) | `SimulatedTransport`: latency, failure, timeout, state emission (fake clock + seeded RNG) |
+| Unit (`glowhaus_mqtt`) | Broker semantics: retained, wills, wildcards, QoS downgrade, QoS 0 loss, QoS 1 duplicates |
+| Unit (`glowhaus_device`) | Devices checked on the wire against the protocol doc: payload shapes, acks, expiry, redelivery, retained set ignored, wills |
+| Unit (`glowhaus_transport`) | `MqttTransport`: acks, timeouts, duplicates, link loss, backoff, lost discovery; `SimulatedTransport`: latency, failure, timeout, state emission (fake clock + seeded RNG) |
 | Unit (app) | Every bloc and repository, including optimistic rollback |
 | Widget | `DeviceTile` states, `TickDial` drag, RTL dashboard |
 | Golden | Key components, light and dark |

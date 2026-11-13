@@ -26,6 +26,10 @@ import 'package:glowhaus_transport/src/transport.dart';
 /// State and availability that arrive before the device's announce (retained
 /// messages are delivered as soon as the app subscribes, the announce only
 /// after the query) are held until the announce, then emitted in order.
+/// Discovery is QoS 0, so the query or an announce can be lost: while any
+/// device has retained messages but no announce, the query is repeated with
+/// backoff ([discoveryRetryDelay] doubling up to 30 s, [maxDiscoveryRetries]
+/// times).
 class MqttTransport implements Transport {
   new({
     required this.homeId,
@@ -33,6 +37,8 @@ class MqttTransport implements Transport {
     required this.clientId,
     this.login,
     this.reconnectPolicy = const ReconnectPolicy(),
+    this.discoveryRetryDelay = const Duration(seconds: 3),
+    this.maxDiscoveryRetries = 8,
     DateTime Function()? clock,
     Random? random,
     this._topics = const TopicCodec(),
@@ -46,6 +52,8 @@ class MqttTransport implements Transport {
   final String clientId;
   final MqttLogin? login;
   final ReconnectPolicy reconnectPolicy;
+  final Duration discoveryRetryDelay;
+  final int maxDiscoveryRetries;
 
   final MqttConnection _connection;
   final DateTime Function() _clock;
@@ -66,9 +74,15 @@ class MqttTransport implements Transport {
   bool _disposed = false;
   int _attempt = 0;
   Timer? _retry;
+  int _discoveryRetries = 0;
+  Timer? _discoveryRetry;
 
   /// Reconnect attempts since the last successful connection.
   int get reconnectAttempts => _attempt;
+
+  /// Discovery queries repeated since the last connection, because some
+  /// device had retained messages but no announce.
+  int get discoveryRetries => _discoveryRetries;
 
   @override
   TransportStatus get currentStatus => _status;
@@ -95,6 +109,7 @@ class MqttTransport implements Transport {
     _wanted = false;
     _retry?.cancel();
     _retry = null;
+    _cancelDiscoveryRetry();
     _failPending();
     await _connection.disconnect();
     _setStatus(TransportStatus.disconnected);
@@ -158,7 +173,35 @@ class MqttTransport implements Transport {
     }
     if (!_wanted) return;
     _attempt = 0;
+    _discoveryRetries = 0;
     _setStatus(TransportStatus.connected);
+    _scheduleDiscoveryCheck();
+  }
+
+  /// Section 5: announces are best effort. If a device left retained state
+  /// or availability but its announce has not arrived, ask again.
+  void _scheduleDiscoveryCheck() {
+    _cancelDiscoveryRetry();
+    if (_discoveryRetries >= maxDiscoveryRetries) return;
+    var delay = discoveryRetryDelay * pow(2, _discoveryRetries).toInt();
+    if (delay > const Duration(seconds: 30)) {
+      delay = const Duration(seconds: 30);
+    }
+    _discoveryRetry = Timer(delay, () {
+      _discoveryRetry = null;
+      if (_status != TransportStatus.connected) return;
+      if (_stateBeforeAnnounce.isEmpty && _availabilityBeforeAnnounce.isEmpty) {
+        return;
+      }
+      _discoveryRetries++;
+      unawaited(_query().catchError((_) {}));
+      _scheduleDiscoveryCheck();
+    });
+  }
+
+  void _cancelDiscoveryRetry() {
+    _discoveryRetry?.cancel();
+    _discoveryRetry = null;
   }
 
   Future<void> _subscribeAll() async {
@@ -187,6 +230,7 @@ class MqttTransport implements Transport {
     if (state != MqttConnectionState.disconnected || !_wanted) return;
     // The link dropped under us. Devices keep their last known state and
     // availability; only the commands in flight are lost.
+    _cancelDiscoveryRetry();
     _failPending();
     _setStatus(
       _status == TransportStatus.connected

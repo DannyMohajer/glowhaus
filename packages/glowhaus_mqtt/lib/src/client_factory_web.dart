@@ -1,4 +1,4 @@
-import 'package:glowhaus_transport/src/mqtt/mqtt_endpoint.dart';
+import 'package:glowhaus_mqtt/src/mqtt_endpoint.dart';
 import 'package:mqtt_client/mqtt_browser_client.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 

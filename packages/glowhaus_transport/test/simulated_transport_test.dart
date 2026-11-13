@@ -142,11 +142,11 @@ void main() {
       });
     });
 
-    test('commands sent while disconnected time out', () {
+    test('commands sent while disconnected are unreachable at once', () {
       _run(connect: false, (h) {
         final result = h.send(h.command('lr-lamp', _lampOff));
-        h.async.elapse(Protocol.commandTimeout);
-        expect(result.single, isA<CommandTimedOut>());
+        h.async.flushMicrotasks();
+        expect(result.single, isA<CommandUnreachable>());
       });
     });
   });
@@ -236,35 +236,50 @@ void main() {
       });
     });
 
-    test('latency longer than the timeout: timed out and not applied', () {
+    test('latency longer than the timeout: timed out, then applied late', () {
       _run(config: _exact.copyWith(latency: const Duration(seconds: 3)), (h) {
         final result = h.send(
           h.command('lr-lamp', _lampOff),
           timeout: const Duration(seconds: 1),
         );
-        h.async.elapse(const Duration(seconds: 5));
+        h.async.elapse(const Duration(seconds: 2));
         expect(result.single, isA<CommandTimedOut>());
         expect(h.state<OnOffState>('lr-lamp', 'onOff').on, isTrue);
+        // A slow device still acts; the app shows the reported state
+        // when it finally arrives (the repository rolled back meanwhile).
+        h.async.elapse(const Duration(seconds: 2));
+        expect(h.state<OnOffState>('lr-lamp', 'onOff').on, isFalse);
+        expect(
+          h.statesOf('lr-lamp').last.state['onOff'],
+          const OnOffState(on: false),
+        );
       });
     });
 
-    test('offline or unknown device and foreign home time out', () {
-      _run((h) {
-        final results = [
-          h.send(
-            h.command('kt-motion', const {
-              'motionSensor': CapabilityPatch.onOff(on: true),
-            }),
-          ),
-          h.send(h.command('ghost', _lampOff)),
-          h.send(h.command('lr-lamp', _lampOff).copyWith(homeId: 'other')),
-        ];
-        h.async.elapse(Protocol.commandTimeout);
-        for (final result in results) {
-          expect(result.single, isA<CommandTimedOut>());
-        }
-      });
-    });
+    test(
+      'offline or unknown device time out; a foreign home is unreachable',
+      () {
+        _run((h) {
+          final results = [
+            h.send(
+              h.command('kt-motion', const {
+                'motionSensor': CapabilityPatch.onOff(on: true),
+              }),
+            ),
+            h.send(h.command('ghost', _lampOff)),
+          ];
+          final foreign = h.send(
+            h.command('lr-lamp', _lampOff).copyWith(homeId: 'other'),
+          );
+          h.async.flushMicrotasks();
+          expect(foreign.single, isA<CommandUnreachable>());
+          h.async.elapse(Protocol.commandTimeout);
+          for (final result in results) {
+            expect(result.single, isA<CommandTimedOut>());
+          }
+        });
+      },
+    );
 
     test('validation errors use the protocol codes and are atomic', () {
       _run((h) {
@@ -518,7 +533,7 @@ void main() {
     test('a device going offline and coming back', () {
       _run((h) {
         h.events.clear();
-        h.transport.setDeviceOnline('lr-lamp', online: false);
+        unawaited(h.transport.setDeviceOnline('lr-lamp', online: false));
         h.async.flushMicrotasks();
         expect(
           (h.events.single as DeviceAvailabilityChanged).availability,
@@ -529,14 +544,18 @@ void main() {
         expect(result.single, isA<CommandTimedOut>());
 
         h.events.clear();
-        h.transport.setDeviceOnline('lr-lamp', online: true);
+        unawaited(h.transport.setDeviceOnline('lr-lamp', online: true));
         h.async.flushMicrotasks();
-        expect(h.events, hasLength(2));
+        // Section 6 / 5.1: online, state, and an announce on (re)connect.
+        expect(h.events.map((e) => e.runtimeType), [
+          DeviceAvailabilityChanged,
+          DeviceStateChanged,
+          DeviceAnnounced,
+        ]);
         expect(
           (h.events.first as DeviceAvailabilityChanged).availability,
           DeviceAvailability.online,
         );
-        expect(h.events.last, isA<DeviceStateChanged>());
       });
     });
   });

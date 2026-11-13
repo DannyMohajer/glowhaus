@@ -1,5 +1,5 @@
+import 'package:glowhaus_device/src/device_model.dart';
 import 'package:glowhaus_domain/glowhaus_domain.dart';
-import 'package:glowhaus_transport/src/simulated/simulated_device.dart';
 
 /// Translation keys of the demo's default names. The app translates these;
 /// a renamed room or device has no key and is shown exactly as typed.
@@ -163,9 +163,9 @@ abstract final class DemoHome {
   static Capability _cap(CapabilityKind kind, [Map<String, dynamic>? config]) =>
       Capability.of(kind, config: config ?? const <String, dynamic>{});
 
-  static List<SimulatedDevice> devices() => [
+  static List<DeviceSpec> devices() => [
     // Living room
-    SimulatedDevice(
+    DeviceSpec(
       descriptor: DeviceDescriptor(
         id: 'lr-ceiling',
         type: DeviceType.light,
@@ -185,7 +185,7 @@ abstract final class DemoHome {
         'brightness': CapabilityState.brightness(level: 70),
       },
     ),
-    SimulatedDevice(
+    DeviceSpec(
       descriptor: DeviceDescriptor(
         id: 'lr-lamp',
         type: DeviceType.light,
@@ -212,7 +212,7 @@ abstract final class DemoHome {
         'colorTemperature': CapabilityState.colorTemperature(kelvin: 2700),
       },
     ),
-    SimulatedDevice(
+    DeviceSpec(
       descriptor: DeviceDescriptor(
         id: 'lr-curtain',
         type: DeviceType.curtain,
@@ -228,7 +228,7 @@ abstract final class DemoHome {
         'position': CapabilityState.position(position: 60, target: 60),
       },
     ),
-    SimulatedDevice(
+    DeviceSpec(
       descriptor: DeviceDescriptor(
         id: 'lr-thermostat',
         type: DeviceType.thermostat,
@@ -260,7 +260,7 @@ abstract final class DemoHome {
       },
     ),
     // Bedroom
-    SimulatedDevice(
+    DeviceSpec(
       descriptor: DeviceDescriptor(
         id: 'br-reading',
         type: DeviceType.light,
@@ -274,7 +274,7 @@ abstract final class DemoHome {
       ),
       initialState: const {'onOff': CapabilityState.onOff(on: false)},
     ),
-    SimulatedDevice(
+    DeviceSpec(
       descriptor: DeviceDescriptor(
         id: 'br-climate',
         type: DeviceType.sensor,
@@ -295,7 +295,7 @@ abstract final class DemoHome {
       },
     ),
     // Kitchen
-    const SimulatedDevice(
+    const DeviceSpec(
       descriptor: DeviceDescriptor(
         id: 'kt-switch',
         type: DeviceType.wallSwitch,
@@ -332,7 +332,7 @@ abstract final class DemoHome {
         'ch3': CapabilityState.onOff(on: false),
       },
     ),
-    SimulatedDevice(
+    DeviceSpec(
       descriptor: DeviceDescriptor(
         id: 'kt-outlet',
         type: DeviceType.outlet,
@@ -353,7 +353,7 @@ abstract final class DemoHome {
       },
       onWatts: 1180,
     ),
-    SimulatedDevice(
+    DeviceSpec(
       descriptor: DeviceDescriptor(
         id: 'kt-motion',
         type: DeviceType.sensor,
@@ -372,7 +372,7 @@ abstract final class DemoHome {
       online: false,
     ),
     // Entrance
-    SimulatedDevice(
+    DeviceSpec(
       descriptor: DeviceDescriptor(
         id: 'en-lock',
         type: DeviceType.lock,
@@ -386,7 +386,7 @@ abstract final class DemoHome {
       ),
       initialState: const {'lock': CapabilityState.lock(locked: true)},
     ),
-    SimulatedDevice(
+    DeviceSpec(
       descriptor: DeviceDescriptor(
         id: 'en-door',
         type: DeviceType.sensor,
@@ -402,7 +402,7 @@ abstract final class DemoHome {
         'contactSensor': CapabilityState.contactSensor(open: false),
       },
     ),
-    SimulatedDevice(
+    DeviceSpec(
       descriptor: DeviceDescriptor(
         id: 'en-camera',
         type: DeviceType.camera,

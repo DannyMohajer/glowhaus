@@ -4,9 +4,9 @@ import 'dart:math';
 import 'package:glowhaus_domain/glowhaus_domain.dart';
 import 'package:meta/meta.dart';
 
-/// The definition of one in-memory device.
+/// The definition of one virtual device: what it is and how it starts.
 @immutable
-class SimulatedDevice {
+class DeviceSpec {
   const new({
     required this.descriptor,
     required this.initialState,
@@ -25,9 +25,12 @@ class SimulatedDevice {
   final double onWatts;
 }
 
-/// Mutable runtime of a [SimulatedDevice]. Behaves like a protocol-compliant
-/// device: atomic commands, documented error codes, derived readings.
-class DeviceRuntime {
+/// The behaviour of one device, with no I/O: it takes `set` payloads and
+/// answers with `ack` payloads and a new state, exactly as section 8 of
+/// `docs/protocol.md` prescribes (atomic commands, the documented error
+/// codes, expiry, idempotent redelivery), and derives readings (power
+/// follows the switch, a thermostat's action follows its mode and the room).
+class DeviceModel {
   new(this.spec)
     : online = spec.online,
       state = Map.of(spec.initialState),
@@ -41,10 +44,10 @@ class DeviceRuntime {
   static const int _rememberedCommands = 8;
   static const int _positionStep = 5;
 
-  final SimulatedDevice spec;
+  final DeviceSpec spec;
   final Map<String, CapabilityState> state;
   final double? _restingCelsius;
-  final LinkedHashMap<String, CommandResult> _handled = LinkedHashMap();
+  final LinkedHashMap<String, AckPayload> _handled = LinkedHashMap();
 
   bool online;
 
@@ -56,62 +59,71 @@ class DeviceRuntime {
     (position) => position.moving,
   );
 
-  /// Handles a command the way section 8 of the protocol prescribes.
-  CommandResult handle(
-    DeviceCommand command, {
+  /// Handles a `set` the way section 8 of the protocol prescribes.
+  ///
+  /// Returns the ack to publish and whether the state changed (false for a
+  /// rejected command and for a redelivered one, which gets its original
+  /// ack again without being applied twice).
+  ({AckPayload ack, bool applied}) handle(
+    SetPayload payload, {
     required DateTime now,
     required bool Function() shouldFail,
   }) {
-    final previous = _handled[command.id];
-    if (previous != null) return previous;
+    final previous = _handled[payload.commandId];
+    if (previous != null) return (ack: previous, applied: false);
 
-    final result = _evaluate(command, now: now, shouldFail: shouldFail);
-    _handled[command.id] = result;
+    final (:ack, :applied) = _evaluate(
+      payload,
+      now: now,
+      shouldFail: shouldFail,
+    );
+    _handled[payload.commandId] = ack;
     if (_handled.length > _rememberedCommands) {
       _handled.remove(_handled.keys.first);
     }
-    return result;
+    return (ack: ack, applied: applied);
   }
 
-  CommandResult _evaluate(
-    DeviceCommand command, {
+  ({AckPayload ack, bool applied}) _evaluate(
+    SetPayload payload, {
     required DateTime now,
     required bool Function() shouldFail,
   }) {
-    CommandResult fail(ProtocolErrorCode code, String message) =>
-        CommandResult.failed(
-          commandId: command.id,
-          code: code,
-          message: message,
-        );
+    ({AckPayload ack, bool applied}) fail(
+      ProtocolErrorCode code,
+      String message,
+    ) => (
+      ack: AckPayload(
+        commandId: payload.commandId,
+        ok: false,
+        ts: now.millisecondsSinceEpoch,
+        error: AckError(code: code, message: message),
+      ),
+      applied: false,
+    );
 
-    if (now.difference(command.issuedAt) > Protocol.commandMaxAge) {
+    if (payload.isExpired(now)) {
       return fail(ProtocolErrorCode.expired, 'command is older than 10 s');
     }
-    if (command.patches.isEmpty) {
-      return fail(ProtocolErrorCode.invalidPayload, 'set is empty');
-    }
-    for (final MapEntry(key: id, value: patch) in command.patches.entries) {
-      final capability = _capability(id);
-      if (capability == null) {
-        return fail(
-          ProtocolErrorCode.unsupportedCapability,
-          'no capability "$id"',
-        );
-      }
-      final error = patch.validate(capability);
-      if (error != null) return fail(error, 'invalid value for "$id"');
-    }
+    final (:patches, :error) = payload.decode(spec.descriptor.capabilities);
+    if (error != null) return fail(error, 'rejected: ${error.name}');
     if (shouldFail()) {
       return fail(ProtocolErrorCode.busy, 'device is busy');
     }
 
-    for (final MapEntry(key: id, value: patch) in command.patches.entries) {
+    for (final MapEntry(key: id, value: patch) in patches.entries) {
       final next = patch.applyTo(state[id]);
       if (next != null) state[id] = next;
     }
     _derive();
-    return CommandResult.acked(commandId: command.id);
+    return (
+      ack: AckPayload(
+        commandId: payload.commandId,
+        ok: true,
+        ts: now.millisecondsSinceEpoch,
+      ),
+      applied: true,
+    );
   }
 
   /// Advances moving covers by one step. Returns whether anything changed.
@@ -179,13 +191,6 @@ class DeviceRuntime {
     }
     if (changed) _derive();
     return changed;
-  }
-
-  Capability? _capability(String id) {
-    for (final capability in spec.descriptor.capabilities) {
-      if (capability.id == id) return capability;
-    }
-    return null;
   }
 
   /// Recomputes readings that follow from other state.

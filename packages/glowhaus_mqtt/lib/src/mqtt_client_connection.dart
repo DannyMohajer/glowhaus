@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:glowhaus_mqtt/glowhaus_mqtt.dart';
-import 'package:glowhaus_transport/src/mqtt/client_factory_stub.dart'
-    if (dart.library.io) 'package:glowhaus_transport/src/mqtt/client_factory_io.dart'
-    if (dart.library.js_interop) 'package:glowhaus_transport/src/mqtt/client_factory_web.dart'
+import 'package:glowhaus_mqtt/src/client_factory_stub.dart'
+    if (dart.library.io) 'package:glowhaus_mqtt/src/client_factory_io.dart'
+    if (dart.library.js_interop) 'package:glowhaus_mqtt/src/client_factory_web.dart'
     as clients;
-import 'package:glowhaus_transport/src/mqtt/mqtt_endpoint.dart';
+import 'package:glowhaus_mqtt/src/connection.dart';
+import 'package:glowhaus_mqtt/src/mqtt_endpoint.dart';
 import 'package:mqtt_client/mqtt_client.dart' as mqtt;
 import 'package:typed_data/typed_data.dart' as typed;
 

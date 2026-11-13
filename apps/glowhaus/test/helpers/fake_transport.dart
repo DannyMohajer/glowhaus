@@ -72,10 +72,7 @@ class FakeTransport implements Transport {
 
   /// Announces every device of [devices] with availability and state, as a
   /// transport does after connecting.
-  void seed(
-    Iterable<SimulatedDevice> devices, {
-    String homeId = DemoHome.homeId,
-  }) {
+  void seed(Iterable<DeviceSpec> devices, {String homeId = DemoHome.homeId}) {
     for (final device in devices) {
       final id = device.descriptor.id;
       _events

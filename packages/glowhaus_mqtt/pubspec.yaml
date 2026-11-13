@@ -9,6 +9,8 @@ environment:
 
 dependencies:
   meta: ^1.19.0
+  mqtt_client: ^10.14.0
+  typed_data: ^1.4.0
 
 dev_dependencies:
   test: ^1.25.6
