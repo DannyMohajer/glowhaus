@@ -1,7 +1,14 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 import 'package:glowhaus/app/di/injection.config.dart';
 import 'package:glowhaus/data/device_repository.dart';
 import 'package:glowhaus/data/home_repository.dart';
+import 'package:glowhaus/features/connection/cubit/connection_settings_cubit.dart';
+import 'package:glowhaus/features/connection/data/broker_transports.dart';
+import 'package:glowhaus/features/connection/data/connection_store.dart';
+import 'package:glowhaus/features/settings/data/app_platform.dart';
 import 'package:glowhaus/features/settings/data/simulation_control.dart';
 import 'package:glowhaus_transport/glowhaus_transport.dart';
 import 'package:injectable/injectable.dart';
@@ -19,8 +26,8 @@ abstract class AppModule {
   @preResolve
   Future<SharedPreferences> get preferences => SharedPreferences.getInstance();
 
-  /// Milestone 1 runs on the simulation. A real transport replaces these
-  /// three registrations and nothing above the repositories changes.
+  /// The demo home. The repository starts on it; the connection settings
+  /// can switch the repository to a real broker and back.
   @lazySingleton
   SimulatedTransport get simulatedTransport =>
       SimulatedTransport(homeId: DemoHome.homeId, devices: DemoHome.devices());
@@ -36,6 +43,38 @@ abstract class AppModule {
       DeviceRepository(transport);
 
   @lazySingleton
+  ConnectionSettingsCubit connectionSettings(
+    DeviceRepository devices,
+    SimulatedTransport simulated,
+    BrokerTransports brokers,
+    ConnectionStore store,
+    AppPlatform platform,
+  ) => ConnectionSettingsCubit(
+    devices: devices,
+    demo: simulated,
+    brokers: brokers,
+    store: store,
+    platform: platform,
+    developmentCa: developmentCa(),
+  );
+
+  @lazySingleton
   SimulationControl simulationControl(SimulatedTransport simulated) =>
       TransportSimulationControl(simulated);
+}
+
+/// The mkcert CA handed to a debug build, so a phone can trust a broker on
+/// the Mac without installing anything (Dart on Android ignores user CAs):
+///
+///     flutter run --dart-define=GLOWHAUS_DEV_CA="$(base64 -i infra/certs/ca.crt)"
+///
+/// Release builds never read it.
+String? developmentCa() {
+  const encoded = String.fromEnvironment('GLOWHAUS_DEV_CA');
+  if (!kDebugMode || encoded.isEmpty) return null;
+  try {
+    return utf8.decode(base64.decode(encoded));
+  } on FormatException {
+    return null;
+  }
 }

@@ -562,4 +562,138 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get listSeparator => ' · ';
+
+  @override
+  String get connectionReconnecting => 'Reconnecting…';
+
+  @override
+  String get connectionDemo => 'Demo home';
+
+  @override
+  String get settingsConnection => 'Connection';
+
+  @override
+  String get settingsConnectionHint => 'Where the devices come from.';
+
+  @override
+  String get connectionModeDemo => 'Demo';
+
+  @override
+  String get connectionModeBroker => 'My broker';
+
+  @override
+  String get connectionDemoHint =>
+      'Twelve simulated devices, right here in the app. No network needed.';
+
+  @override
+  String get connectionBrokerHint =>
+      'An MQTT broker that speaks the Glowhaus protocol, such as the one in infra/.';
+
+  @override
+  String get connectionWebNote =>
+      'In a browser the app connects over secure WebSocket (wss://), and this browser has to trust the broker\'s certificate.';
+
+  @override
+  String get connectionHost => 'Host';
+
+  @override
+  String get connectionHostHint =>
+      'Name or IP address, without mqtts:// or a port';
+
+  @override
+  String get connectionPort => 'Port';
+
+  @override
+  String connectionPortHint(int port) {
+    return 'Empty for the default, $port';
+  }
+
+  @override
+  String get connectionTls => 'Encrypted (TLS)';
+
+  @override
+  String get connectionTlsHint =>
+      'Turn off only for a broker on this computer or an emulator.';
+
+  @override
+  String get connectionWebSocket => 'Over WebSocket';
+
+  @override
+  String get connectionWebSocketHint =>
+      'For a broker that only listens for WebSocket clients.';
+
+  @override
+  String get connectionPath => 'WebSocket path';
+
+  @override
+  String get connectionHome => 'Home ID';
+
+  @override
+  String get connectionUsername => 'Username';
+
+  @override
+  String get connectionPassword => 'Password';
+
+  @override
+  String get connectionPasswordHint => 'Kept in memory only, never saved.';
+
+  @override
+  String get connectionCa => 'Extra CA certificate (PEM)';
+
+  @override
+  String get connectionCaHint =>
+      'Optional. Paste infra/certs/ca.crt so this device trusts a development broker.';
+
+  @override
+  String get connectionConnect => 'Connect';
+
+  @override
+  String connectionStatusConnected(String broker) {
+    return 'Connected to $broker.';
+  }
+
+  @override
+  String connectionStatusConnecting(String broker) {
+    return 'Connecting to $broker…';
+  }
+
+  @override
+  String connectionStatusNeedsPassword(String broker) {
+    return 'Showing the devices last seen on $broker. Enter the password to connect.';
+  }
+
+  @override
+  String get connectionProblemUnreachable =>
+      'No broker answers there. Check the host and port, and that the broker is running.';
+
+  @override
+  String get connectionProblemUnreachableWeb =>
+      'No broker answers there, or this browser does not trust its certificate.';
+
+  @override
+  String get connectionProblemUntrusted =>
+      'The broker\'s certificate is not trusted here, or it does not cover this host name.';
+
+  @override
+  String get connectionProblemUnauthorized => 'Wrong username or password.';
+
+  @override
+  String get connectionProblemRefused => 'The broker refused the connection.';
+
+  @override
+  String get connectionInvalidHost =>
+      'Enter a host name or IP address, without a scheme or port.';
+
+  @override
+  String get connectionInvalidPort => 'A port is a number from 1 to 65535.';
+
+  @override
+  String get connectionInvalidPath => 'The path starts with /.';
+
+  @override
+  String get connectionInvalidHome =>
+      'Lowercase letters, digits, - and _, up to 32.';
+
+  @override
+  String get connectionInvalidUsername => 'Enter a username.';
 }

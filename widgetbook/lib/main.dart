@@ -54,6 +54,7 @@ class GlowhausWidgetbook extends StatelessWidget {
             _component('ToggleSwitch', _toggle),
             _component('StatusDot', _statusDots),
             _component('ConnectionBadge', _connection),
+            _component('GlowTextField', (_) => const _TextFields()),
           ],
         ),
         WidgetbookFolder(
@@ -327,6 +328,49 @@ Widget _connection(BuildContext context) {
       ),
     ],
   );
+}
+
+class _TextFields extends StatefulWidget {
+  const new();
+
+  @override
+  State<_TextFields> createState() => _TextFieldsState();
+}
+
+class _TextFieldsState extends State<_TextFields> {
+  final _host = TextEditingController(text: 'localhost');
+  final _password = TextEditingController(text: 'not-the-password');
+
+  @override
+  void dispose() {
+    _host.dispose();
+    _password.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = Samples.of(context);
+    final showError = context.knobs.boolean(label: 'Error');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        GlowTextField(
+          label: s.host,
+          hint: s.hostHint,
+          controller: _host,
+          textDirection: TextDirection.ltr,
+        ),
+        const SizedBox(height: GlowSpace.x4),
+        GlowTextField(
+          label: s.password,
+          error: showError ? s.wrongPassword : null,
+          controller: _password,
+          obscure: true,
+        ),
+      ],
+    );
+  }
 }
 
 Widget _deviceTile(BuildContext context) {

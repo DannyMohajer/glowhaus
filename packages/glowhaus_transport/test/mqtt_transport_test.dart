@@ -131,6 +131,50 @@ class _BrokerLamp {
   }
 }
 
+/// A broker that always says "bad username or password".
+class _RefusingConnection implements MqttConnection {
+  @override
+  MqttConnectionState get currentState => MqttConnectionState.disconnected;
+
+  @override
+  Stream<MqttConnectionState> get state => const Stream.empty();
+
+  @override
+  Stream<MqttMessage> get messages => const Stream.empty();
+
+  @override
+  Future<void> connect({
+    required String clientId,
+    MqttWill? will,
+    MqttLogin? login,
+    Duration keepAlive = const Duration(seconds: 30),
+  }) async => throw const MqttConnectionException(
+    'refused',
+    reason: MqttConnectFailure.unauthorized,
+  );
+
+  @override
+  Future<void> subscribe(String filter, {MqttQos qos = MqttQos.atLeastOnce}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> unsubscribe(String filter) => throw UnimplementedError();
+
+  @override
+  Future<void> publish(
+    String topic,
+    Uint8List payload, {
+    MqttQos qos = MqttQos.atLeastOnce,
+    bool retain = false,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<void> disconnect() async {}
+
+  @override
+  Future<void> dispose() async {}
+}
+
 class _Harness {
   new(this.async, {InMemoryBroker? broker})
     : broker = broker ?? InMemoryBroker() {
@@ -677,6 +721,52 @@ void main() {
         unawaited(h.transport.dispose());
         async.flushMicrotasks();
       });
+    });
+  });
+
+  test('every failed connect is reported with its reason, then retried', () {
+    fakeAsync((async) {
+      final transport = MqttTransport(
+        homeId: _home,
+        connection: _RefusingConnection(),
+        clientId: 'app-test',
+        random: Random(1),
+        reconnectPolicy: const ReconnectPolicy(jitter: 0),
+      );
+      final failures = <MqttConnectionException>[];
+      transport.connectFailures.listen(failures.add);
+      unawaited(transport.connect());
+      async.flushMicrotasks();
+      expect(failures.single.reason, MqttConnectFailure.unauthorized);
+      expect(transport.currentStatus, TransportStatus.connecting);
+
+      async.elapse(const Duration(seconds: 3));
+      expect(failures.length, greaterThan(1), reason: 'it keeps trying');
+      unawaited(transport.dispose());
+      async.flushMicrotasks();
+    });
+  });
+
+  test('an explicit disconnect forgets the devices; connect learns them '
+      'again', () {
+    fakeAsync((async) {
+      final h = _Harness(async)
+        ..startLamp()
+        ..connect();
+      expect(h.eventTypes, contains(DeviceAnnounced));
+      unawaited(h.transport.disconnect());
+      async.flushMicrotasks();
+      h.events.clear();
+
+      h.connect();
+      async.elapse(const Duration(seconds: 1));
+      expect(
+        h.eventTypes,
+        contains(DeviceAnnounced),
+        reason: 'not swallowed as an unchanged repeat',
+      );
+      unawaited(h.transport.dispose());
+      async.flushMicrotasks();
     });
   });
 }

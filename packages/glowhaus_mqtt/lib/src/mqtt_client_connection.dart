@@ -81,13 +81,18 @@ class MqttClientConnection implements MqttConnection {
     } on Object catch (error) {
       _client = null;
       _setState(MqttConnectionState.disconnected);
-      throw MqttConnectionException('connect failed: $error');
+      final code = client.connectionStatus?.returnCode;
+      throw MqttConnectionException(
+        'connect failed: $error',
+        reason: _refusal(code) ?? _failureOf(error),
+      );
     }
     if (status?.state != mqtt.MqttConnectionState.connected) {
       _client = null;
       _setState(MqttConnectionState.disconnected);
       throw MqttConnectionException(
         'broker refused the connection: ${status?.returnCode}',
+        reason: _refusal(status?.returnCode) ?? MqttConnectFailure.refused,
       );
     }
     _updates = client.updates?.listen(_onUpdates);
@@ -222,6 +227,26 @@ class MqttClientConnection implements MqttConnection {
     if (_current == next) return;
     _current = next;
     if (!_state.isClosed) _state.add(next);
+  }
+
+  static MqttConnectFailure? _refusal(mqtt.MqttConnectReturnCode? code) =>
+      switch (code) {
+        mqtt.MqttConnectReturnCode.badUsernameOrPassword ||
+        mqtt.MqttConnectReturnCode.notAuthorized =>
+          MqttConnectFailure.unauthorized,
+        null ||
+        mqtt.MqttConnectReturnCode.noneSpecified ||
+        mqtt.MqttConnectReturnCode.connectionAccepted => null,
+        _ => MqttConnectFailure.refused,
+      };
+
+  /// TLS failures surface as handshake or certificate errors on native
+  /// platforms; a browser only reports that the WebSocket closed.
+  static MqttConnectFailure _failureOf(Object error) {
+    final text = '$error';
+    return text.contains('Handshake') || text.contains('CERTIFICATE')
+        ? MqttConnectFailure.untrusted
+        : MqttConnectFailure.unreachable;
   }
 
   static mqtt.MqttQos _toClientQos(MqttQos qos) => switch (qos) {

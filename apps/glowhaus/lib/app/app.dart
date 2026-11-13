@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glowhaus/data/device_repository.dart';
 import 'package:glowhaus/data/home_repository.dart';
+import 'package:glowhaus/features/connection/cubit/connection_settings_cubit.dart';
 import 'package:glowhaus/features/feedback/app_cubits.dart';
 import 'package:glowhaus/features/settings/cubit/settings_cubit.dart';
 import 'package:glowhaus/features/settings/cubit/settings_state.dart';
@@ -12,6 +13,7 @@ import 'package:go_router/go_router.dart';
 class GlowhausApp extends StatelessWidget {
   const new({
     required this.settings,
+    required this.connection,
     required this.homes,
     required this.devices,
     required this.router,
@@ -20,6 +22,9 @@ class GlowhausApp extends StatelessWidget {
 
   /// Already initialised; the app takes ownership and closes it.
   final SettingsCubit settings;
+
+  /// Already initialised; the app takes ownership and closes it.
+  final ConnectionSettingsCubit connection;
   final HomeRepository homes;
   final DeviceRepository devices;
   final GoRouter router;
@@ -34,6 +39,7 @@ class GlowhausApp extends StatelessWidget {
       child: MultiBlocProvider(
         providers: [
           BlocProvider<SettingsCubit>(create: (_) => settings),
+          BlocProvider<ConnectionSettingsCubit>(create: (_) => connection),
           BlocProvider<ConnectionCubit>(
             create: (_) => ConnectionCubit(devices),
           ),

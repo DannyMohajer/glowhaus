@@ -90,16 +90,17 @@ class _LateCandidate {
 /// rejected or times out.
 class DeviceRepository {
   new(
-    this._transport, {
+    Transport transport, {
     DateTime Function()? clock,
     String Function()? commandIds,
     this.commandTimeout = Protocol.commandTimeout,
     this.settleTimeout = Protocol.stateSettleTimeout,
     this.lateApplyWindow = const Duration(seconds: 30),
-  }) : _clock = clock ?? DateTime.now,
+  }) : _transport = transport,
+       _clock = clock ?? DateTime.now,
        _commandIds = commandIds ?? _sequentialIds();
 
-  final Transport _transport;
+  Transport _transport;
   final DateTime Function() _clock;
   final String Function() _commandIds;
   final Duration commandTimeout;
@@ -117,6 +118,7 @@ class DeviceRepository {
   final _views = StreamController<List<DeviceView>>.broadcast();
   final _failures = StreamController<CommandFailure>.broadcast();
   final _lateApplies = StreamController<LateApply>.broadcast();
+  final _statusOut = StreamController<TransportStatus>.broadcast();
   StreamSubscription<DeviceEvent>? _events;
   StreamSubscription<TransportStatus>? _status;
 
@@ -126,10 +128,14 @@ class DeviceRepository {
     return () => 'c-$session-${counter++}';
   }
 
-  /// Connection state of the transport.
+  /// The transport in use.
+  Transport get transport => _transport;
+
+  /// Connection state of the transport in use, starting with the current
+  /// one. Follows [use] to a new transport.
   Stream<TransportStatus> get status async* {
     yield _transport.currentStatus;
-    yield* _transport.status;
+    yield* _statusOut.stream;
   }
 
   /// All devices in announce order, starting with the current list.
@@ -163,17 +169,41 @@ class DeviceRepository {
     await _transport.connect();
   }
 
+  /// Switches to [next]: the demo, a broker, or nothing at all. The previous
+  /// transport is disconnected (its owner disposes it), every device and
+  /// every command in flight is forgotten, and [lastKnown] stands in until
+  /// [next] reports, with availability `unknown`.
+  Future<void> use(
+    Transport next, {
+    Iterable<Device> lastKnown = const [],
+  }) async {
+    final previous = _transport;
+    await _events?.cancel();
+    await _status?.cancel();
+    _clearCommands();
+    _reported
+      ..clear()
+      ..addEntries([
+        for (final device in lastKnown)
+          MapEntry(
+            device.id,
+            device.copyWith(availability: DeviceAvailability.unknown),
+          ),
+      ]);
+    _transport = next;
+    _events = next.events.listen(_onEvent);
+    _status = next.status.listen(_onStatus);
+    _publish();
+    if (!_statusOut.isClosed) _statusOut.add(next.currentStatus);
+    if (!identical(previous, next)) await previous.disconnect();
+    await next.connect();
+  }
+
   Future<void> dispose() async {
     await _events?.cancel();
     await _status?.cancel();
-    for (final pending in _pending) {
-      pending.settleTimer?.cancel();
-    }
-    _pending.clear();
-    for (final candidate in _late) {
-      candidate.timer?.cancel();
-    }
-    _late.clear();
+    _clearCommands();
+    await _statusOut.close();
     await _views.close();
     await _failures.close();
     await _lateApplies.close();
@@ -242,11 +272,23 @@ class DeviceRepository {
     _late.remove(candidate);
   }
 
+  void _clearCommands() {
+    for (final pending in _pending) {
+      pending.settleTimer?.cancel();
+    }
+    _pending.clear();
+    for (final candidate in _late) {
+      candidate.timer?.cancel();
+    }
+    _late.clear();
+  }
+
   /// Losing the broker drops every optimistic value: commands still waiting
   /// for an ack fail (the transport answers them with `unreachable`), and
   /// acked ones stop waiting for their state. What the devices report after
   /// the reconnect, retained on the broker, is the truth.
   void _onStatus(TransportStatus status) {
+    if (!_statusOut.isClosed) _statusOut.add(status);
     if (status == TransportStatus.connected || _pending.isEmpty) return;
     _pending.where((p) => p.acked).toList().forEach(_drop);
     _publish();

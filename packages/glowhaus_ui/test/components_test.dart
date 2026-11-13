@@ -276,6 +276,60 @@ void main() {
     });
   });
 
+  group('GlowTextField', () {
+    testWidgets('label above, hint below, typing reaches the controller', (
+      tester,
+    ) async {
+      final controller = TextEditingController();
+      addTearDown(controller.dispose);
+      final changes = <String>[];
+      await tester.pumpWidget(
+        host(
+          GlowTextField(
+            label: 'Host',
+            hint: 'Name or IP address',
+            controller: controller,
+            onChanged: changes.add,
+          ),
+        ),
+      );
+      expect(find.text('Host'), findsOneWidget);
+      expect(find.text('Name or IP address'), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.text('Host')).dy,
+        lessThan(tester.getTopLeft(find.byType(TextField)).dy),
+      );
+      await tester.enterText(find.byType(TextField), 'localhost');
+      expect(controller.text, 'localhost');
+      expect(changes, ['localhost']);
+      expect(tester.getSemantics(find.byType(TextField)).label, 'Host');
+    });
+
+    testWidgets('an error replaces the hint and a password is hidden', (
+      tester,
+    ) async {
+      final controller = TextEditingController(text: 'secret');
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        host(
+          GlowTextField(
+            label: 'Password',
+            hint: 'Kept in memory only',
+            error: 'Wrong username or password',
+            obscure: true,
+            controller: controller,
+          ),
+        ),
+      );
+      expect(find.text('Kept in memory only'), findsNothing);
+      expect(find.text('Wrong username or password'), findsOneWidget);
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).obscureText,
+        isTrue,
+      );
+    });
+  });
+
   group('PositionSlider', () {
     Widget slider(List<int> changes, List<int> ends, {TextDirection? dir}) =>
         host(

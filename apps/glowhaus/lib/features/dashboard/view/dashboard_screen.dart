@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glowhaus/app/router/routes.dart';
 import 'package:glowhaus/data/device_repository.dart';
 import 'package:glowhaus/data/home_repository.dart';
+import 'package:glowhaus/features/connection/cubit/connection_settings_cubit.dart';
+import 'package:glowhaus/features/connection/data/connection_settings.dart';
 import 'package:glowhaus/features/dashboard/cubit/dashboard_cubit.dart';
 import 'package:glowhaus/features/feedback/app_cubits.dart';
 import 'package:glowhaus/features/shared/demo_names.dart';
@@ -181,16 +183,22 @@ class _ConnectionStatus extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final demo = context.select<ConnectionSettingsCubit, bool>(
+      (c) => c.state.active == ConnectionMode.demo,
+    );
     return BlocBuilder<ConnectionCubit, TransportStatus>(
       builder: (context, status) => switch (status) {
         TransportStatus.connected => ConnectionBadge(
           state: ConnectionBadgeState.online,
-          label: l10n.connectionOnline,
+          label: demo ? l10n.connectionDemo : l10n.connectionOnline,
         ),
-        TransportStatus.connecting ||
-        TransportStatus.reconnecting => ConnectionBadge(
+        TransportStatus.connecting => ConnectionBadge(
           state: ConnectionBadgeState.connecting,
           label: l10n.connectionConnecting,
+        ),
+        TransportStatus.reconnecting => ConnectionBadge(
+          state: ConnectionBadgeState.connecting,
+          label: l10n.connectionReconnecting,
         ),
         TransportStatus.disconnected => ConnectionBadge(
           state: ConnectionBadgeState.offline,

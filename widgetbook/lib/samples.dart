@@ -57,6 +57,18 @@ class Samples {
   String get rooms => _pick('Rooms', 'اتاق‌ها', 'Odalar');
   String get settings => _pick('Settings', 'تنظیمات', 'Ayarlar');
   String get device => _pick('Device', 'دستگاه', 'Cihaz');
+  String get host => _pick('Host', 'میزبان', 'Sunucu');
+  String get hostHint => _pick(
+    'Name or IP address of the broker',
+    'نام یا نشانی IP بروکر',
+    'Broker adı veya IP adresi',
+  );
+  String get password => _pick('Password', 'گذرواژه', 'Parola');
+  String get wrongPassword => _pick(
+    'Wrong username or password',
+    'نام کاربری یا گذرواژه نادرست است',
+    'Kullanıcı adı veya parola yanlış',
+  );
   String get cardBody => _pick(
     'A plain surface with a 28 px radius.',
     'یک سطح ساده با گوشه‌های ۲۸ پیکسلی.',

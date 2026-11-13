@@ -67,6 +67,8 @@ class MqttTransport implements Transport {
   late final StreamSubscription<MqttMessage> _messages;
   final _statusController = StreamController<TransportStatus>.broadcast();
   final _eventController = StreamController<DeviceEvent>.broadcast();
+  final _failureController =
+      StreamController<MqttConnectionException>.broadcast();
   final Map<String, _Pending> _pending = {};
   final Map<String, DeviceDescriptor> _descriptors = {};
   final Map<String, StatePayload> _stateBeforeAnnounce = {};
@@ -96,6 +98,11 @@ class MqttTransport implements Transport {
   @override
   Stream<DeviceEvent> get events => _eventController.stream;
 
+  /// Every failed connect attempt, with its reason. The transport keeps
+  /// retrying; this is only so a settings screen can say why it waits.
+  Stream<MqttConnectionException> get connectFailures =>
+      _failureController.stream;
+
   @override
   Future<void> connect() async {
     if (_disposed) throw StateError('MqttTransport is disposed');
@@ -114,6 +121,11 @@ class MqttTransport implements Transport {
     _retry = null;
     _cancelDiscoveryRetry();
     _failPending();
+    // An explicit disconnect ends the session: the next connect learns the
+    // devices afresh. (A dropped link keeps them; see _onConnectionState.)
+    _descriptors.clear();
+    _stateBeforeAnnounce.clear();
+    _availabilityBeforeAnnounce.clear();
     await _connection.disconnect();
     _setStatus(TransportStatus.disconnected);
   }
@@ -127,6 +139,7 @@ class MqttTransport implements Transport {
     await _messages.cancel();
     await _statusController.close();
     await _eventController.close();
+    await _failureController.close();
     await _connection.dispose();
   }
 
@@ -170,7 +183,8 @@ class MqttTransport implements Transport {
       await _connection.connect(clientId: clientId, login: login);
       await _subscribeAll();
       await _query();
-    } on MqttConnectionException {
+    } on MqttConnectionException catch (failure) {
+      if (!_failureController.isClosed) _failureController.add(failure);
       _scheduleRetry();
       return;
     }

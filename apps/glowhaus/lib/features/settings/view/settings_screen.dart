@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:glowhaus/features/connection/cubit/connection_settings_cubit.dart';
+import 'package:glowhaus/features/connection/data/connection_settings.dart';
+import 'package:glowhaus/features/connection/view/connection_section.dart';
 import 'package:glowhaus/features/settings/cubit/settings_cubit.dart';
 import 'package:glowhaus/features/settings/cubit/settings_state.dart';
+import 'package:glowhaus/features/settings/view/settings_parts.dart';
 import 'package:glowhaus/features/shared/pane.dart';
 import 'package:glowhaus/l10n/generated/app_localizations.dart';
 import 'package:glowhaus_ui/glowhaus_ui.dart';
@@ -34,12 +38,14 @@ class SettingsScreen extends StatelessWidget {
                   child: Text(l10n.settingsTitle, style: context.type.display),
                 ),
                 const SizedBox(height: GlowSpace.x6),
-                _Section(
+                const ConnectionSection(),
+                const SizedBox(height: GlowSpace.x4),
+                SettingsSection(
                   title: l10n.settingsAppearance,
                   children: [
-                    _Labeled(
+                    SettingsLabeled(
                       label: l10n.settingsTheme,
-                      child: _Choices<ThemeMode>(
+                      child: SettingsChoices<ThemeMode>(
                         values: const [
                           ThemeMode.light,
                           ThemeMode.dark,
@@ -59,7 +65,7 @@ class SettingsScreen extends StatelessWidget {
                         onSelected: cubit.setThemeMode,
                       ),
                     ),
-                    _Labeled(
+                    SettingsLabeled(
                       label: l10n.settingsAccent,
                       child: Wrap(
                         spacing: GlowSpace.x3,
@@ -81,9 +87,9 @@ class SettingsScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    _Labeled(
+                    SettingsLabeled(
                       label: l10n.settingsLanguage,
-                      child: _Choices<AppLanguage>(
+                      child: SettingsChoices<AppLanguage>(
                         values: AppLanguage.values,
                         selected: state.language,
                         label: (language) => switch (language) {
@@ -94,7 +100,7 @@ class SettingsScreen extends StatelessWidget {
                         onSelected: cubit.setLanguage,
                       ),
                     ),
-                    _SwitchRow(
+                    SettingsSwitchRow(
                       title: l10n.settingsReduceMotion,
                       subtitle: l10n.settingsReduceMotionHint,
                       value: state.reduceMotion,
@@ -102,7 +108,7 @@ class SettingsScreen extends StatelessWidget {
                           cubit.setReduceMotion(enabled: value),
                     ),
                     if (cubit.welcomeToggleAvailable)
-                      _SwitchRow(
+                      SettingsSwitchRow(
                         title: l10n.settingsShowWelcome,
                         subtitle: l10n.settingsShowWelcomeHint,
                         value: state.showWelcome,
@@ -111,9 +117,13 @@ class SettingsScreen extends StatelessWidget {
                       ),
                   ],
                 ),
-                if (cubit.simulationAvailable) ...[
+                // The network knobs only mean something for the demo home.
+                if (cubit.simulationAvailable &&
+                    context.select<ConnectionSettingsCubit, bool>(
+                      (c) => c.state.active == ConnectionMode.demo,
+                    )) ...[
                   const SizedBox(height: GlowSpace.x4),
-                  _Section(
+                  SettingsSection(
                     title: l10n.settingsSimulation,
                     subtitle: l10n.settingsSimulationHint,
                     children: [
@@ -146,99 +156,6 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _Section extends StatelessWidget {
-  const new({required this.title, required this.children, this.subtitle});
-
-  final String title;
-  final String? subtitle;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return GlowCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Semantics(
-            header: true,
-            child: Text(title, style: context.type.heading),
-          ),
-          if (subtitle != null) ...[
-            const SizedBox(height: GlowSpace.x1),
-            Text(
-              subtitle!,
-              style: context.type.caption.copyWith(
-                color: context.colors.textMuted,
-              ),
-            ),
-          ],
-          for (final child in children) ...[
-            const SizedBox(height: GlowSpace.x5),
-            child,
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _Labeled extends StatelessWidget {
-  const new({required this.label, required this.child});
-
-  final String label;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: context.type.caption
-              .weight(600)
-              .copyWith(color: context.colors.textMuted),
-        ),
-        const SizedBox(height: GlowSpace.x2),
-        child,
-      ],
-    );
-  }
-}
-
-class _Choices<T> extends StatelessWidget {
-  const new({
-    required this.values,
-    required this.selected,
-    required this.label,
-    required this.onSelected,
-    this.icon,
-  });
-
-  final List<T> values;
-  final T selected;
-  final String Function(T value) label;
-  final IconData Function(T value)? icon;
-  final void Function(T value) onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: GlowSpace.x2,
-      runSpacing: GlowSpace.x2,
-      children: [
-        for (final value in values)
-          GlowChip(
-            label: label(value),
-            icon: icon?.call(value),
-            selected: value == selected,
-            onTap: () => onSelected(value),
-          ),
-      ],
     );
   }
 }
@@ -291,46 +208,6 @@ class _AccentSwatch extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _SwitchRow extends StatelessWidget {
-  const new({
-    required this.title,
-    required this.subtitle,
-    required this.value,
-    required this.onChanged,
-  });
-
-  final String title;
-  final String subtitle;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ExcludeSemantics(
-                child: Text(title, style: context.type.body.weight(600)),
-              ),
-              Text(
-                subtitle,
-                style: context.type.caption.copyWith(
-                  color: context.colors.textMuted,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: GlowSpace.x3),
-        ToggleSwitch(value: value, onChanged: onChanged, semanticLabel: title),
-      ],
     );
   }
 }

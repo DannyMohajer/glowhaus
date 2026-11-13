@@ -306,5 +306,71 @@
   "listSeparator": " · ",
   "@listSeparator": {
     "description": "Joins short status parts, e.g. \"4 devices · 2 on\". Persian uses a comma because a middle dot reads like the Persian digit zero."
-  }
+  },
+  "connectionReconnecting": "Reconnecting…",
+  "connectionDemo": "Demo home",
+  "settingsConnection": "Connection",
+  "settingsConnectionHint": "Where the devices come from.",
+  "connectionModeDemo": "Demo",
+  "connectionModeBroker": "My broker",
+  "connectionDemoHint": "Twelve simulated devices, right here in the app. No network needed.",
+  "connectionBrokerHint": "An MQTT broker that speaks the Glowhaus protocol, such as the one in infra/.",
+  "connectionWebNote": "In a browser the app connects over secure WebSocket (wss://), and this browser has to trust the broker's certificate.",
+  "connectionHost": "Host",
+  "connectionHostHint": "Name or IP address, without mqtts:// or a port",
+  "connectionPort": "Port",
+  "connectionPortHint": "Empty for the default, {port}",
+  "@connectionPortHint": {
+    "placeholders": {
+      "port": {
+        "type": "int"
+      }
+    }
+  },
+  "connectionTls": "Encrypted (TLS)",
+  "connectionTlsHint": "Turn off only for a broker on this computer or an emulator.",
+  "connectionWebSocket": "Over WebSocket",
+  "connectionWebSocketHint": "For a broker that only listens for WebSocket clients.",
+  "connectionPath": "WebSocket path",
+  "connectionHome": "Home ID",
+  "connectionUsername": "Username",
+  "connectionPassword": "Password",
+  "connectionPasswordHint": "Kept in memory only, never saved.",
+  "connectionCa": "Extra CA certificate (PEM)",
+  "connectionCaHint": "Optional. Paste infra/certs/ca.crt so this device trusts a development broker.",
+  "connectionConnect": "Connect",
+  "connectionStatusConnected": "Connected to {broker}.",
+  "@connectionStatusConnected": {
+    "placeholders": {
+      "broker": {
+        "type": "String"
+      }
+    }
+  },
+  "connectionStatusConnecting": "Connecting to {broker}…",
+  "@connectionStatusConnecting": {
+    "placeholders": {
+      "broker": {
+        "type": "String"
+      }
+    }
+  },
+  "connectionStatusNeedsPassword": "Showing the devices last seen on {broker}. Enter the password to connect.",
+  "@connectionStatusNeedsPassword": {
+    "placeholders": {
+      "broker": {
+        "type": "String"
+      }
+    }
+  },
+  "connectionProblemUnreachable": "No broker answers there. Check the host and port, and that the broker is running.",
+  "connectionProblemUnreachableWeb": "No broker answers there, or this browser does not trust its certificate.",
+  "connectionProblemUntrusted": "The broker's certificate is not trusted here, or it does not cover this host name.",
+  "connectionProblemUnauthorized": "Wrong username or password.",
+  "connectionProblemRefused": "The broker refused the connection.",
+  "connectionInvalidHost": "Enter a host name or IP address, without a scheme or port.",
+  "connectionInvalidPort": "A port is a number from 1 to 65535.",
+  "connectionInvalidPath": "The path starts with /.",
+  "connectionInvalidHome": "Lowercase letters, digits, - and _, up to 32.",
+  "connectionInvalidUsername": "Enter a username."
 }

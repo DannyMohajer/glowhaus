@@ -8,6 +8,15 @@ library;
 export 'package:glowhaus_device/glowhaus_device.dart'
     show DemoHome, DemoNames, DeviceSpec, SimulationConfig;
 
+// What an app needs to point an MqttTransport at a real broker.
+export 'package:glowhaus_mqtt/glowhaus_mqtt.dart'
+    show
+        MqttClientConnection,
+        MqttConnectFailure,
+        MqttConnectionException,
+        MqttEndpoint,
+        MqttLogin;
+
 export 'src/mqtt/mqtt_transport.dart';
 export 'src/mqtt/reconnect_policy.dart';
 export 'src/simulated/simulated_transport.dart';

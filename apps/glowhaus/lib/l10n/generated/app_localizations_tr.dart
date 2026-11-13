@@ -560,4 +560,139 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get listSeparator => ' · ';
+
+  @override
+  String get connectionReconnecting => 'Yeniden bağlanıyor…';
+
+  @override
+  String get connectionDemo => 'Demo ev';
+
+  @override
+  String get settingsConnection => 'Bağlantı';
+
+  @override
+  String get settingsConnectionHint => 'Cihazların nereden geldiği.';
+
+  @override
+  String get connectionModeDemo => 'Demo';
+
+  @override
+  String get connectionModeBroker => 'Kendi broker\'ım';
+
+  @override
+  String get connectionDemoHint =>
+      'Uygulamanın içinde on iki simüle cihaz. Ağ gerekmez.';
+
+  @override
+  String get connectionBrokerHint =>
+      'Glowhaus protokolünü konuşan bir MQTT broker\'ı, örneğin infra/ içindeki.';
+
+  @override
+  String get connectionWebNote =>
+      'Tarayıcıda uygulama güvenli WebSocket (wss://) ile bağlanır ve bu tarayıcı broker\'ın sertifikasına güvenmelidir.';
+
+  @override
+  String get connectionHost => 'Sunucu';
+
+  @override
+  String get connectionHostHint =>
+      'Ad veya IP adresi, mqtts:// ve port olmadan';
+
+  @override
+  String get connectionPort => 'Port';
+
+  @override
+  String connectionPortHint(int port) {
+    return 'Varsayılan için boş bırak: $port';
+  }
+
+  @override
+  String get connectionTls => 'Şifreli (TLS)';
+
+  @override
+  String get connectionTlsHint =>
+      'Yalnızca bu bilgisayardaki bir broker veya bir emülatör için kapat.';
+
+  @override
+  String get connectionWebSocket => 'WebSocket üzerinden';
+
+  @override
+  String get connectionWebSocketHint =>
+      'Yalnızca WebSocket istemcilerini dinleyen bir broker için.';
+
+  @override
+  String get connectionPath => 'WebSocket yolu';
+
+  @override
+  String get connectionHome => 'Ev kimliği';
+
+  @override
+  String get connectionUsername => 'Kullanıcı adı';
+
+  @override
+  String get connectionPassword => 'Parola';
+
+  @override
+  String get connectionPasswordHint =>
+      'Yalnızca bellekte tutulur, asla kaydedilmez.';
+
+  @override
+  String get connectionCa => 'Ek CA sertifikası (PEM)';
+
+  @override
+  String get connectionCaHint =>
+      'İsteğe bağlı. Bu cihazın geliştirme broker\'ına güvenmesi için infra/certs/ca.crt dosyasını yapıştır.';
+
+  @override
+  String get connectionConnect => 'Bağlan';
+
+  @override
+  String connectionStatusConnected(String broker) {
+    return '$broker adresine bağlı.';
+  }
+
+  @override
+  String connectionStatusConnecting(String broker) {
+    return '$broker adresine bağlanıyor…';
+  }
+
+  @override
+  String connectionStatusNeedsPassword(String broker) {
+    return '$broker üzerinde en son görülen cihazlar gösteriliyor. Bağlanmak için parolayı gir.';
+  }
+
+  @override
+  String get connectionProblemUnreachable =>
+      'Orada yanıt veren bir broker yok. Sunucuyu, portu ve broker\'ın çalıştığını kontrol et.';
+
+  @override
+  String get connectionProblemUnreachableWeb =>
+      'Orada yanıt veren bir broker yok ya da bu tarayıcı sertifikasına güvenmiyor.';
+
+  @override
+  String get connectionProblemUntrusted =>
+      'Broker\'ın sertifikasına burada güvenilmiyor ya da bu sunucu adını kapsamıyor.';
+
+  @override
+  String get connectionProblemUnauthorized =>
+      'Kullanıcı adı veya parola yanlış.';
+
+  @override
+  String get connectionProblemRefused => 'Broker bağlantıyı reddetti.';
+
+  @override
+  String get connectionInvalidHost =>
+      'Şema veya port olmadan bir sunucu adı ya da IP adresi gir.';
+
+  @override
+  String get connectionInvalidPort => 'Port 1 ile 65535 arasında bir sayıdır.';
+
+  @override
+  String get connectionInvalidPath => 'Yol / ile başlar.';
+
+  @override
+  String get connectionInvalidHome => 'Küçük harf, rakam, - ve _, en fazla 32.';
+
+  @override
+  String get connectionInvalidUsername => 'Bir kullanıcı adı gir.';
 }

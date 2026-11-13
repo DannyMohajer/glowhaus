@@ -36,7 +36,7 @@ void main() {
       await tester.pumpApp(location: Routes.home, home: home);
       expect(find.textContaining('Hi Daniel,'), findsOneWidget);
       expect(find.text('5 devices active'), findsOneWidget);
-      expect(find.text('Connected'), findsOneWidget);
+      expect(find.text('Demo home'), findsOneWidget, reason: 'demo badge');
       expect(find.byType(RoomCard), findsNWidgets(4));
       expect(find.text('4 devices · 3 on'), findsOneWidget);
       expect(find.text('20.8°'), findsOneWidget);

@@ -136,8 +136,15 @@ transports slot in without UI changes:
 | `MqttTransport` | 3 | `TopicCodec` and the protocol models over an `MqttConnection`: the `mqtt_client` adapter (TCP + TLS on native, WSS on web) or the `InMemoryBroker`. Backoff reconnect; pending commands become `unreachable` when the link drops, devices keep their last known state |
 | `LocalTransport` | 6 | UDP discovery + local WebSocket, same payload models |
 
-Which transport is active is a DI decision (`get_it` + `injectable`
-environments), invisible above the repository.
+The app starts on `SimulatedTransport`. The Connection section in
+Settings (`ConnectionSettingsCubit`, app-wide) can switch the
+`DeviceRepository` to an `MqttTransport` for a real broker and back with
+`DeviceRepository.use`. That call forgets every device and command in flight
+and shows the broker's last-known devices until it reports. The cubit owns the
+broker transport and disposes it on the next switch. It saves the broker
+settings and the last-known devices, never the password, so a launch in broker
+mode shows those devices offline and asks for the password again. Nothing
+above the repository knows which transport is in use.
 
 ## Why capability-based devices
 

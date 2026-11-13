@@ -56,9 +56,11 @@ class MqttEndpoint {
   /// The URL form `mqtt_client` wants for WebSocket connections.
   String get webSocketUrl => '${tls ? 'wss' : 'ws'}://$host$path';
 
+  /// The address as a person would write it, e.g. `mqtts://localhost:8883`
+  /// or `wss://localhost:8884/mqtt`.
   @override
   String toString() => webSocket
-      ? '$webSocketUrl:$port'
+      ? '${tls ? 'wss' : 'ws'}://$host:$port$path'
       : '${tls ? 'mqtts' : 'mqtt'}://$host:$port';
 
   @override

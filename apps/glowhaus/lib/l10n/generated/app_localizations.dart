@@ -1023,6 +1023,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **' · '**
   String get listSeparator;
+
+  /// No description provided for @connectionReconnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnecting…'**
+  String get connectionReconnecting;
+
+  /// No description provided for @connectionDemo.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo home'**
+  String get connectionDemo;
+
+  /// No description provided for @settingsConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection'**
+  String get settingsConnection;
+
+  /// No description provided for @settingsConnectionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Where the devices come from.'**
+  String get settingsConnectionHint;
+
+  /// No description provided for @connectionModeDemo.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo'**
+  String get connectionModeDemo;
+
+  /// No description provided for @connectionModeBroker.
+  ///
+  /// In en, this message translates to:
+  /// **'My broker'**
+  String get connectionModeBroker;
+
+  /// No description provided for @connectionDemoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Twelve simulated devices, right here in the app. No network needed.'**
+  String get connectionDemoHint;
+
+  /// No description provided for @connectionBrokerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'An MQTT broker that speaks the Glowhaus protocol, such as the one in infra/.'**
+  String get connectionBrokerHint;
+
+  /// No description provided for @connectionWebNote.
+  ///
+  /// In en, this message translates to:
+  /// **'In a browser the app connects over secure WebSocket (wss://), and this browser has to trust the broker\'s certificate.'**
+  String get connectionWebNote;
+
+  /// No description provided for @connectionHost.
+  ///
+  /// In en, this message translates to:
+  /// **'Host'**
+  String get connectionHost;
+
+  /// No description provided for @connectionHostHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Name or IP address, without mqtts:// or a port'**
+  String get connectionHostHint;
+
+  /// No description provided for @connectionPort.
+  ///
+  /// In en, this message translates to:
+  /// **'Port'**
+  String get connectionPort;
+
+  /// No description provided for @connectionPortHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty for the default, {port}'**
+  String connectionPortHint(int port);
+
+  /// No description provided for @connectionTls.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted (TLS)'**
+  String get connectionTls;
+
+  /// No description provided for @connectionTlsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn off only for a broker on this computer or an emulator.'**
+  String get connectionTlsHint;
+
+  /// No description provided for @connectionWebSocket.
+  ///
+  /// In en, this message translates to:
+  /// **'Over WebSocket'**
+  String get connectionWebSocket;
+
+  /// No description provided for @connectionWebSocketHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For a broker that only listens for WebSocket clients.'**
+  String get connectionWebSocketHint;
+
+  /// No description provided for @connectionPath.
+  ///
+  /// In en, this message translates to:
+  /// **'WebSocket path'**
+  String get connectionPath;
+
+  /// No description provided for @connectionHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home ID'**
+  String get connectionHome;
+
+  /// No description provided for @connectionUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get connectionUsername;
+
+  /// No description provided for @connectionPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get connectionPassword;
+
+  /// No description provided for @connectionPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Kept in memory only, never saved.'**
+  String get connectionPasswordHint;
+
+  /// No description provided for @connectionCa.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra CA certificate (PEM)'**
+  String get connectionCa;
+
+  /// No description provided for @connectionCaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. Paste infra/certs/ca.crt so this device trusts a development broker.'**
+  String get connectionCaHint;
+
+  /// No description provided for @connectionConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get connectionConnect;
+
+  /// No description provided for @connectionStatusConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to {broker}.'**
+  String connectionStatusConnected(String broker);
+
+  /// No description provided for @connectionStatusConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting to {broker}…'**
+  String connectionStatusConnecting(String broker);
+
+  /// No description provided for @connectionStatusNeedsPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing the devices last seen on {broker}. Enter the password to connect.'**
+  String connectionStatusNeedsPassword(String broker);
+
+  /// No description provided for @connectionProblemUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'No broker answers there. Check the host and port, and that the broker is running.'**
+  String get connectionProblemUnreachable;
+
+  /// No description provided for @connectionProblemUnreachableWeb.
+  ///
+  /// In en, this message translates to:
+  /// **'No broker answers there, or this browser does not trust its certificate.'**
+  String get connectionProblemUnreachableWeb;
+
+  /// No description provided for @connectionProblemUntrusted.
+  ///
+  /// In en, this message translates to:
+  /// **'The broker\'s certificate is not trusted here, or it does not cover this host name.'**
+  String get connectionProblemUntrusted;
+
+  /// No description provided for @connectionProblemUnauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong username or password.'**
+  String get connectionProblemUnauthorized;
+
+  /// No description provided for @connectionProblemRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'The broker refused the connection.'**
+  String get connectionProblemRefused;
+
+  /// No description provided for @connectionInvalidHost.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a host name or IP address, without a scheme or port.'**
+  String get connectionInvalidHost;
+
+  /// No description provided for @connectionInvalidPort.
+  ///
+  /// In en, this message translates to:
+  /// **'A port is a number from 1 to 65535.'**
+  String get connectionInvalidPort;
+
+  /// No description provided for @connectionInvalidPath.
+  ///
+  /// In en, this message translates to:
+  /// **'The path starts with /.'**
+  String get connectionInvalidPath;
+
+  /// No description provided for @connectionInvalidHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Lowercase letters, digits, - and _, up to 32.'**
+  String get connectionInvalidHome;
+
+  /// No description provided for @connectionInvalidUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a username.'**
+  String get connectionInvalidUsername;
 }
 
 class _AppLocalizationsDelegate

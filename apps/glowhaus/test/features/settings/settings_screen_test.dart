@@ -41,6 +41,7 @@ void main() {
     await tester.pumpApp(location: Routes.settings, settings: settings);
     expect(find.text('Settings'), findsWidgets);
 
+    await tester.ensureVisible(find.text('فارسی'));
     await tester.tap(find.text('فارسی'));
     await tester.pumpAndSettle();
     expect(languages.prepared, [AppLanguage.fa]);
@@ -51,6 +52,7 @@ void main() {
       'packages/glowhaus_ui/Vazirmatn',
     );
 
+    await tester.ensureVisible(find.text('Türkçe'));
     await tester.tap(find.text('Türkçe'));
     await tester.pumpAndSettle();
     expect(find.text('Ayarlar'), findsWidgets);

@@ -118,13 +118,34 @@ class MqttLogin {
 
 enum MqttConnectionState { disconnected, connecting, connected }
 
+/// Why a connect failed, as far as the client can tell.
+enum MqttConnectFailure {
+  /// No broker answered: wrong host or port, no network, a firewall, or (in
+  /// a browser, which does not say why) any TLS problem.
+  unreachable,
+
+  /// The TLS handshake failed: the broker's certificate is not trusted here
+  /// or does not cover the host name.
+  untrusted,
+
+  /// The broker rejected the username or password.
+  unauthorized,
+
+  /// The broker answered but refused the connection for another reason.
+  refused,
+}
+
 /// Thrown by [MqttConnection.publish], [MqttConnection.subscribe] and
 /// [MqttConnection.unsubscribe] while the connection is not connected, and
 /// by a [MqttConnection.connect] that the broker refused.
 class MqttConnectionException implements Exception {
-  const new(this.message);
+  const new(this.message, {this.reason = MqttConnectFailure.unreachable});
 
   final String message;
+
+  /// Why a [MqttConnection.connect] failed; [MqttConnectFailure.unreachable]
+  /// for everything else.
+  final MqttConnectFailure reason;
 
   @override
   String toString() => 'MqttConnectionException: $message';

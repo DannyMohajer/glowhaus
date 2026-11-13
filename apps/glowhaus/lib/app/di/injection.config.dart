@@ -14,6 +14,12 @@ import 'package:get_it/get_it.dart' as _i174;
 import 'package:glowhaus/app/di/injection.dart' as _i348;
 import 'package:glowhaus/data/device_repository.dart' as _i284;
 import 'package:glowhaus/data/home_repository.dart' as _i851;
+import 'package:glowhaus/features/connection/cubit/connection_settings_cubit.dart'
+    as _i171;
+import 'package:glowhaus/features/connection/data/broker_transports.dart'
+    as _i741;
+import 'package:glowhaus/features/connection/data/connection_store.dart'
+    as _i528;
 import 'package:glowhaus/features/settings/cubit/settings_cubit.dart' as _i849;
 import 'package:glowhaus/features/settings/data/app_platform.dart' as _i920;
 import 'package:glowhaus/features/settings/data/language_preparer.dart'
@@ -45,17 +51,32 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i693.LanguagePreparer>(
       () => _i693.FontLanguagePreparer(),
     );
+    gh.lazySingleton<_i741.BrokerTransports>(
+      () => _i741.MqttBrokerTransports(gh<_i920.AppPlatform>()),
+    );
     gh.lazySingleton<_i319.Transport>(
       () => appModule.transport(gh<_i319.SimulatedTransport>()),
     );
     gh.lazySingleton<_i893.SimulationControl>(
       () => appModule.simulationControl(gh<_i319.SimulatedTransport>()),
     );
+    gh.lazySingleton<_i528.ConnectionStore>(
+      () => _i528.PrefsConnectionStore(gh<_i460.SharedPreferences>()),
+    );
     gh.lazySingleton<_i284.DeviceRepository>(
       () => appModule.deviceRepository(gh<_i319.Transport>()),
     );
     gh.lazySingleton<_i1068.SettingsStore>(
       () => _i1068.PrefsSettingsStore(gh<_i460.SharedPreferences>()),
+    );
+    gh.lazySingleton<_i171.ConnectionSettingsCubit>(
+      () => appModule.connectionSettings(
+        gh<_i284.DeviceRepository>(),
+        gh<_i319.SimulatedTransport>(),
+        gh<_i741.BrokerTransports>(),
+        gh<_i528.ConnectionStore>(),
+        gh<_i920.AppPlatform>(),
+      ),
     );
     gh.factory<_i849.SettingsCubit>(
       () => _i849.SettingsCubit(

@@ -561,4 +561,139 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get listSeparator => '، ';
+
+  @override
+  String get connectionReconnecting => 'اتصال دوباره…';
+
+  @override
+  String get connectionDemo => 'خانه‌ی نمایشی';
+
+  @override
+  String get settingsConnection => 'اتصال';
+
+  @override
+  String get settingsConnectionHint => 'دستگاه‌ها از کجا می‌آیند.';
+
+  @override
+  String get connectionModeDemo => 'نمایشی';
+
+  @override
+  String get connectionModeBroker => 'بروکر من';
+
+  @override
+  String get connectionDemoHint =>
+      'دوازده دستگاه شبیه‌سازی‌شده، همین‌جا در برنامه. شبکه لازم نیست.';
+
+  @override
+  String get connectionBrokerHint =>
+      'یک بروکر MQTT که پروتکل Glowhaus را می‌فهمد، مثل نمونه‌ی پوشه‌ی infra/.';
+
+  @override
+  String get connectionWebNote =>
+      'در مرورگر، برنامه از راه WebSocket امن (wss://) وصل می‌شود و این مرورگر باید گواهی بروکر را معتبر بداند.';
+
+  @override
+  String get connectionHost => 'میزبان';
+
+  @override
+  String get connectionHostHint => 'نام یا نشانی IP، بدون mqtts:// و بدون پورت';
+
+  @override
+  String get connectionPort => 'پورت';
+
+  @override
+  String connectionPortHint(int port) {
+    return 'خالی برای پیش‌فرض، $port';
+  }
+
+  @override
+  String get connectionTls => 'رمزگذاری‌شده (TLS)';
+
+  @override
+  String get connectionTlsHint =>
+      'فقط برای بروکری روی همین رایانه یا یک شبیه‌ساز خاموش کن.';
+
+  @override
+  String get connectionWebSocket => 'از راه WebSocket';
+
+  @override
+  String get connectionWebSocketHint =>
+      'برای بروکری که فقط به کلاینت‌های WebSocket گوش می‌دهد.';
+
+  @override
+  String get connectionPath => 'مسیر WebSocket';
+
+  @override
+  String get connectionHome => 'شناسه‌ی خانه';
+
+  @override
+  String get connectionUsername => 'نام کاربری';
+
+  @override
+  String get connectionPassword => 'گذرواژه';
+
+  @override
+  String get connectionPasswordHint =>
+      'فقط در حافظه می‌ماند و هرگز ذخیره نمی‌شود.';
+
+  @override
+  String get connectionCa => 'گواهی CA اضافه (PEM)';
+
+  @override
+  String get connectionCaHint =>
+      'اختیاری. infra/certs/ca.crt را اینجا بچسبان تا این دستگاه به بروکر توسعه اعتماد کند.';
+
+  @override
+  String get connectionConnect => 'وصل شو';
+
+  @override
+  String connectionStatusConnected(String broker) {
+    return 'به $broker وصل است.';
+  }
+
+  @override
+  String connectionStatusConnecting(String broker) {
+    return 'در حال اتصال به $broker…';
+  }
+
+  @override
+  String connectionStatusNeedsPassword(String broker) {
+    return 'دستگاه‌هایی که آخرین بار روی $broker دیده شدند نمایش داده می‌شوند. برای اتصال گذرواژه را وارد کن.';
+  }
+
+  @override
+  String get connectionProblemUnreachable =>
+      'آنجا هیچ بروکری پاسخ نمی‌دهد. میزبان و پورت را بررسی کن و مطمئن شو بروکر در حال اجراست.';
+
+  @override
+  String get connectionProblemUnreachableWeb =>
+      'آنجا هیچ بروکری پاسخ نمی‌دهد، یا این مرورگر گواهی آن را معتبر نمی‌داند.';
+
+  @override
+  String get connectionProblemUntrusted =>
+      'گواهی بروکر اینجا معتبر نیست یا این نام میزبان را پوشش نمی‌دهد.';
+
+  @override
+  String get connectionProblemUnauthorized =>
+      'نام کاربری یا گذرواژه نادرست است.';
+
+  @override
+  String get connectionProblemRefused => 'بروکر اتصال را نپذیرفت.';
+
+  @override
+  String get connectionInvalidHost =>
+      'یک نام میزبان یا نشانی IP وارد کن، بدون پیشوند و پورت.';
+
+  @override
+  String get connectionInvalidPort => 'پورت عددی از ۱ تا ۶۵۵۳۵ است.';
+
+  @override
+  String get connectionInvalidPath => 'مسیر با / شروع می‌شود.';
+
+  @override
+  String get connectionInvalidHome =>
+      'حروف کوچک لاتین، رقم، - و _، حداکثر ۳۲ نویسه.';
+
+  @override
+  String get connectionInvalidUsername => 'یک نام کاربری وارد کن.';
 }
