@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:glowhaus_device/glowhaus_device.dart';
+import 'package:glowhaus_domain/glowhaus_domain.dart';
 import 'package:glowhaus_mqtt/glowhaus_mqtt.dart';
 
 const _usage =
@@ -15,8 +16,11 @@ Usage: dart run simulator/bin/simulator.dart [options]
   --port <port>        Broker port (default: 8883, or 1883 with --no-tls)
   --no-tls             Plain MQTT instead of MQTT over TLS
   --home <id>          Home id (default: ${DemoHome.homeId})
-  --username <name>    Broker username
-  --password <secret>  Broker password (or set GLOWHAUS_PASSWORD)
+  --credentials <file> "username:password" per line; each device logs in as
+                       <home>.<deviceId> (what infra/scripts/make-users.sh writes)
+  --username <name>    One broker username for every device instead
+  --password <secret>  Its password (or set GLOWHAUS_PASSWORD)
+  --camera-url <url>   Stream URL the doorbell camera announces
   --latency <ms>       Mean command latency (default: 250)
   --failure-rate <p>   Share of commands rejected as busy, 0..1 (default: 0)
   --timeout-rate <p>   Share of commands lost on the way, 0..1 (default: 0)
@@ -39,19 +43,19 @@ Future<void> main(List<String> arguments) async {
     port: int.parse(args.option('port') ?? (tls ? '8883' : '1883')),
     tls: tls,
   );
-  final username = args.option('username');
-  final password =
-      args.option('password') ?? Platform.environment['GLOWHAUS_PASSWORD'];
   final homeId = args.option('home') ?? DemoHome.homeId;
+  final logins = _logins(args, homeId);
+  final cameraUrl = args.option('camera-url');
 
   final home = VirtualHome(
     homeId: homeId,
-    specs: DemoHome.devices(),
-    connectionFactory: () => _LoggedConnection(
+    specs: [
+      for (final spec in DemoHome.devices())
+        if (cameraUrl == null) spec else _withCameraUrl(spec, cameraUrl),
+    ],
+    connectionFactory: (deviceId) => _LoggedConnection(
       MqttClientConnection(endpoint),
-      login: username == null
-          ? null
-          : MqttLogin(username: username, password: password),
+      login: logins(deviceId),
     ),
     config: SimulationConfig(
       latency: Duration(
@@ -81,6 +85,62 @@ Future<void> main(List<String> arguments) async {
   await stop.future;
   stdout.writeln('Stopping: devices say goodbye.');
   await home.dispose();
+}
+
+/// Which login a device uses: one shared `--username`, or its own line in
+/// the `--credentials` file under the name `<home>.<deviceId>`.
+MqttLogin? Function(String deviceId) _logins(_Args args, String homeId) {
+  final file = args.option('credentials');
+  if (file != null) {
+    final byUser = <String, String>{};
+    for (final line in File(file).readAsLinesSync()) {
+      final colon = line.indexOf(':');
+      if (colon <= 0 || line.startsWith('#')) continue;
+      byUser[line.substring(0, colon)] = line.substring(colon + 1).trim();
+    }
+    return (deviceId) {
+      final username = '$homeId.$deviceId';
+      final password = byUser[username];
+      if (password == null) {
+        stderr.writeln('$file has no line for $username; connecting without.');
+        return null;
+      }
+      return MqttLogin(username: username, password: password);
+    };
+  }
+  final username = args.option('username');
+  if (username == null) return (_) => null;
+  final password =
+      args.option('password') ?? Platform.environment['GLOWHAUS_PASSWORD'];
+  return (_) => MqttLogin(username: username, password: password);
+}
+
+/// The demo camera announces a placeholder stream; a real broker setup has a
+/// real one (infra/ runs MediaMTX).
+DeviceSpec _withCameraUrl(DeviceSpec spec, String url) {
+  if (spec.descriptor.type != DeviceType.camera) return spec;
+  final descriptor = spec.descriptor;
+  return DeviceSpec(
+    descriptor: descriptor.copyWith(
+      capabilities: [
+        for (final capability in descriptor.capabilities)
+          if (capability.kind == CapabilityKind.camera)
+            capability.copyWith(
+              config: {
+                ...capability.config,
+                'streams': [
+                  {'protocol': 'rtsp', 'url': url},
+                ],
+              },
+            )
+          else
+            capability,
+      ],
+    ),
+    initialState: spec.initialState,
+    online: spec.online,
+    onWatts: spec.onWatts,
+  );
 }
 
 /// Adds the login to every connect and logs link changes per device.

@@ -8,14 +8,14 @@ import 'package:glowhaus_mqtt/glowhaus_mqtt.dart';
 
 /// A set of `VirtualDevice`s on one broker, started and tuned together.
 ///
-/// `connectionFactory` gives each device its own connection: a broker's
-/// `client()` for the in-memory case, or a new `MqttClientConnection` for a
-/// real broker.
+/// `connectionFactory` gives each device its own connection, by device id: a
+/// broker's `client()` for the in-memory case, or a new `MqttClientConnection`
+/// carrying that device's own login for a real broker.
 class VirtualHome {
   new({
     required this.homeId,
     required Iterable<DeviceSpec> specs,
-    required MqttConnection Function() connectionFactory,
+    required MqttConnection Function(String deviceId) connectionFactory,
     SimulationConfig config = const SimulationConfig(),
     Duration stateDelay = const Duration(milliseconds: 60),
     Duration positionInterval = const Duration(milliseconds: 400),
@@ -28,7 +28,7 @@ class VirtualHome {
            spec.descriptor.id: VirtualDevice(
              homeId: homeId,
              spec: spec,
-             connection: connectionFactory(),
+             connection: connectionFactory(spec.descriptor.id),
              config: config,
              stateDelay: stateDelay,
              positionInterval: positionInterval,

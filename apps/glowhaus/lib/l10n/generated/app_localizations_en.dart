@@ -487,6 +487,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String feedbackAppliedLate(String device) {
+    return '$device changed after all.';
+  }
+
+  @override
   String get demoRoomLivingRoom => 'Living Room';
 
   @override

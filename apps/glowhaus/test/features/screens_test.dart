@@ -326,6 +326,20 @@ void main() {
         find.text("Floor lamp didn't respond. Your change was undone."),
         findsOneWidget,
       );
+
+      // The device applies it after all: a quiet note, no overlay.
+      home.transport.reportState('lr-lamp', {
+        ...home.device('lr-lamp').state,
+        'onOff': const CapabilityState.onOff(on: false),
+      });
+      await tester.pumpEvents(40);
+      expect(tile(tester, 'lr-lamp').on, isFalse);
+      expect(tile(tester, 'lr-lamp').pending, isFalse);
+      expect(find.text('Floor lamp changed after all.'), findsOneWidget);
+      expect(
+        find.text("Floor lamp didn't respond. Your change was undone."),
+        findsNothing,
+      );
     });
 
     testWidgets('a rejected command explains that the device was busy', (

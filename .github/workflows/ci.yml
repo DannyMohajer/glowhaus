@@ -68,6 +68,43 @@ jobs:
           path: '**/test/**/failures/'
           if-no-files-found: ignore
 
+  broker:
+    name: Real broker (Mosquitto, simulator image, ACLs)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+
+      # Fresh passwords for every identity in infra/mosquitto/acl.conf
+      # (hashed by mosquitto_passwd from the broker image), then the broker
+      # and the simulator, the latter built from infra/simulator/Dockerfile.
+      - name: Passwords
+        run: infra/scripts/make-users.sh
+      - name: Broker and simulator
+        run: docker compose -f infra/docker-compose.yml up -d --build --wait mosquitto simulator
+
+      # MqttTransport over the real mqtt_client adapter against the broker
+      # and the twelve devices in the container, plus the ACL tests: a
+      # device identity cannot write another device's topics, read its
+      # commands, or reach another home.
+      - name: Protocol and ACL tests
+        env:
+          GLOWHAUS_BROKER_HOST: 127.0.0.1
+        run: dart test test/broker_test.dart
+        working-directory: packages/glowhaus_transport
+
+      - name: Container logs
+        if: always()
+        run: docker compose -f infra/docker-compose.yml logs --no-color
+      - name: Stop
+        if: always()
+        run: docker compose -f infra/docker-compose.yml down -v
+
   build-web:
     name: Build web (app + Widgetbook)
     runs-on: ubuntu-24.04
@@ -106,7 +143,7 @@ jobs:
   deploy:
     name: Deploy to GitHub Pages
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [analyze, test, build-web]
+    needs: [analyze, test, broker, build-web]
     runs-on: ubuntu-24.04
     permissions:
       pages: write

@@ -38,6 +38,7 @@ graph TD
 | `glowhaus_device` | `glowhaus_domain`, `glowhaus_mqtt` | `DeviceModel` (behaviour, no I/O), `VirtualDevice` / `VirtualHome` (the protocol's device side on an `MqttConnection`), `DemoHome` seed | The app, the transport package: it proves the protocol doc is enough to build a device |
 | `glowhaus_transport` | `glowhaus_domain`, `glowhaus_mqtt`, `glowhaus_device` | `Transport` interface, `MqttTransport`, `SimulatedTransport` (= `InMemoryBroker` + `VirtualHome` + `MqttTransport`) | Flutter imports, UI concepts |
 | `simulator` | `glowhaus_device`, `glowhaus_mqtt` | CLI that runs the demo home against a real broker | App or transport code |
+| `infra` | Docker | Mosquitto with per-identity ACLs, the simulator image, a MediaMTX test camera, the mkcert and password scripts | Code |
 | `glowhaus_ui` | Flutter only | Tokens, themes, components | Domain models, blocs, strings that need translating |
 | `apps/glowhaus` | all three | Features (bloc + view), repositories, routing, DI, l10n | Topic strings, raw JSON handling |
 | `widgetbook` | `glowhaus_ui` | One use-case per component | App logic |
@@ -252,6 +253,7 @@ never translated, even if it happens to match a default.
 | Unit (`glowhaus_mqtt`) | Broker semantics: retained, wills, wildcards, QoS downgrade, QoS 0 loss, QoS 1 duplicates |
 | Unit (`glowhaus_device`) | Devices checked on the wire against the protocol doc: payload shapes, acks, expiry, redelivery, retained set ignored, wills |
 | Unit (`glowhaus_transport`) | `MqttTransport`: acks, timeouts, duplicates, link loss, backoff, lost discovery; `SimulatedTransport`: latency, failure, timeout, state emission (fake clock + seeded RNG) |
-| Unit (app) | Every bloc and repository, including optimistic rollback |
+| Unit (app) | Every bloc and repository, including optimistic rollback and the late-apply note |
+| Integration (CI job `broker`) | `MqttTransport` over the real `mqtt_client` adapter against Mosquitto and the simulator container; the ACLs: a device identity cannot write another device's topics, read its commands or reach another home |
 | Widget | `DeviceTile` states, `TickDial` drag, RTL dashboard |
 | Golden | Key components, light and dark |

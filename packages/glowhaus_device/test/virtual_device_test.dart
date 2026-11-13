@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:glowhaus_device/glowhaus_device.dart';
@@ -14,6 +15,60 @@ final DateTime _epoch = DateTime.utc(2026, 11, 13, 12);
 
 /// An app-side observer that speaks raw MQTT, so these tests check the
 /// bytes on the wire against docs/protocol.md rather than any app code.
+/// A connection whose broker can be made to refuse connects.
+class _FlakyConnection implements MqttConnection {
+  new(this._inner);
+
+  final MqttConnection _inner;
+  bool refuse = false;
+
+  @override
+  MqttConnectionState get currentState => _inner.currentState;
+
+  @override
+  Stream<MqttConnectionState> get state => _inner.state;
+
+  @override
+  Stream<MqttMessage> get messages => _inner.messages;
+
+  @override
+  Future<void> connect({
+    required String clientId,
+    MqttWill? will,
+    MqttLogin? login,
+    Duration keepAlive = const Duration(seconds: 30),
+  }) {
+    if (refuse) throw const MqttConnectionException('broker away');
+    return _inner.connect(
+      clientId: clientId,
+      will: will,
+      login: login,
+      keepAlive: keepAlive,
+    );
+  }
+
+  @override
+  Future<void> subscribe(String filter, {MqttQos qos = MqttQos.atLeastOnce}) =>
+      _inner.subscribe(filter, qos: qos);
+
+  @override
+  Future<void> unsubscribe(String filter) => _inner.unsubscribe(filter);
+
+  @override
+  Future<void> publish(
+    String topic,
+    Uint8List payload, {
+    MqttQos qos = MqttQos.atLeastOnce,
+    bool retain = false,
+  }) => _inner.publish(topic, payload, qos: qos, retain: retain);
+
+  @override
+  Future<void> disconnect() => _inner.disconnect();
+
+  @override
+  Future<void> dispose() => _inner.dispose();
+}
+
 class _Wire {
   new(this.async, this.broker) {
     connection = broker.client();
@@ -123,7 +178,7 @@ void _run(
     final home = VirtualHome(
       homeId: _home,
       specs: specs ?? DemoHome.devices(),
-      connectionFactory: broker.client,
+      connectionFactory: (_) => broker.client(),
       config: config,
       ambientInterval: ambientInterval,
       random: Random(5),
@@ -378,6 +433,51 @@ void main() {
       wire.async.flushMicrotasks();
       expect(wire.availability('lr-lamp').last, 'offline');
       expect(home.device('lr-lamp')!.online, isFalse);
+
+      // Then the device comes back by itself, after a second or so.
+      wire.async.elapse(const Duration(milliseconds: 1600));
+      expect(home.device('lr-lamp')!.online, isTrue);
+      expect(wire.availability('lr-lamp').last, 'online');
+      expect(wire.broker.connectedClientIds, contains('device-$_home-lr-lamp'));
+    });
+  });
+
+  test('a broker that stays away is retried with growing pauses', () {
+    fakeAsync((async) {
+      final broker = InMemoryBroker();
+      final wire = _Wire(async, broker)..connect();
+      final flaky = _FlakyConnection(broker.client());
+      final device = VirtualDevice(
+        homeId: _home,
+        spec: DemoHome.devices().firstWhere(
+          (d) => d.descriptor.id == 'lr-lamp',
+        ),
+        connection: flaky,
+        random: Random(1),
+        clock: wire.now,
+      );
+      unawaited(device.start());
+      async.flushMicrotasks();
+      expect(device.online, isTrue);
+
+      flaky.refuse = true;
+      broker.drop(device.clientId);
+      async.flushMicrotasks();
+      expect(device.online, isFalse);
+
+      // 1 s, 2 s, 4 s (each up to 50% longer): three tries within 11 s.
+      async.elapse(const Duration(seconds: 11));
+      expect(device.reconnectAttempts, 3);
+      expect(device.online, isFalse);
+
+      flaky.refuse = false;
+      async.elapse(const Duration(seconds: 13));
+      expect(device.online, isTrue, reason: 'the fourth try succeeds');
+      expect(wire.availability('lr-lamp').last, 'online');
+
+      unawaited(device.dispose());
+      unawaited(broker.close());
+      async.flushMicrotasks();
     });
   });
 

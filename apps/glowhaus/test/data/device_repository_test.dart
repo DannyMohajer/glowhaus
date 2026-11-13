@@ -221,6 +221,93 @@ void main() {
       expect(failures.single.code, isNull);
     });
 
+    group('applied after a timeout', () {
+      late List<LateApply> lateApplies;
+      final lampOff = {
+        ..._lampState,
+        'onOff': const CapabilityState.onOff(on: false),
+      };
+
+      setUp(() {
+        lateApplies = [];
+        repository.lateApplies.listen(lateApplies.add);
+      });
+
+      Future<void> timeOutOff() async {
+        final result = repository.send(_lamp, _off);
+        transport.timeOut();
+        await result;
+        await pumpEventQueue();
+        expect(failures.single.timedOut, isTrue);
+        expect(lampOn(), isTrue, reason: 'rolled back');
+      }
+
+      test('a matching state afterwards is noted once', () async {
+        await timeOutOff();
+        transport.reportState(_lamp, lampOff);
+        await pumpEventQueue();
+        expect(lateApplies.single.device.id, _lamp);
+        expect(lampOn(), isFalse);
+        expect(lampPending(), isFalse, reason: 'no overlay is re-applied');
+
+        transport.reportState(_lamp, lampOff);
+        await pumpEventQueue();
+        expect(lateApplies, hasLength(1), reason: 'said once');
+      });
+
+      test('a state that does not match is not it', () async {
+        await timeOutOff();
+        transport.reportState(_lamp, {
+          ..._lampState,
+          'brightness': const CapabilityState.brightness(level: 20),
+        });
+        await pumpEventQueue();
+        expect(lateApplies, isEmpty);
+      });
+
+      test('a newer command for the device takes over', () async {
+        await timeOutOff();
+        final again = repository.send(_lamp, _off);
+        transport.ack();
+        await again;
+        transport.reportState(_lamp, lampOff);
+        await pumpEventQueue();
+        expect(lateApplies, isEmpty, reason: 'the second command did it');
+      });
+
+      test('only within the window', () {
+        fakeAsync((async) {
+          transport = FakeTransport();
+          repository = DeviceRepository(transport);
+          lateApplies = [];
+          repository.lateApplies.listen(lateApplies.add);
+          unawaited(repository.start());
+          transport.seed(DemoHome.devices());
+          async.flushMicrotasks();
+
+          unawaited(repository.send(_lamp, _off));
+          transport.timeOut();
+          async
+            ..flushMicrotasks()
+            ..elapse(const Duration(seconds: 31));
+          transport.reportState(_lamp, lampOff);
+          async.flushMicrotasks();
+          expect(lateApplies, isEmpty);
+        });
+      });
+
+      test('a command for a value already shown is not watched', () async {
+        final result = repository.send(_lamp, const {
+          'onOff': CapabilityPatch.onOff(on: true),
+        });
+        transport.timeOut();
+        await result;
+        transport.reportState(_lamp, _lampState);
+        await pumpEventQueue();
+        expect(lateApplies, isEmpty);
+      });
+    });
+
     test(
       'unreachable: rolls back and reports it as a connection problem',
       () async {

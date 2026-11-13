@@ -486,6 +486,11 @@ class AppLocalizationsFa extends AppLocalizations {
   }
 
   @override
+  String feedbackAppliedLate(String device) {
+    return '$device در نهایت تغییر کرد.';
+  }
+
+  @override
   String get demoRoomLivingRoom => 'اتاق نشیمن';
 
   @override

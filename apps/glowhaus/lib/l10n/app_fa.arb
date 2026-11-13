@@ -129,6 +129,7 @@
   "feedbackTimedOut": "{device} پاسخ نداد. تغییر شما برگردانده شد.",
   "feedbackBusy": "{device} مشغول است و تغییر را نپذیرفت. تغییر برگردانده شد.",
   "feedbackRejected": "{device} نتوانست تغییر را اعمال کند. تغییر برگردانده شد.",
+  "feedbackAppliedLate": "{device} در نهایت تغییر کرد.",
   "demoRoomLivingRoom": "اتاق نشیمن",
   "demoRoomBedroom": "اتاق خواب",
   "demoRoomKitchen": "آشپزخانه",

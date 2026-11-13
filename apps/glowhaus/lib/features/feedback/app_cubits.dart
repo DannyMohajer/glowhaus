@@ -22,31 +22,42 @@ class ConnectionCubit extends Cubit<TransportStatus> {
 
 @immutable
 class FeedbackState {
-  const new({this.failure, this.sequence = 0});
+  const new({this.failure, this.lateApply, this.sequence = 0});
 
-  /// The most recent command that was rolled back.
+  /// The most recent command that was rolled back, unless [lateApply] is
+  /// the more recent event.
   final CommandFailure? failure;
+
+  /// The most recent timed-out command that turned out to be applied.
+  final LateApply? lateApply;
 
   /// Increases with every failure, so two identical failures in a row are
   /// still two events.
   final int sequence;
 }
 
-/// Surfaces rolled-back commands so the app can explain what happened, no
-/// matter which screen sent the command.
+/// Surfaces rolled-back commands, and the rare command that was applied
+/// after its timeout, so the app can explain what happened no matter which
+/// screen sent the command.
 class FeedbackCubit extends Cubit<FeedbackState> {
   new(DeviceRepository devices) : super(const FeedbackState()) {
-    _subscription = devices.failures.listen(
+    _failures = devices.failures.listen(
       (failure) =>
           emit(FeedbackState(failure: failure, sequence: state.sequence + 1)),
     );
+    _lateApplies = devices.lateApplies.listen(
+      (late) =>
+          emit(FeedbackState(lateApply: late, sequence: state.sequence + 1)),
+    );
   }
 
-  late final StreamSubscription<CommandFailure> _subscription;
+  late final StreamSubscription<CommandFailure> _failures;
+  late final StreamSubscription<LateApply> _lateApplies;
 
   @override
   Future<void> close() async {
-    await _subscription.cancel();
+    await _failures.cancel();
+    await _lateApplies.cancel();
     await super.close();
   }
 }

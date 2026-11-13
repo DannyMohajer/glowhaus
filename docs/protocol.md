@@ -318,6 +318,11 @@ exactly as for `failed`.
   dropped.
 - Acks are visible to every app in the home. An app ignores acks whose
   `commandId` it did not send.
+- A device may apply a command after the app gave up on it (the ack was
+  late or lost). The app has already rolled back; when a `state` then shows
+  the requested values within a short window (30 s) it MAY tell the user
+  the change happened after all, but it MUST NOT re-apply the optimistic
+  value. A newer command for the same device ends that window.
 
 ## 9. Capabilities
 
@@ -629,19 +634,27 @@ The protocol itself carries no authentication; it relies on the broker.
 A real deployment MUST provide:
 
 - **Encryption**: MQTT over TLS (port 8883) for native clients and devices,
-  MQTT over secure WebSocket (WSS) for web clients. No plaintext listeners.
-- **Per-home credentials**: every app session and every device authenticates
-  with credentials that are scoped to one home (username/password or client
-  certificate). Credentials are never shared between homes.
-- **Topic ACLs per `homeId`**: a client may only touch `glowhaus/{homeId}/#`
-  for its own home. Within that, a device may publish only to its own `state`,
-  `ack`, `availability` and to `discovery`, and subscribe only to its own
-  `set` and to `discovery`. Apps may publish to `set` and `discovery` and
-  subscribe to the rest.
+  MQTT over secure WebSocket (WSS) for web clients. No plaintext listener
+  that is reachable from a network.
+- **One identity per client**: every app session and every device
+  authenticates as its own identity (username/password or client
+  certificate), scoped to one home. Nothing is shared between homes.
+- **Topic ACLs bound to identity**, not to patterns a client fills in:
+  - the app identity of a home may read and write `glowhaus/{homeId}/#`;
+  - a device identity may publish only its own `state`, `ack` and
+    `availability`, subscribe only to its own `set`, and publish and
+    subscribe on the home's `discovery`;
+  - nothing else. In particular a device cannot forge another device's
+    state or acks, cannot read another device's commands, and no identity
+    reaches another home.
+- The broker MUST apply the same rules to the last will, so a will on
+  another device's `availability` is never published.
 
-Broker configuration implementing this ships with milestone 3. Until then the
-app runs against the in-memory simulation only. The public demo broker will be
-a throwaway instance with no secrets and no real devices.
+The reference setup in `infra/` is Mosquitto 2 with a password file and an
+ACL file written per identity: usernames are `{homeId}.app` and
+`{homeId}.{deviceId}`. Its README shows the ACL, and CI runs a test that a
+device identity cannot publish to another device's topics. The public demo
+broker (if any) is a throwaway instance with no secrets and no real devices.
 
 ## 13. In the Glowhaus codebase
 
@@ -664,8 +677,8 @@ a throwaway instance with no secrets and no real devices.
   of the last 8 command ids); `VirtualDevice` puts a model on an
   `MqttConnection` and does sections 5 to 7 (announce on connect and on
   query with jitter, retained availability with a last will, retained
-  state, retained `set` ignored). It depends on `glowhaus_domain` and
-  `glowhaus_mqtt` only, never on the app or the transport: it is the proof
+  state, retained `set` ignored, reconnect with backoff when the broker
+  goes away). It depends on `glowhaus_domain` and `glowhaus_mqtt` only, never on the app or the transport: it is the proof
   that this document is enough to build a device. `simulator/` runs it
   against a real broker.
 - `SimulatedTransport` is not a simulation of the protocol: it is an

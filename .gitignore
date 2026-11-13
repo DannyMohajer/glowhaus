@@ -7,3 +7,11 @@ coverage/
 .DS_Store
 .flutter-plugins-dependencies
 **/test/**/failures/
+
+# Local broker secrets and certificates (infra/scripts/make-*.sh write them)
+infra/secrets/*
+infra/certs/*
+infra/mosquitto/conf.d/*
+!infra/secrets/.gitkeep
+!infra/certs/.gitkeep
+!infra/mosquitto/conf.d/.gitkeep

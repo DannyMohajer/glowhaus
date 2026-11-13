@@ -19,7 +19,9 @@ import 'package:glowhaus_mqtt/glowhaus_mqtt.dart';
 ///   command exactly once (a QoS 1 redelivery gets the same ack again) and
 ///   publishes the new state after a successful one;
 /// - publishes while covers move and while readings drift;
-/// - publishes `offline` and disconnects cleanly when told to go offline.
+/// - publishes `offline` and disconnects cleanly when told to go offline;
+/// - when the broker goes away, keeps trying to come back (1 s, doubling
+///   to 30 s, with jitter), as any device on a shelf would.
 ///
 /// [config] adds the imperfections of a real link: latency with jitter, the
 /// odd `busy` rejection and the odd command that never arrives.
@@ -32,6 +34,8 @@ class VirtualDevice {
     this.stateDelay = const Duration(milliseconds: 60),
     this.positionInterval = const Duration(milliseconds: 400),
     this.ambientInterval = const Duration(seconds: 2),
+    this.reconnectInitial = const Duration(seconds: 1),
+    this.reconnectMax = const Duration(seconds: 30),
     Random? random,
     DateTime Function()? clock,
     this._topics = const TopicCodec(),
@@ -58,6 +62,10 @@ class VirtualDevice {
   /// How often sensors and meters change by themselves. Null disables it.
   final Duration? ambientInterval;
 
+  /// First wait after the broker went away; doubles up to [reconnectMax].
+  final Duration reconnectInitial;
+  final Duration reconnectMax;
+
   final MqttConnection _connection;
   final Random _random;
   final DateTime Function() _clock;
@@ -67,6 +75,8 @@ class VirtualDevice {
   final Set<Timer> _timers = {};
   Timer? _positionTimer;
   Timer? _ambientTimer;
+  Timer? _reconnectTimer;
+  int _reconnectAttempts = 0;
   bool _online = false;
   bool _disposed = false;
 
@@ -78,6 +88,9 @@ class VirtualDevice {
 
   /// Whether the device is on the network right now.
   bool get online => _online;
+
+  /// Reconnects tried since the device last lost its broker.
+  int get reconnectAttempts => _reconnectAttempts;
 
   Map<String, CapabilityState> get state => model.snapshot();
 
@@ -101,7 +114,10 @@ class VirtualDevice {
   /// Plugs the device in: connect, announce, go online, report state.
   Future<void> goOnline() async {
     if (_online) return;
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
     await _connect();
+    _reconnectAttempts = 0;
     _online = true;
     await _publishAvailability(AvailabilityStatus.online);
     await _publishState();
@@ -113,6 +129,8 @@ class VirtualDevice {
   /// Unplugs the device cleanly: it says goodbye on its availability topic
   /// itself (section 6), so the will is not needed.
   Future<void> goOffline() async {
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
     if (!_online) return;
     _online = false;
     _cancelTimers();
@@ -175,12 +193,32 @@ class VirtualDevice {
   }
 
   /// The network went away (the broker published the will): the device is
-  /// off the air until someone plugs it back in with [goOnline].
+  /// off the air, and tries to come back with growing pauses.
   void _onLink(MqttConnectionState state) {
     if (state == MqttConnectionState.disconnected && _online) {
       _online = false;
       _cancelTimers();
+      _scheduleReconnect();
     }
+  }
+
+  void _scheduleReconnect() {
+    if (_disposed || _reconnectTimer != null) return;
+    final exponent = min(_reconnectAttempts, 10);
+    final base = min(
+      reconnectInitial.inMilliseconds * (1 << exponent),
+      reconnectMax.inMilliseconds,
+    );
+    final jitter = (base * 0.5 * _random.nextDouble()).round();
+    _reconnectTimer = Timer(Duration(milliseconds: base + jitter), () async {
+      _reconnectTimer = null;
+      _reconnectAttempts++;
+      try {
+        await goOnline();
+      } on MqttConnectionException {
+        _scheduleReconnect();
+      }
+    });
   }
 
   Future<void> _onMessage(MqttMessage message) async {

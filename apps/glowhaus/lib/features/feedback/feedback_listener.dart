@@ -17,7 +17,8 @@ String feedbackMessage(AppLocalizations l10n, CommandFailure failure) {
       : l10n.feedbackRejected(device);
 }
 
-/// Shows a message whenever a command was rolled back, on any screen.
+/// Shows a message whenever a command was rolled back, and a quieter one
+/// when a timed-out command turns out to have been applied, on any screen.
 class FeedbackListener extends StatelessWidget {
   const new({required this.child, super.key});
 
@@ -29,9 +30,24 @@ class FeedbackListener extends StatelessWidget {
       listenWhen: (previous, current) => previous.sequence != current.sequence,
       listener: (context, state) {
         final failure = state.failure;
-        if (failure == null) return;
+        final lateApply = state.lateApply;
+        if (failure == null && lateApply == null) return;
         final colors = context.colors;
+        final l10n = AppLocalizations.of(context);
         final wide = GlowWindowSize.of(context) != GlowWindowSize.compact;
+        final (IconData icon, Color iconColor, String message) = failure != null
+            ? (
+                failure.timedOut || failure.unreachable
+                    ? GlowIcons.wifiOff
+                    : GlowIcons.triangleAlert,
+                colors.warning,
+                feedbackMessage(l10n, failure),
+              )
+            : (
+                GlowIcons.check,
+                colors.onInverse,
+                l10n.feedbackAppliedLate(lateApply!.device.displayName(l10n)),
+              );
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
@@ -51,20 +67,14 @@ class FeedbackListener extends StatelessWidget {
               shape: const RoundedRectangleBorder(
                 borderRadius: GlowRadius.tileAll,
               ),
-              duration: const Duration(seconds: 5),
+              duration: Duration(seconds: failure != null ? 5 : 3),
               content: Row(
                 children: [
-                  Icon(
-                    failure.timedOut || failure.unreachable
-                        ? GlowIcons.wifiOff
-                        : GlowIcons.triangleAlert,
-                    size: GlowSize.icon,
-                    color: colors.warning,
-                  ),
+                  Icon(icon, size: GlowSize.icon, color: iconColor),
                   const SizedBox(width: GlowSpace.x3),
                   Expanded(
                     child: Text(
-                      feedbackMessage(AppLocalizations.of(context), failure),
+                      message,
                       style: context.type.body.copyWith(
                         color: colors.onInverse,
                       ),

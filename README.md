@@ -52,11 +52,14 @@ Coming:
 apps/glowhaus/            Flutter app (web, android, macos, ios)
 packages/
   glowhaus_domain/        pure Dart: models, capabilities, protocol
-  glowhaus_transport/     Transport interface + SimulatedTransport
+  glowhaus_mqtt/          MqttConnection, mqtt_client adapter, in-memory broker
+  glowhaus_device/        device engine: the protocol's device side, demo home
+  glowhaus_transport/     Transport interface, MqttTransport, SimulatedTransport
   glowhaus_ui/            design system: tokens, themes, components
 widgetbook/               Widgetbook catalog of the design system
-simulator/                device simulator CLI (milestone 3)
-infra/                    docker-compose (milestone 3)
+simulator/                device simulator CLI: the demo home on a real broker
+infra/                    docker-compose: Mosquitto (TLS, WSS, per-identity ACLs),
+                          simulator image, MediaMTX test camera
 docs/                     architecture, protocol, roadmap
 ```
 

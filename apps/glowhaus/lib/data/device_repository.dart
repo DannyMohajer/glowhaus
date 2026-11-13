@@ -56,12 +56,30 @@ class CommandFailure {
   };
 }
 
+/// A command that timed out, after which the device reported the requested
+/// values anyway: the ack was late or lost, the change was not.
+@immutable
+class LateApply {
+  const new({required this.device});
+
+  /// The device as it reports itself now.
+  final Device device;
+}
+
 class _PendingCommand {
   new(this.command);
 
   final DeviceCommand command;
   bool acked = false;
   Timer? settleTimer;
+}
+
+/// A timed-out command we still watch for, in case the device applies it.
+class _LateCandidate {
+  new(this.command);
+
+  final DeviceCommand command;
+  Timer? timer;
 }
 
 /// The single source of truth for devices.
@@ -77,6 +95,7 @@ class DeviceRepository {
     String Function()? commandIds,
     this.commandTimeout = Protocol.commandTimeout,
     this.settleTimeout = Protocol.stateSettleTimeout,
+    this.lateApplyWindow = const Duration(seconds: 30),
   }) : _clock = clock ?? DateTime.now,
        _commandIds = commandIds ?? _sequentialIds();
 
@@ -88,10 +107,16 @@ class DeviceRepository {
   /// How long an acked command may wait for its matching state.
   final Duration settleTimeout;
 
+  /// How long after a timeout a matching state still counts as that command
+  /// being applied late.
+  final Duration lateApplyWindow;
+
   final Map<String, Device> _reported = {};
   final List<_PendingCommand> _pending = [];
+  final List<_LateCandidate> _late = [];
   final _views = StreamController<List<DeviceView>>.broadcast();
   final _failures = StreamController<CommandFailure>.broadcast();
+  final _lateApplies = StreamController<LateApply>.broadcast();
   StreamSubscription<DeviceEvent>? _events;
   StreamSubscription<TransportStatus>? _status;
 
@@ -120,6 +145,11 @@ class DeviceRepository {
   /// Commands that were rejected or timed out, after their rollback.
   Stream<CommandFailure> get failures => _failures.stream;
 
+  /// Timed-out commands that the device turned out to apply after all. The
+  /// state already shows it; this is only so the earlier "didn't respond" is
+  /// not the last word.
+  Stream<LateApply> get lateApplies => _lateApplies.stream;
+
   List<DeviceView> get current => [
     for (final device in _reported.values) _viewOf(device),
   ];
@@ -140,8 +170,13 @@ class DeviceRepository {
       pending.settleTimer?.cancel();
     }
     _pending.clear();
+    for (final candidate in _late) {
+      candidate.timer?.cancel();
+    }
+    _late.clear();
     await _views.close();
     await _failures.close();
+    await _lateApplies.close();
   }
 
   /// Applies [patches] optimistically and sends them as one command.
@@ -162,6 +197,11 @@ class DeviceRepository {
     );
     final pending = _PendingCommand(command);
     _pending.add(pending);
+    // A new command for the device makes any earlier timed-out one moot.
+    _late
+        .where((c) => c.command.deviceId == deviceId)
+        .toList()
+        .forEach(_forget);
     _publish();
 
     final result = await _transport.send(command, timeout: commandTimeout);
@@ -182,8 +222,24 @@ class DeviceRepository {
       if (reported != null && !_failures.isClosed) {
         _failures.add(CommandFailure(device: reported, result: result));
       }
+      if (result is CommandTimedOut && !_isSatisfied(pending)) {
+        _watchLate(pending);
+      }
     }
     return result;
+  }
+
+  /// Keeps a timed-out command around for [lateApplyWindow]: a `state` that
+  /// matches it within that time means the device applied it after all.
+  void _watchLate(_PendingCommand pending) {
+    final candidate = _LateCandidate(pending.command);
+    candidate.timer = Timer(lateApplyWindow, () => _forget(candidate));
+    _late.add(candidate);
+  }
+
+  void _forget(_LateCandidate candidate) {
+    candidate.timer?.cancel();
+    _late.remove(candidate);
   }
 
   /// Losing the broker drops every optimistic value: commands still waiting
@@ -218,6 +274,17 @@ class DeviceRepository {
             .where(_isSatisfied)
             .toList()
             .forEach(_drop);
+        // One that matches a timed-out command means it was applied late.
+        final applied = _late
+            .where((c) => c.command.deviceId == deviceId)
+            .where((c) => _reported[deviceId]!.satisfies(c.command.patches))
+            .toList();
+        if (applied.isNotEmpty) {
+          applied.forEach(_forget);
+          if (!_lateApplies.isClosed) {
+            _lateApplies.add(LateApply(device: _reported[deviceId]!));
+          }
+        }
       case DeviceAvailabilityChanged(:final deviceId, :final availability):
         final known = _reported[deviceId];
         if (known == null) return;
@@ -228,6 +295,10 @@ class DeviceRepository {
             .where((p) => p.command.deviceId == deviceId)
             .toList()
             .forEach(_drop);
+        _late
+            .where((c) => c.command.deviceId == deviceId)
+            .toList()
+            .forEach(_forget);
     }
     _publish();
   }

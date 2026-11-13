@@ -271,6 +271,15 @@
       }
     }
   },
+  "feedbackAppliedLate": "{device} changed after all.",
+  "@feedbackAppliedLate": {
+    "description": "Quiet note after a timed-out command turned out to be applied",
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
   "demoRoomLivingRoom": "Living Room",
   "demoRoomBedroom": "Bedroom",
   "demoRoomKitchen": "Kitchen",

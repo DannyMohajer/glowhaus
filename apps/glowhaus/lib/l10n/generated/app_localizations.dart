@@ -874,6 +874,12 @@ abstract class AppLocalizations {
   /// **'{device} couldn\'t apply the change. It was undone.'**
   String feedbackRejected(String device);
 
+  /// Quiet note after a timed-out command turned out to be applied
+  ///
+  /// In en, this message translates to:
+  /// **'{device} changed after all.'**
+  String feedbackAppliedLate(String device);
+
   /// No description provided for @demoRoomLivingRoom.
   ///
   /// In en, this message translates to:

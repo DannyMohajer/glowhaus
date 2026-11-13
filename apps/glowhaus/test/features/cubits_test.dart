@@ -298,6 +298,27 @@ void main() {
       },
     );
 
+    test('FeedbackCubit notes a timed-out command applied late', () async {
+      final cubit = FeedbackCubit(home.devices);
+      final result = home.devices.send('lr-lamp', const {
+        'onOff': CapabilityPatch.onOff(on: false),
+      });
+      home.transport.timeOut();
+      await result;
+      await pumpEventQueue();
+      expect(cubit.state.failure!.timedOut, isTrue);
+
+      home.transport.reportState('lr-lamp', {
+        ...home.device('lr-lamp').state,
+        'onOff': const CapabilityState.onOff(on: false),
+      });
+      await pumpEventQueue();
+      expect(cubit.state.sequence, 2);
+      expect(cubit.state.failure, isNull);
+      expect(cubit.state.lateApply!.device.id, 'lr-lamp');
+      await cubit.close();
+    });
+
     test('successful commands produce no feedback', () async {
       final cubit = FeedbackCubit(home.devices);
       final result = home.devices.send('lr-lamp', const {

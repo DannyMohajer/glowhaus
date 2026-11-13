@@ -32,7 +32,7 @@ class SimulatedTransport implements Transport {
     home = VirtualHome(
       homeId: homeId,
       specs: devices,
-      connectionFactory: this.broker.client,
+      connectionFactory: (_) => this.broker.client(),
       config: config,
       stateDelay: stateDelay,
       positionInterval: positionInterval,

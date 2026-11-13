@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   glowhaus_device: ^0.1.0
+  glowhaus_domain: ^0.1.0
   glowhaus_mqtt: ^0.1.0
 
 executables:

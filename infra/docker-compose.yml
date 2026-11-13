@@ -1,0 +1,62 @@
+# Glowhaus local infrastructure: broker, device simulator, test camera.
+#
+#   infra/scripts/make-users.sh            once: passwords for every identity
+#   infra/scripts/make-certs.sh            once: trusted TLS/WSS (needs mkcert)
+#   docker compose -f infra/docker-compose.yml up --build
+#
+# See infra/README.md.
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      # Plain MQTT: loopback only. TLS and WSS are reachable from the LAN.
+      - "127.0.0.1:1883:1883"
+      - "8883:8883"
+      - "8884:8884"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./mosquitto/acl.conf:/mosquitto/config/acl.conf:ro
+      - ./mosquitto/conf.d:/mosquitto/config/conf.d:ro
+      - ./secrets/passwd:/mosquitto/config/passwd:ro
+      - ./certs:/mosquitto/certs:ro
+      - mosquitto-data:/mosquitto/data
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 1883"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+      start_period: 20s
+      start_interval: 1s
+
+  simulator:
+    build:
+      context: ..
+      dockerfile: infra/simulator/Dockerfile
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    volumes:
+      - ./secrets/credentials:/run/glowhaus/credentials:ro
+    # Inside the compose network the broker is one hop away; plain MQTT is
+    # fine there. From outside, only TLS and WSS are exposed.
+    command:
+      - --host=mosquitto
+      - --no-tls
+      - --home=demo-home
+      - --credentials=/run/glowhaus/credentials
+      - --camera-url=rtsp://localhost:8554/en-camera
+    restart: on-failure
+
+  camera:
+    # MediaMTX with ffmpeg: an RTSP test pattern standing in for the doorbell
+    # camera (rtsp://localhost:8554/en-camera, HLS on http://localhost:8888).
+    image: bluenviron/mediamtx:latest-ffmpeg
+    ports:
+      - "8554:8554"
+      - "8888:8888"
+    volumes:
+      - ./mediamtx/mediamtx.yml:/mediamtx.yml:ro
+
+volumes:
+  mosquitto-data:

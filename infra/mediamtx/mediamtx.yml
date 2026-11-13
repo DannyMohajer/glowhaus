@@ -1,0 +1,19 @@
+# MediaMTX: one path, fed by ffmpeg with a generated test pattern so the demo
+# has a camera stream without a camera. RTSP on 8554, HLS on 8888.
+
+logLevel: info
+rtspAddress: :8554
+hlsAddress: :8888
+rtmp: no
+webrtc: no
+srt: no
+
+paths:
+  en-camera:
+    runOnInit: >
+      ffmpeg -re -f lavfi -i testsrc2=size=640x360:rate=25
+      -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100
+      -c:v libx264 -preset ultrafast -tune zerolatency -g 50 -pix_fmt yuv420p
+      -c:a aac -shortest
+      -f rtsp rtsp://localhost:$RTSP_PORT/$MTX_PATH
+    runOnInitRestart: yes
