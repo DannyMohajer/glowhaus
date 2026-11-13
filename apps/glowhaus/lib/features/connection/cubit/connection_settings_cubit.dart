@@ -202,7 +202,11 @@ class ConnectionSettingsCubit extends Cubit<ConnectionSettingsState> {
       broker: broker,
     );
     unawaited(_store.save(settings));
-    final transport = _brokers.create(broker, password: password);
+    final transport = await _brokers.create(broker, password: password);
+    if (isClosed) {
+      await transport.dispose();
+      return;
+    }
     emit(
       state.copyWith(
         settings: settings,

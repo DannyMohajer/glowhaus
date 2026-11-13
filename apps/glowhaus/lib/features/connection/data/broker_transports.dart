@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:glowhaus/features/connection/data/connection_settings.dart';
+import 'package:glowhaus/features/connection/data/mqtt_adapter.dart'
+    deferred as adapter;
 import 'package:glowhaus/features/settings/data/app_platform.dart';
 import 'package:glowhaus_domain/glowhaus_domain.dart';
 import 'package:glowhaus_transport/glowhaus_transport.dart';
@@ -9,28 +11,34 @@ import 'package:injectable/injectable.dart';
 
 /// Makes the transport for a broker. An interface so tests need no network.
 abstract interface class BrokerTransports {
-  MqttTransport create(BrokerSettings settings, {required String password});
+  /// Async because the real MQTT adapter is a deferred library: it is
+  /// downloaded the first time someone connects to a broker.
+  Future<MqttTransport> create(
+    BrokerSettings settings, {
+    required String password,
+  });
 }
 
 @LazySingleton(as: BrokerTransports)
-class MqttBrokerTransports implements BrokerTransports {
+class DeferredBrokerTransports implements BrokerTransports {
   new(this._platform);
 
   final AppPlatform _platform;
   final Random _random = Random();
 
   @override
-  MqttTransport create(
+  Future<MqttTransport> create(
     BrokerSettings settings, {
     required String password,
-  }) => MqttTransport(
-    homeId: settings.homeId,
-    connection: MqttClientConnection(settings.endpoint(web: _platform.isWeb)),
-    // Unique per app session: two sessions with one id would keep
-    // taking the connection from each other.
-    clientId: 'app-${_random.nextInt(1 << 32).toRadixString(36)}',
-    login: MqttLogin(username: settings.username.trim(), password: password),
-  );
+  }) async {
+    await adapter.loadLibrary();
+    return adapter.createBrokerTransport(
+      settings,
+      password: password,
+      web: _platform.isWeb,
+      random: _random,
+    );
+  }
 }
 
 /// The transport while the app has no connection to make: broker mode after

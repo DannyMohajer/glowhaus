@@ -123,7 +123,10 @@ class FakeBrokerTransports implements BrokerTransports {
   MqttConnectFailure? refuse;
 
   @override
-  MqttTransport create(BrokerSettings settings, {required String password}) {
+  Future<MqttTransport> create(
+    BrokerSettings settings, {
+    required String password,
+  }) async {
     final connection = broker.client();
     final transport = MqttTransport(
       homeId: settings.homeId,

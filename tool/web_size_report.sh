@@ -38,6 +38,13 @@ report=$(
     main.dart.js canvaskit/canvaskit.wasm canvaskit/canvaskit.js "${fonts[@]}"
   row 'JS + CanvasKit (fallback, Chromium)' \
     main.dart.js canvaskit/chromium/canvaskit.wasm canvaskit/chromium/canvaskit.js "${fonts[@]}"
+  # dart2js splits deferred imports into part files; dart2wasm in this
+  # Flutter version emits one module, so on Wasm they are in the rows above.
+  parts=(main.dart.js_*.part.js)
+  if [[ -e "${parts[0]}" ]]; then
+    row 'JS only: broker settings + MQTT adapter (deferred, on first use)' \
+      "${parts[@]}"
+  fi
   row 'Vazirmatn (only when Persian is chosen)' \
     assets/packages/glowhaus_ui/assets/fonts/Vazirmatn-Variable.ttf
   row 'NOTICES (only if the license page opens)' assets/NOTICES

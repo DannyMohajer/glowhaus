@@ -52,7 +52,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i693.FontLanguagePreparer(),
     );
     gh.lazySingleton<_i741.BrokerTransports>(
-      () => _i741.MqttBrokerTransports(gh<_i920.AppPlatform>()),
+      () => _i741.DeferredBrokerTransports(gh<_i920.AppPlatform>()),
     );
     gh.lazySingleton<_i319.Transport>(
       () => appModule.transport(gh<_i319.SimulatedTransport>()),

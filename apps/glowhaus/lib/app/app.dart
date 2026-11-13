@@ -6,6 +6,7 @@ import 'package:glowhaus/features/connection/cubit/connection_settings_cubit.dar
 import 'package:glowhaus/features/feedback/app_cubits.dart';
 import 'package:glowhaus/features/settings/cubit/settings_cubit.dart';
 import 'package:glowhaus/features/settings/cubit/settings_state.dart';
+import 'package:glowhaus/l10n/framework_localizations.dart';
 import 'package:glowhaus/l10n/generated/app_localizations.dart';
 import 'package:glowhaus_ui/glowhaus_ui.dart';
 import 'package:go_router/go_router.dart';
@@ -60,7 +61,10 @@ class GlowhausApp extends StatelessWidget {
                   AppLocalizations.of(context).appTitle,
               locale: state.language.locale,
               supportedLocales: AppLocalizations.supportedLocales,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                ...FrameworkLocalizations.delegates,
+              ],
               themeMode: state.themeMode,
               theme: theme(Brightness.light),
               darkTheme: theme(Brightness.dark),
