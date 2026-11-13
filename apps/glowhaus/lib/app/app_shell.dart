@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:glowhaus/features/demo/cubit/devices_panel_cubit.dart';
+import 'package:glowhaus/features/demo/view/demo_panel_host.dart';
 import 'package:glowhaus/features/feedback/feedback_listener.dart';
 import 'package:glowhaus/l10n/generated/app_localizations.dart';
 import 'package:glowhaus_ui/glowhaus_ui.dart';
@@ -13,21 +16,29 @@ class AppShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final demo = demoPanelAvailable(context);
+    final panelOpen = demo && context.watch<DemoPanelCubit>().state;
     return FeedbackListener(
-      child: AdaptiveScaffold(
-        destinations: [
-          GlowNavItem(icon: GlowIcons.house, label: l10n.navHome),
-          GlowNavItem(icon: GlowIcons.layoutGrid, label: l10n.navRooms),
-          GlowNavItem(icon: GlowIcons.settings, label: l10n.navSettings),
-        ],
-        currentIndex: navigationShell.currentIndex,
-        // Tapping the current destination returns to its first page.
-        onDestinationSelected: (index) => navigationShell.goBranch(
-          index,
-          initialLocation: index == navigationShell.currentIndex,
+      child: DemoPanelLauncher(
+        child: AdaptiveScaffold(
+          railFooter: demo ? const DemoPanelRailButton() : null,
+          sidePanel: panelOpen
+              ? DemoDevicesPanel(onClose: context.read<DemoPanelCubit>().hide)
+              : null,
+          destinations: [
+            GlowNavItem(icon: GlowIcons.house, label: l10n.navHome),
+            GlowNavItem(icon: GlowIcons.layoutGrid, label: l10n.navRooms),
+            GlowNavItem(icon: GlowIcons.settings, label: l10n.navSettings),
+          ],
+          currentIndex: navigationShell.currentIndex,
+          // Tapping the current destination returns to its first page.
+          onDestinationSelected: (index) => navigationShell.goBranch(
+            index,
+            initialLocation: index == navigationShell.currentIndex,
+          ),
+          railHeader: const GlowLogoMark(),
+          body: navigationShell,
         ),
-        railHeader: const GlowLogoMark(),
-        body: navigationShell,
       ),
     );
   }

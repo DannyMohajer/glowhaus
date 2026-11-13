@@ -225,6 +225,17 @@ faster; browsers without WasmGC fall back to JS automatically. It runs
 single-threaded because GitHub Pages cannot send cross-origin isolation
 headers, which is fine for this UI.
 
+Milestone 3 (gzip, first visit in demo mode): Wasm + skwasm ~2.6 MB, JS
++ CanvasKit Chromium ~3.0 MB. The broker settings form and the `mqtt_client`
+adapter are deferred imports, so a demo visitor on the JS path never fetches
+them (~53 KB, loaded on first use). dart2wasm in Flutter 3.47 emits a single
+module, so on Wasm they are part of the main download. dart2js keeps a
+class's overridden methods in the main unit when the class is created
+there, which is why the app lists Flutter's own Material / Cupertino strings
+for its three languages (`FrameworkLocalizations`) instead of using the
+~80-locale global delegates: that alone kept ~90 KB of text-field menu
+strings out of every visitor's download.
+
 Other decisions:
 
 - **No third-party downloads** (`--no-web-resources-cdn`): CanvasKit, skwasm
@@ -243,6 +254,27 @@ Other decisions:
   `uses-material-design: false` to avoid shipping the font. Expected.
 - Hash URLs (go_router's default on web) so a reload inside the iframe or on
   Pages never hits a 404.
+
+## The demo's device side
+
+The devices panel (`features/demo`) talks to the `VirtualHome` inside
+`SimulatedTransport` directly, never through the app's repository: it is
+the other end of the protocol. A press on a device's own button is a local
+change that the device reports as `state` (no command, no ack); a plug pulls
+the device off the broker with a clean goodbye. Every device connection is
+tapped by an `MqttTrafficLog`, which the panel lists.
+
+Two-tab mode: `DemoBridgeHost` (app tab) and `RemoteDemoHome` (`#/devices`
+tab) talk over a `BridgePort`, a `BroadcastChannel` in the browser. The
+devices leave the app tab with a snapshot of their state and run as real
+MQTT clients of the app tab's in-memory broker, relayed by `BridgeHost` /
+`BridgeGuest` in `glowhaus_mqtt` (connect with will, subscribe, publish,
+messages). When the devices tab says goodbye or goes silent for four
+seconds, the app tab takes them back from the broker's retained state. A
+silent tab's wills are told apart from a deliberate unplug by the missing
+`ts` (protocol section 6). All of it is plain Dart and tested on the VM
+with an in-process channel; only the `BroadcastChannel` adapter is web
+code.
 
 ## Names and translation
 

@@ -6,6 +6,7 @@ import 'package:glowhaus/data/home_repository.dart';
 import 'package:glowhaus/features/connection/cubit/connection_settings_cubit.dart';
 import 'package:glowhaus/features/connection/data/connection_settings.dart';
 import 'package:glowhaus/features/dashboard/cubit/dashboard_cubit.dart';
+import 'package:glowhaus/features/demo/view/demo_panel_host.dart';
 import 'package:glowhaus/features/feedback/app_cubits.dart';
 import 'package:glowhaus/features/shared/demo_names.dart';
 import 'package:glowhaus/features/shared/device_presentation.dart';
@@ -66,6 +67,7 @@ class _DashboardView extends StatelessWidget {
                   children: [
                     _ActivePill(count: state.activeCount),
                     const _ConnectionStatus(),
+                    const DemoPanelChip(),
                   ],
                 ),
                 const SizedBox(height: GlowSpace.x5),

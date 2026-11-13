@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:glowhaus_device/src/device_model.dart';
@@ -65,6 +66,36 @@ class VirtualHome {
     _started = true;
     for (final device in devices.values) {
       await device.start();
+    }
+  }
+
+  /// Ids of devices whose state or online status just changed.
+  Stream<String> get changes => Stream<String>.multi((controller) {
+    final subscriptions = [
+      for (final device in devices.values)
+        device.changes.listen((_) => controller.add(device.id)),
+    ];
+    controller.onCancel = () async {
+      for (final subscription in subscriptions) {
+        await subscription.cancel();
+      }
+    };
+  }, isBroadcast: true);
+
+  /// What every device is right now, to carry over to another runtime.
+  Map<String, DeviceSnapshot> snapshot() => {
+    for (final device in devices.values)
+      device.id: DeviceSnapshot(state: device.state, online: device.online),
+  };
+
+  /// Starts again after [stop], each device carrying on from [from] where
+  /// it has an entry: its state, and online or not.
+  Future<void> resume(Map<String, DeviceSnapshot> from) async {
+    _started = true;
+    for (final device in devices.values) {
+      final snapshot = from[device.id];
+      if (snapshot != null) device.restore(snapshot.state);
+      if (snapshot?.online ?? device.spec.online) await device.goOnline();
     }
   }
 

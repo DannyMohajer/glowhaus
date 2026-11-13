@@ -695,4 +695,68 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get connectionInvalidUsername => 'Bir kullanıcı adı gir.';
+
+  @override
+  String get panelTitle => 'Cihazlar';
+
+  @override
+  String get panelSubtitle =>
+      'Protokolün öbür ucu: bu sayfanın içindeki bir MQTT broker\'ına bağlı on iki sanal cihaz.';
+
+  @override
+  String get panelOpen => 'Cihazlar';
+
+  @override
+  String get panelClose => 'Cihaz panelini kapat';
+
+  @override
+  String get panelOpenTab => 'Yeni sekmede aç';
+
+  @override
+  String get panelPlugged => 'Prize takılı';
+
+  @override
+  String panelPlugDevice(String device) {
+    return '$device prize takılı';
+  }
+
+  @override
+  String panelPress(String device) {
+    return '$device üzerindeki düğmeye bas';
+  }
+
+  @override
+  String get panelTraffic => 'MQTT trafiği';
+
+  @override
+  String get panelTrafficEmpty =>
+      'Henüz bir şey yok. Uygulamada bir şeye dokun.';
+
+  @override
+  String panelTrafficSent(String device) {
+    return '$device gönderdi';
+  }
+
+  @override
+  String panelTrafficReceived(String device) {
+    return '$device aldı';
+  }
+
+  @override
+  String get panelAway =>
+      'Cihazlar başka bir sekmede çalışıyor. Buraya dönmeleri için o sekmeyi kapat.';
+
+  @override
+  String get devicesTabJoining => 'Demoya bağlanıyor…';
+
+  @override
+  String get devicesTabNoHost =>
+      'Bu tarayıcıda açık bir Glowhaus demosu yok. Başka bir sekmede aç ve tekrar dene.';
+
+  @override
+  String get devicesTabRetry => 'Tekrar dene';
+
+  @override
+  String get devicesTabHint =>
+      'Bu cihazlar diğer sekmendeki uygulamayla MQTT üzerinden konuşur. Bu sekmeyi kapatırsan geri dönerler.';
 }

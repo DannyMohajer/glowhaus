@@ -145,6 +145,7 @@ class GlowNavRail extends StatelessWidget {
     required this.currentIndex,
     required this.onTap,
     this.header,
+    this.footer,
     super.key,
   });
 
@@ -152,6 +153,9 @@ class GlowNavRail extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
   final Widget? header;
+
+  /// Pinned to the bottom of the rail, e.g. a secondary action.
+  final Widget? footer;
 
   static const double width = 88;
 
@@ -227,6 +231,7 @@ class GlowNavRail extends StatelessWidget {
                 ),
               ),
             ),
+          if (footer != null) ...[const Spacer(), footer!],
         ],
       ),
     );
@@ -241,6 +246,8 @@ class AdaptiveScaffold extends StatelessWidget {
     required this.onDestinationSelected,
     required this.body,
     this.railHeader,
+    this.railFooter,
+    this.sidePanel,
     super.key,
   });
 
@@ -249,6 +256,16 @@ class AdaptiveScaffold extends StatelessWidget {
   final ValueChanged<int> onDestinationSelected;
   final Widget body;
   final Widget? railHeader;
+
+  /// At the bottom of the side rail; not shown on phones.
+  final Widget? railFooter;
+
+  /// A column next to the body on expanded windows only, such as a tool
+  /// panel. Smaller windows show it some other way, or not at all.
+  final Widget? sidePanel;
+
+  /// Width of [sidePanel].
+  static const double sidePanelWidth = 380;
 
   @override
   Widget build(BuildContext context) {
@@ -274,8 +291,25 @@ class AdaptiveScaffold extends StatelessWidget {
               currentIndex: currentIndex,
               onTap: onDestinationSelected,
               header: railHeader,
+              footer: railFooter,
             ),
             Expanded(child: body),
+            if (sidePanel != null &&
+                GlowWindowSize.of(context) == GlowWindowSize.expanded)
+              Container(
+                width: sidePanelWidth,
+                margin: const EdgeInsetsDirectional.only(
+                  end: GlowSpace.x4,
+                  top: GlowSpace.x4,
+                  bottom: GlowSpace.x4,
+                ),
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  color: context.colors.surface,
+                  borderRadius: GlowRadius.cardAll,
+                ),
+                child: sidePanel,
+              ),
           ],
         ),
       ),

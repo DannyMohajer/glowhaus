@@ -6,8 +6,10 @@
 /// `glowhaus_domain`. Nothing here imports Flutter.
 library;
 
+export 'src/bridge.dart';
 export 'src/connection.dart';
 export 'src/in_memory_broker.dart';
 export 'src/mqtt_client_connection.dart';
 export 'src/mqtt_endpoint.dart';
 export 'src/topic_filter.dart';
+export 'src/traffic.dart';

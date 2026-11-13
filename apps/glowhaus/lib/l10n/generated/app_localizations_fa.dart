@@ -696,4 +696,67 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get connectionInvalidUsername => 'یک نام کاربری وارد کن.';
+
+  @override
+  String get panelTitle => 'دستگاه‌ها';
+
+  @override
+  String get panelSubtitle =>
+      'آن سوی پروتکل: دوازده دستگاه مجازی روی یک بروکر MQTT درون همین صفحه.';
+
+  @override
+  String get panelOpen => 'دستگاه‌ها';
+
+  @override
+  String get panelClose => 'بستن پنل دستگاه‌ها';
+
+  @override
+  String get panelOpenTab => 'باز کردن در زبانه‌ی جدید';
+
+  @override
+  String get panelPlugged => 'به برق وصل';
+
+  @override
+  String panelPlugDevice(String device) {
+    return '$device به برق وصل است';
+  }
+
+  @override
+  String panelPress(String device) {
+    return 'دکمه‌ی روی $device را بزن';
+  }
+
+  @override
+  String get panelTraffic => 'ترافیک MQTT';
+
+  @override
+  String get panelTrafficEmpty => 'هنوز چیزی نیست. در برنامه روی چیزی بزن.';
+
+  @override
+  String panelTrafficSent(String device) {
+    return '$device فرستاد';
+  }
+
+  @override
+  String panelTrafficReceived(String device) {
+    return '$device دریافت کرد';
+  }
+
+  @override
+  String get panelAway =>
+      'دستگاه‌ها در زبانه‌ی دیگری اجرا می‌شوند. آن را ببند تا به اینجا برگردند.';
+
+  @override
+  String get devicesTabJoining => 'در حال اتصال به نسخه‌ی نمایشی…';
+
+  @override
+  String get devicesTabNoHost =>
+      'هیچ نسخه‌ی نمایشی Glowhaus در این مرورگر باز نیست. آن را در زبانه‌ی دیگری باز کن و دوباره امتحان کن.';
+
+  @override
+  String get devicesTabRetry => 'دوباره امتحان کن';
+
+  @override
+  String get devicesTabHint =>
+      'این دستگاه‌ها با برنامه در زبانه‌ی دیگرت از راه MQTT حرف می‌زنند. این زبانه را ببندی، به خانه برمی‌گردند.';
 }

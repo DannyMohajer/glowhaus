@@ -79,6 +79,11 @@ class VirtualDevice {
   int _reconnectAttempts = 0;
   bool _online = false;
   bool _disposed = false;
+  final _changes = StreamController<void>.broadcast(sync: true);
+
+  /// Fires whenever [state] or [online] changes, for a panel that shows the
+  /// device. Not part of the protocol.
+  Stream<void> get changes => _changes.stream;
 
   String get id => spec.descriptor.id;
 
@@ -132,6 +137,7 @@ class VirtualDevice {
     await _connect();
     _reconnectAttempts = 0;
     _online = true;
+    _changed();
     await _publishInfo();
     await _publishAvailability(AvailabilityStatus.online);
     await _publishState();
@@ -147,9 +153,25 @@ class VirtualDevice {
     _reconnectTimer = null;
     if (!_online) return;
     _online = false;
+    _changed();
     _cancelTimers();
     await _publishAvailability(AvailabilityStatus.offline);
     await _connection.disconnect();
+  }
+
+  /// Someone used the device itself (its button, a wall switch). An
+  /// unplugged device has no power, so nothing happens then.
+  Future<void> pressLocal(Map<String, CapabilityPatch> patches) async {
+    if (!_online || !model.applyLocal(patches)) return;
+    await _publishState();
+    _ensurePositionTimer();
+  }
+
+  /// Carries on from [snapshot] (see [DeviceModel.restore]). Call while the
+  /// device is offline, before [goOnline].
+  void restore(Map<String, CapabilityState> snapshot) {
+    model.restore(snapshot);
+    _changed();
   }
 
   /// [goOffline] plus releasing the connection. The device cannot be reused.
@@ -158,6 +180,7 @@ class VirtualDevice {
     await goOffline();
     _disposed = true;
     await _messages.cancel();
+    await _changes.close();
     await _link.cancel();
     await _connection.dispose();
   }
@@ -205,8 +228,13 @@ class VirtualDevice {
         retain: true,
       );
 
+  void _changed() {
+    if (!_changes.isClosed) _changes.add(null);
+  }
+
   Future<void> _publishState() async {
     if (!_online) return;
+    _changed();
     await _connection.publishText(
       _topic(DeviceChannel.state),
       jsonEncode(StatePayload.encode(model.snapshot(), ts: _ts).toJson()),
@@ -219,6 +247,7 @@ class VirtualDevice {
   void _onLink(MqttConnectionState state) {
     if (state == MqttConnectionState.disconnected && _online) {
       _online = false;
+      _changed();
       _cancelTimers();
       _scheduleRetry(goOnline);
     }

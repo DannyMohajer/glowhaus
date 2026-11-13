@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glowhaus/data/device_repository.dart';
 import 'package:glowhaus/data/home_repository.dart';
 import 'package:glowhaus/features/connection/cubit/connection_settings_cubit.dart';
+import 'package:glowhaus/features/demo/cubit/devices_panel_cubit.dart';
+import 'package:glowhaus/features/demo/view/demo_panel_host.dart';
 import 'package:glowhaus/features/feedback/app_cubits.dart';
 import 'package:glowhaus/features/settings/cubit/settings_cubit.dart';
 import 'package:glowhaus/features/settings/cubit/settings_state.dart';
@@ -18,6 +20,8 @@ class GlowhausApp extends StatelessWidget {
     required this.homes,
     required this.devices,
     required this.router,
+    this.demo,
+    this.panelOpen = false,
     super.key,
   });
 
@@ -30,12 +34,21 @@ class GlowhausApp extends StatelessWidget {
   final DeviceRepository devices;
   final GoRouter router;
 
+  /// The demo's device side, when the app runs the demo home.
+  final DemoSetup? demo;
+
+  /// Start with the devices panel open (the app was opened at `/demo`).
+  final bool panelOpen;
+
   @override
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider<HomeRepository>.value(value: homes),
         RepositoryProvider<DeviceRepository>.value(value: devices),
+        RepositoryProvider<DemoSetup?>.value(value: demo),
+        if (demo case final demo?)
+          RepositoryProvider<DemoSetup>.value(value: demo),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -45,6 +58,18 @@ class GlowhausApp extends StatelessWidget {
             create: (_) => ConnectionCubit(devices),
           ),
           BlocProvider<FeedbackCubit>(create: (_) => FeedbackCubit(devices)),
+          BlocProvider<DemoPanelCubit>(
+            create: (_) => DemoPanelCubit(open: panelOpen && demo != null),
+          ),
+          if (demo case final demo?)
+            BlocProvider<DevicesPanelCubit>(
+              create: (_) => DevicesPanelCubit(
+                home: demo.demo.home,
+                traffic: demo.demo.traffic,
+                away: demo.away,
+                initiallyAway: demo.demo.devicesAway,
+              ),
+            ),
         ],
         child: BlocBuilder<SettingsCubit, SettingsState>(
           builder: (context, state) {

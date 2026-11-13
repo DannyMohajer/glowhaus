@@ -696,4 +696,67 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get connectionInvalidUsername => 'Enter a username.';
+
+  @override
+  String get panelTitle => 'Devices';
+
+  @override
+  String get panelSubtitle =>
+      'The other side of the protocol: twelve virtual devices on an MQTT broker inside this page.';
+
+  @override
+  String get panelOpen => 'Devices';
+
+  @override
+  String get panelClose => 'Close the devices panel';
+
+  @override
+  String get panelOpenTab => 'Open in a new tab';
+
+  @override
+  String get panelPlugged => 'Plugged in';
+
+  @override
+  String panelPlugDevice(String device) {
+    return '$device plugged in';
+  }
+
+  @override
+  String panelPress(String device) {
+    return 'Press the button on $device';
+  }
+
+  @override
+  String get panelTraffic => 'MQTT traffic';
+
+  @override
+  String get panelTrafficEmpty => 'Nothing yet. Tap something in the app.';
+
+  @override
+  String panelTrafficSent(String device) {
+    return '$device sent';
+  }
+
+  @override
+  String panelTrafficReceived(String device) {
+    return '$device received';
+  }
+
+  @override
+  String get panelAway =>
+      'The devices are running in another tab. Close it to bring them back here.';
+
+  @override
+  String get devicesTabJoining => 'Connecting to the demo…';
+
+  @override
+  String get devicesTabNoHost =>
+      'No Glowhaus demo is open in this browser. Open it in another tab, then try again.';
+
+  @override
+  String get devicesTabRetry => 'Try again';
+
+  @override
+  String get devicesTabHint =>
+      'These devices talk MQTT to the app in your other tab. Close this tab and they go home.';
 }

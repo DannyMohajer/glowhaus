@@ -1251,6 +1251,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter a username.'**
   String get connectionInvalidUsername;
+
+  /// No description provided for @panelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Devices'**
+  String get panelTitle;
+
+  /// No description provided for @panelSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The other side of the protocol: twelve virtual devices on an MQTT broker inside this page.'**
+  String get panelSubtitle;
+
+  /// No description provided for @panelOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Devices'**
+  String get panelOpen;
+
+  /// No description provided for @panelClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close the devices panel'**
+  String get panelClose;
+
+  /// No description provided for @panelOpenTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in a new tab'**
+  String get panelOpenTab;
+
+  /// No description provided for @panelPlugged.
+  ///
+  /// In en, this message translates to:
+  /// **'Plugged in'**
+  String get panelPlugged;
+
+  /// No description provided for @panelPlugDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'{device} plugged in'**
+  String panelPlugDevice(String device);
+
+  /// No description provided for @panelPress.
+  ///
+  /// In en, this message translates to:
+  /// **'Press the button on {device}'**
+  String panelPress(String device);
+
+  /// No description provided for @panelTraffic.
+  ///
+  /// In en, this message translates to:
+  /// **'MQTT traffic'**
+  String get panelTraffic;
+
+  /// No description provided for @panelTrafficEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing yet. Tap something in the app.'**
+  String get panelTrafficEmpty;
+
+  /// No description provided for @panelTrafficSent.
+  ///
+  /// In en, this message translates to:
+  /// **'{device} sent'**
+  String panelTrafficSent(String device);
+
+  /// No description provided for @panelTrafficReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'{device} received'**
+  String panelTrafficReceived(String device);
+
+  /// No description provided for @panelAway.
+  ///
+  /// In en, this message translates to:
+  /// **'The devices are running in another tab. Close it to bring them back here.'**
+  String get panelAway;
+
+  /// No description provided for @devicesTabJoining.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting to the demo…'**
+  String get devicesTabJoining;
+
+  /// No description provided for @devicesTabNoHost.
+  ///
+  /// In en, this message translates to:
+  /// **'No Glowhaus demo is open in this browser. Open it in another tab, then try again.'**
+  String get devicesTabNoHost;
+
+  /// No description provided for @devicesTabRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get devicesTabRetry;
+
+  /// No description provided for @devicesTabHint.
+  ///
+  /// In en, this message translates to:
+  /// **'These devices talk MQTT to the app in your other tab. Close this tab and they go home.'**
+  String get devicesTabHint;
 }
 
 class _AppLocalizationsDelegate

@@ -372,5 +372,50 @@
   "connectionInvalidPort": "A port is a number from 1 to 65535.",
   "connectionInvalidPath": "The path starts with /.",
   "connectionInvalidHome": "Lowercase letters, digits, - and _, up to 32.",
-  "connectionInvalidUsername": "Enter a username."
+  "connectionInvalidUsername": "Enter a username.",
+  "panelTitle": "Devices",
+  "panelSubtitle": "The other side of the protocol: twelve virtual devices on an MQTT broker inside this page.",
+  "panelOpen": "Devices",
+  "panelClose": "Close the devices panel",
+  "panelOpenTab": "Open in a new tab",
+  "panelPlugged": "Plugged in",
+  "panelPlugDevice": "{device} plugged in",
+  "@panelPlugDevice": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "panelPress": "Press the button on {device}",
+  "@panelPress": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "panelTraffic": "MQTT traffic",
+  "panelTrafficEmpty": "Nothing yet. Tap something in the app.",
+  "panelTrafficSent": "{device} sent",
+  "@panelTrafficSent": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "panelTrafficReceived": "{device} received",
+  "@panelTrafficReceived": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "panelAway": "The devices are running in another tab. Close it to bring them back here.",
+  "devicesTabJoining": "Connecting to the demo…",
+  "devicesTabNoHost": "No Glowhaus demo is open in this browser. Open it in another tab, then try again.",
+  "devicesTabRetry": "Try again",
+  "devicesTabHint": "These devices talk MQTT to the app in your other tab. Close this tab and they go home."
 }

@@ -191,5 +191,22 @@
   "connectionInvalidPort": "Port 1 ile 65535 arasında bir sayıdır.",
   "connectionInvalidPath": "Yol / ile başlar.",
   "connectionInvalidHome": "Küçük harf, rakam, - ve _, en fazla 32.",
-  "connectionInvalidUsername": "Bir kullanıcı adı gir."
+  "connectionInvalidUsername": "Bir kullanıcı adı gir.",
+  "panelTitle": "Cihazlar",
+  "panelSubtitle": "Protokolün öbür ucu: bu sayfanın içindeki bir MQTT broker'ına bağlı on iki sanal cihaz.",
+  "panelOpen": "Cihazlar",
+  "panelClose": "Cihaz panelini kapat",
+  "panelOpenTab": "Yeni sekmede aç",
+  "panelPlugged": "Prize takılı",
+  "panelPlugDevice": "{device} prize takılı",
+  "panelPress": "{device} üzerindeki düğmeye bas",
+  "panelTraffic": "MQTT trafiği",
+  "panelTrafficEmpty": "Henüz bir şey yok. Uygulamada bir şeye dokun.",
+  "panelTrafficSent": "{device} gönderdi",
+  "panelTrafficReceived": "{device} aldı",
+  "panelAway": "Cihazlar başka bir sekmede çalışıyor. Buraya dönmeleri için o sekmeyi kapat.",
+  "devicesTabJoining": "Demoya bağlanıyor…",
+  "devicesTabNoHost": "Bu tarayıcıda açık bir Glowhaus demosu yok. Başka bir sekmede aç ve tekrar dene.",
+  "devicesTabRetry": "Tekrar dene",
+  "devicesTabHint": "Bu cihazlar diğer sekmendeki uygulamayla MQTT üzerinden konuşur. Bu sekmeyi kapatırsan geri dönerler."
 }

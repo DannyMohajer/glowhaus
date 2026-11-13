@@ -550,6 +550,67 @@ void main() {
     });
   });
 
+  test('a press on the device itself reports state, with no ack', () {
+    _run((wire, home) {
+      final lamp = home.device('lr-lamp')!;
+      final wasOn = (lamp.state['onOff']! as OnOffState).on;
+      var changes = 0;
+      lamp.changes.listen((_) => changes++);
+      wire.received.clear();
+      unawaited(lamp.pressLocal({'onOff': CapabilityPatch.onOff(on: !wasOn)}));
+      wire.async.elapse(const Duration(milliseconds: 100));
+      expect(wire.states('lr-lamp').last.state['onOff'], {'on': !wasOn});
+      expect(wire.on('lr-lamp', DeviceChannel.ack), isEmpty);
+      expect(changes, greaterThan(0));
+
+      // Pressing what it already is changes nothing and says nothing.
+      wire.received.clear();
+      unawaited(lamp.pressLocal({'onOff': CapabilityPatch.onOff(on: !wasOn)}));
+      wire.async.elapse(const Duration(milliseconds: 100));
+      expect(wire.states('lr-lamp'), isEmpty);
+
+      // Unplugged: no power, so the button does nothing.
+      unawaited(home.setOnline('lr-lamp', online: false));
+      wire.async.elapse(const Duration(milliseconds: 100));
+      wire.received.clear();
+      unawaited(lamp.pressLocal({'onOff': CapabilityPatch.onOff(on: wasOn)}));
+      wire.async.elapse(const Duration(milliseconds: 100));
+      expect(wire.states('lr-lamp'), isEmpty);
+      expect(lamp.state['onOff'], CapabilityState.onOff(on: !wasOn));
+    });
+  });
+
+  test('a home snapshot survives the trip and resumes where it was', () {
+    _run((wire, home) {
+      unawaited(
+        home.device('lr-lamp')!.pressLocal({
+          'onOff': const CapabilityPatch.onOff(on: false),
+        }),
+      );
+      unawaited(home.setOnline('kt-switch', online: false));
+      wire.async.elapse(const Duration(milliseconds: 100));
+      final snapshot = {
+        for (final MapEntry(:key, :value) in home.snapshot().entries)
+          key: DeviceSnapshot.fromJson(
+            jsonDecode(jsonEncode(value.toJson())) as Map<String, Object?>,
+            home.device(key)!.spec.descriptor.capabilities,
+          ),
+      };
+      unawaited(home.stop());
+      wire.async.elapse(const Duration(milliseconds: 100));
+
+      unawaited(home.resume(snapshot));
+      wire.async.elapse(const Duration(milliseconds: 100));
+      expect(home.device('lr-lamp')!.online, isTrue);
+      expect(
+        home.stateOf('lr-lamp')!['onOff'],
+        const CapabilityState.onOff(on: false),
+      );
+      expect(home.device('kt-switch')!.online, isFalse);
+      expect(wire.states('lr-lamp').last.state['onOff'], {'on': false});
+    });
+  });
+
   test('ambient drift publishes state without a command', () {
     _run(ambientInterval: const Duration(seconds: 1), (wire, home) {
       wire.received.clear();

@@ -25,6 +25,29 @@ class DeviceSpec {
   final double onWatts;
 }
 
+/// One device at a moment: its state and whether it is on the network.
+@immutable
+class DeviceSnapshot {
+  const new({required this.state, required this.online});
+
+  /// Decodes against [capabilities]; unknown entries are dropped.
+  factory fromJson(Map<String, Object?> json, List<Capability> capabilities) =>
+      DeviceSnapshot(
+        state: StatePayload.fromJson({'ts': 0, 'state': json['state']})
+            .decode(capabilities),
+        online: json['online'] == true,
+      );
+
+  final Map<String, CapabilityState> state;
+  final bool online;
+
+  /// The wire form of protocol section 7, plus `online`.
+  Map<String, Object?> toJson() => {
+    'state': StatePayload.encode(state, ts: 0).toJson()['state'],
+    'online': online,
+  };
+}
+
 /// The behaviour of one device, with no I/O: it takes `set` payloads and
 /// answers with `ack` payloads and a new state, exactly as section 8 of
 /// `docs/protocol.md` prescribes (atomic commands, the documented error
@@ -124,6 +147,33 @@ class DeviceModel {
       ),
       applied: true,
     );
+  }
+
+  /// A change made at the device itself: its own button, a wall switch, a
+  /// hand on the curtain. No command and no ack, only a new state (protocol
+  /// section 7: devices report local changes). Returns whether anything
+  /// changed.
+  bool applyLocal(Map<String, CapabilityPatch> patches) {
+    var changed = false;
+    for (final MapEntry(key: id, value: patch) in patches.entries) {
+      final next = patch.applyTo(state[id]);
+      if (next != null && next != state[id]) {
+        state[id] = next;
+        changed = true;
+      }
+    }
+    if (changed) _derive();
+    return changed;
+  }
+
+  /// Takes over [snapshot] as the current state, for a device that moves
+  /// to another runtime (the demo's second browser tab) and must carry on
+  /// where it was. Capabilities it does not have are ignored.
+  void restore(Map<String, CapabilityState> snapshot) {
+    for (final MapEntry(:key, :value) in snapshot.entries) {
+      if (state.containsKey(key)) state[key] = value;
+    }
+    _derive();
   }
 
   /// Advances moving covers by one step. Returns whether anything changed.

@@ -191,5 +191,22 @@
   "connectionInvalidPort": "پورت عددی از ۱ تا ۶۵۵۳۵ است.",
   "connectionInvalidPath": "مسیر با / شروع می‌شود.",
   "connectionInvalidHome": "حروف کوچک لاتین، رقم، - و _، حداکثر ۳۲ نویسه.",
-  "connectionInvalidUsername": "یک نام کاربری وارد کن."
+  "connectionInvalidUsername": "یک نام کاربری وارد کن.",
+  "panelTitle": "دستگاه‌ها",
+  "panelSubtitle": "آن سوی پروتکل: دوازده دستگاه مجازی روی یک بروکر MQTT درون همین صفحه.",
+  "panelOpen": "دستگاه‌ها",
+  "panelClose": "بستن پنل دستگاه‌ها",
+  "panelOpenTab": "باز کردن در زبانه‌ی جدید",
+  "panelPlugged": "به برق وصل",
+  "panelPlugDevice": "{device} به برق وصل است",
+  "panelPress": "دکمه‌ی روی {device} را بزن",
+  "panelTraffic": "ترافیک MQTT",
+  "panelTrafficEmpty": "هنوز چیزی نیست. در برنامه روی چیزی بزن.",
+  "panelTrafficSent": "{device} فرستاد",
+  "panelTrafficReceived": "{device} دریافت کرد",
+  "panelAway": "دستگاه‌ها در زبانه‌ی دیگری اجرا می‌شوند. آن را ببند تا به اینجا برگردند.",
+  "devicesTabJoining": "در حال اتصال به نسخه‌ی نمایشی…",
+  "devicesTabNoHost": "هیچ نسخه‌ی نمایشی Glowhaus در این مرورگر باز نیست. آن را در زبانه‌ی دیگری باز کن و دوباره امتحان کن.",
+  "devicesTabRetry": "دوباره امتحان کن",
+  "devicesTabHint": "این دستگاه‌ها با برنامه در زبانه‌ی دیگرت از راه MQTT حرف می‌زنند. این زبانه را ببندی، به خانه برمی‌گردند."
 }

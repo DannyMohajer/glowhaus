@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 ///
 /// ```text
 /// /welcome
+/// /demo                                  home, devices panel open
 /// shell (bottom nav or side rail)
 ///   /home
 ///   /rooms                                rooms
@@ -26,6 +27,8 @@ GoRouter createRouter({String initialLocation = Routes.welcome}) => GoRouter(
   initialLocation: initialLocation,
   routes: [
     GoRoute(path: '/', redirect: (_, _) => Routes.welcome),
+    // main() opens the devices panel for this route; the page is home.
+    GoRoute(path: Routes.demo, redirect: (_, _) => Routes.home),
     GoRoute(path: Routes.welcome, builder: (_, _) => const WelcomeScreen()),
     StatefulShellRoute.indexedStack(
       builder: (_, _, navigationShell) =>

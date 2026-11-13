@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:glowhaus_device/glowhaus_device.dart';
@@ -32,7 +33,7 @@ class SimulatedTransport implements Transport {
     home = VirtualHome(
       homeId: homeId,
       specs: devices,
-      connectionFactory: (_) => this.broker.client(),
+      connectionFactory: (id) => traffic.tap(this.broker.client(), who: id),
       config: config,
       stateDelay: stateDelay,
       positionInterval: positionInterval,
@@ -69,6 +70,14 @@ class SimulatedTransport implements Transport {
   /// The devices.
   late final VirtualHome home;
 
+  /// What the devices send and receive, for the demo's device panel.
+  final MqttTrafficLog traffic = MqttTrafficLog();
+
+  /// Whether the devices run somewhere else right now (the demo's second
+  /// browser tab); see [releaseDevices].
+  bool get devicesAway => _devicesAway;
+  bool _devicesAway = false;
+
   late final MqttTransport _app;
   late final StreamSubscription<TransportStatus> _appStatus;
   final _statusController = StreamController<TransportStatus>.broadcast();
@@ -102,7 +111,7 @@ class SimulatedTransport implements Transport {
     if (_status != TransportStatus.connecting) return;
     // The app first, so it sees the devices' announces as they come up.
     await _app.connect();
-    await home.start();
+    if (!_devicesAway) await home.start();
     _setStatus(_app.currentStatus);
   }
 
@@ -121,6 +130,7 @@ class SimulatedTransport implements Transport {
     await _appStatus.cancel();
     await _app.dispose();
     await home.dispose();
+    await traffic.close();
     await broker.close();
     await _statusController.close();
   }
@@ -134,6 +144,56 @@ class SimulatedTransport implements Transport {
   /// Takes a device off the network or brings it back, as a power cut would.
   Future<void> setDeviceOnline(String deviceId, {required bool online}) =>
       home.setOnline(deviceId, online: online);
+
+  /// Hands the devices to another runtime that will connect them to this
+  /// [broker] (the demo's second tab): each says goodbye and disconnects,
+  /// and this returns where they were so the other side can carry on.
+  Future<Map<String, DeviceSnapshot>> releaseDevices() async {
+    final snapshot = home.snapshot();
+    _devicesAway = true;
+    await home.stop();
+    return snapshot;
+  }
+
+  /// Takes the devices back after [releaseDevices], each from what the
+  /// broker last retained for it: its state, and whether it was online.
+  Future<void> reclaimDevices() async {
+    if (!_devicesAway) return;
+    _devicesAway = false;
+    const topics = TopicCodec();
+    final from = <String, DeviceSnapshot>{};
+    for (final device in home.devices.values) {
+      final state = broker.retained(
+        topics.device(homeId, device.id, DeviceChannel.state),
+      );
+      final availability = broker.retained(
+        topics.device(homeId, device.id, DeviceChannel.availability),
+      );
+      try {
+        from[device.id] = DeviceSnapshot(
+          state: state == null || state.payload.isEmpty
+              ? device.state
+              : StatePayload.fromJson(
+                  jsonDecode(state.text) as Map<String, dynamic>,
+                ).decode(device.spec.descriptor.capabilities),
+          online: availability == null || _cameBack(availability),
+        );
+      } on Object {
+        // A malformed retained message: carry on from what it last had.
+      }
+    }
+    await home.resume(from);
+  }
+
+  /// Online, unless someone unplugged the device on purpose. An offline
+  /// message without `ts` is a last will (protocol section 6: a will cannot
+  /// know the time), so the other runtime vanished, not the device.
+  static bool _cameBack(MqttMessage availability) {
+    final payload = AvailabilityPayload.fromJson(
+      jsonDecode(availability.text) as Map<String, dynamic>,
+    );
+    return payload.status == AvailabilityStatus.online || payload.ts == null;
+  }
 
   /// Cuts the app's link to the broker; it reconnects by itself.
   void dropLink() => broker.drop(appClientId);

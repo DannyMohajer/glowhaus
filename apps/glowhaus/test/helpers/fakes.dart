@@ -11,6 +11,7 @@ import 'package:glowhaus/features/connection/cubit/connection_settings_cubit.dar
 import 'package:glowhaus/features/connection/data/broker_transports.dart';
 import 'package:glowhaus/features/connection/data/connection_settings.dart';
 import 'package:glowhaus/features/connection/data/connection_store.dart';
+import 'package:glowhaus/features/demo/view/demo_panel_host.dart';
 import 'package:glowhaus/features/settings/cubit/settings_cubit.dart';
 import 'package:glowhaus/features/settings/cubit/settings_state.dart';
 import 'package:glowhaus/features/settings/data/app_platform.dart';
@@ -247,6 +248,8 @@ extension AppTester on WidgetTester {
     SettingsCubit? settings,
     ConnectionSettingsCubit? connection,
     TestHome? home,
+    DemoSetup? demo,
+    bool panelOpen = false,
   }) async {
     view
       ..physicalSize = size
@@ -265,6 +268,8 @@ extension AppTester on WidgetTester {
             buildConnection(devices: data.devices, demo: data.transport),
         homes: data.homes,
         devices: data.devices,
+        demo: demo,
+        panelOpen: panelOpen,
         router: router,
       ),
     );

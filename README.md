@@ -13,6 +13,13 @@ Every device is simulated in the browser, so tap anything; Settings →
 Simulation adds network delay and failures to show optimistic updates and
 rollback.
 
+**See the protocol:** [open with the devices panel](https://dannymohajer.github.io/glowhaus/#/demo).
+The panel is the other end of the conversation: twelve virtual devices with
+their own buttons and plugs, and the MQTT messages they send and receive.
+Its arrow button moves the devices into a second browser tab, where they
+keep talking MQTT to the app over a `BroadcastChannel`; close that tab and
+they come home.
+
 ## Screenshots
 
 | Dashboard | Dark | Persian (RTL) | Thermostat |
@@ -32,6 +39,9 @@ Wide windows show rooms, room and device side by side:
   outlets with live power, door lock, sensors
 - Optimistic control with pending state and rollback on failure or timeout
 - Simulated transport with adjustable latency and failure rate
+- A devices panel next to the app (`#/demo`): physical buttons, plugs and
+  live MQTT traffic, and a two-tab mode over `BroadcastChannel`
+- Connection settings: the demo, or a real MQTT broker over TLS / WSS
 - Phone and tablet / desktop layouts from one set of routes
 - Light / dark / system theme, runtime accent colour, reduced motion
 - English, Persian (RTL), Turkish with live switching
