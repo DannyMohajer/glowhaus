@@ -714,17 +714,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get panelOpenTab => 'Open in a new tab';
 
   @override
+  String get panelHint =>
+      'This is the device side: press a device\'s own buttons, or unplug it to see the app react.';
+
+  @override
+  String get panelPower => 'Power';
+
+  @override
+  String panelPowerDevice(String device) {
+    return 'Power plug of $device';
+  }
+
+  @override
+  String panelHandOn(String device, String action) {
+    return '$device: $action';
+  }
+
+  @override
+  String get panelHandButton => 'Press its button';
+
+  @override
+  String get panelHandLock => 'Keypad: lock';
+
+  @override
+  String get panelHandUnlock => 'Keypad: unlock';
+
+  @override
+  String get panelHandOpenDoor => 'Open the door';
+
+  @override
+  String get panelHandCloseDoor => 'Close the door';
+
+  @override
+  String get panelHandMotion => 'Trigger motion';
+
+  @override
   String get panelPlugged => 'Plugged in';
-
-  @override
-  String panelPlugDevice(String device) {
-    return '$device plugged in';
-  }
-
-  @override
-  String panelPress(String device) {
-    return 'Press the button on $device';
-  }
 
   @override
   String get panelTraffic => 'MQTT traffic';

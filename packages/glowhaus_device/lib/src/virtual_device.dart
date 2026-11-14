@@ -171,6 +171,14 @@ class VirtualDevice {
     _ensurePositionTimer();
   }
 
+  /// The device's own sensors notice something (see
+  /// [DeviceModel.applyReadings]) and it reports the new state. An
+  /// unplugged device notices nothing.
+  Future<void> sense(Map<String, CapabilityState> readings) async {
+    if (!_online || !model.applyReadings(readings)) return;
+    await _publishState();
+  }
+
   /// Carries on from [snapshot] (see [DeviceModel.restore]). Call while the
   /// device is offline, before [goOnline].
   void restore(Map<String, CapabilityState> snapshot) {

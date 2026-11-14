@@ -378,23 +378,34 @@
   "panelOpen": "Devices",
   "panelClose": "Close the devices panel",
   "panelOpenTab": "Open in a new tab",
+  "panelHint": "This is the device side: press a device's own buttons, or unplug it to see the app react.",
+  "panelPower": "Power",
+  "panelPowerDevice": "Power plug of {device}",
+  "@panelPowerDevice": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "panelHandOn": "{device}: {action}",
+  "@panelHandOn": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      },
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "panelHandButton": "Press its button",
+  "panelHandLock": "Keypad: lock",
+  "panelHandUnlock": "Keypad: unlock",
+  "panelHandOpenDoor": "Open the door",
+  "panelHandCloseDoor": "Close the door",
+  "panelHandMotion": "Trigger motion",
   "panelPlugged": "Plugged in",
-  "panelPlugDevice": "{device} plugged in",
-  "@panelPlugDevice": {
-    "placeholders": {
-      "device": {
-        "type": "String"
-      }
-    }
-  },
-  "panelPress": "Press the button on {device}",
-  "@panelPress": {
-    "placeholders": {
-      "device": {
-        "type": "String"
-      }
-    }
-  },
   "panelTraffic": "MQTT traffic",
   "panelTrafficEmpty": "Nothing yet. Tap something in the app.",
   "panelTrafficSent": "{device} sent",

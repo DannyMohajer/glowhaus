@@ -272,10 +272,15 @@ Other decisions:
 
 The devices panel (`features/demo`) talks to the `VirtualHome` inside
 `SimulatedTransport` directly, never through the app's repository: it is
-the other end of the protocol. A press on a device's own button is a local
-change that the device reports as `state` (no command, no ack); a plug pulls
-the device off the broker with a clean goodbye. Every device connection is
-tapped by an `MqttTrafficLog`, which the panel lists.
+the other end of the protocol. Each device row keeps two controls apart
+and labels both. The device's own hardware (`HandAction`: a lamp's button,
+the lock's keypad, opening or closing the door, walking past the motion
+sensor) is a local change that the device reports as `state`, with no
+command and no ack. Buttons and the keypad go through
+`VirtualDevice.pressLocal`; sensor readings, which no command may set, go
+through `VirtualDevice.sense`. The "Power" switch with the plug icon pulls
+the device off the broker with a clean goodbye, and plugs it back in. Every
+device connection is tapped by an `MqttTrafficLog`, which the panel lists.
 
 Two-tab mode: `DemoBridgeHost` (app tab) and `RemoteDemoHome` (`#/devices`
 tab) talk over a `BridgePort`, a `BroadcastChannel` in the browser. The

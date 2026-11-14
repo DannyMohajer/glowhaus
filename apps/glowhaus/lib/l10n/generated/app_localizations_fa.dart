@@ -714,17 +714,42 @@ class AppLocalizationsFa extends AppLocalizations {
   String get panelOpenTab => 'باز کردن در زبانه‌ی جدید';
 
   @override
+  String get panelHint =>
+      'این سمت دستگاه‌هاست: دکمه‌های خود دستگاه را بزن، یا آن را از برق بکش تا واکنش برنامه را ببینی.';
+
+  @override
+  String get panelPower => 'برق';
+
+  @override
+  String panelPowerDevice(String device) {
+    return 'دوشاخه‌ی برق $device';
+  }
+
+  @override
+  String panelHandOn(String device, String action) {
+    return '$device: $action';
+  }
+
+  @override
+  String get panelHandButton => 'دکمه‌اش را بزن';
+
+  @override
+  String get panelHandLock => 'صفحه‌کلید: قفل کن';
+
+  @override
+  String get panelHandUnlock => 'صفحه‌کلید: باز کن';
+
+  @override
+  String get panelHandOpenDoor => 'در را باز کن';
+
+  @override
+  String get panelHandCloseDoor => 'در را ببند';
+
+  @override
+  String get panelHandMotion => 'از جلویش رد شو';
+
+  @override
   String get panelPlugged => 'به برق وصل';
-
-  @override
-  String panelPlugDevice(String device) {
-    return '$device به برق وصل است';
-  }
-
-  @override
-  String panelPress(String device) {
-    return 'دکمه‌ی روی $device را بزن';
-  }
 
   @override
   String get panelTraffic => 'ترافیک MQTT';

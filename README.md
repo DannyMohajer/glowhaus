@@ -73,8 +73,9 @@ Wide windows show rooms, room and device side by side:
 - `glowhaus_device`: the device side as a pure Dart engine that depends only
   on the protocol package, the proof that the document is enough to build
   a device
-- The devices panel: each device's own button and plug, and every MQTT
-  message the devices send and receive
+- The devices panel: each device's own hardware (button, keypad, door,
+  motion) and its power plug, and every MQTT message the devices send and
+  receive
 - Two-tab mode: the devices move to a second tab with their state and keep
   talking MQTT to the app's broker; they come back when the tab closes,
   online even if it vanished without a goodbye

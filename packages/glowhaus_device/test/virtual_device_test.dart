@@ -580,6 +580,51 @@ void main() {
     });
   });
 
+  test('a sensor reading is reported as state, read-only or not', () {
+    _run((wire, home) {
+      final door = home.device('en-door')!;
+      wire.received.clear();
+      unawaited(
+        door.sense({
+          'contactSensor': const CapabilityState.contactSensor(open: true),
+        }),
+      );
+      wire.async.elapse(const Duration(milliseconds: 100));
+      expect(wire.states('en-door').last.state['contactSensor'], {
+        'open': true,
+      });
+      expect(wire.on('en-door', DeviceChannel.ack), isEmpty);
+
+      // A reading for a capability the device lacks, or of another kind,
+      // changes nothing and says nothing.
+      wire.received.clear();
+      unawaited(
+        door.sense({
+          'motionSensor': const CapabilityState.motionSensor(motion: true),
+          'contactSensor': const CapabilityState.onOff(on: false),
+        }),
+      );
+      wire.async.elapse(const Duration(milliseconds: 100));
+      expect(wire.states('en-door'), isEmpty);
+
+      // Unplugged, it notices nothing.
+      unawaited(home.setOnline('en-door', online: false));
+      wire.async.elapse(const Duration(milliseconds: 100));
+      wire.received.clear();
+      unawaited(
+        door.sense({
+          'contactSensor': const CapabilityState.contactSensor(open: false),
+        }),
+      );
+      wire.async.elapse(const Duration(milliseconds: 100));
+      expect(wire.states('en-door'), isEmpty);
+      expect(
+        door.state['contactSensor'],
+        const CapabilityState.contactSensor(open: true),
+      );
+    });
+  });
+
   test('a home snapshot survives the trip and resumes where it was', () {
     _run((wire, home) {
       unawaited(

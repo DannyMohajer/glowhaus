@@ -6,6 +6,48 @@ import 'package:glowhaus_domain/glowhaus_domain.dart';
 import 'package:glowhaus_transport/glowhaus_transport.dart';
 import 'package:meta/meta.dart';
 
+/// What a person can do with a device's own hardware, as the devices panel
+/// offers it. Separate from the plug: this is the device working, the plug
+/// is its power.
+enum HandAction {
+  /// A lamp's, switch's, outlet's or thermostat's own button: flips its
+  /// main switch.
+  button,
+
+  /// The lock's keypad, locking it.
+  lock,
+
+  /// The lock's keypad, unlocking it.
+  unlock,
+
+  /// Opening the door a contact sensor watches.
+  openDoor,
+
+  /// Closing it again.
+  closeDoor,
+
+  /// Walking past a motion sensor.
+  motion,
+}
+
+/// The hand action [device] offers right now, or null when it has none (a
+/// curtain, a climate sensor, a camera).
+HandAction? handAction(Device device) {
+  if (device.has(CapabilityKind.lock)) {
+    return (device.firstState<LockState>()?.locked ?? false)
+        ? HandAction.unlock
+        : HandAction.lock;
+  }
+  if (device.has(CapabilityKind.contactSensor)) {
+    return (device.firstState<ContactSensorState>()?.open ?? false)
+        ? HandAction.closeDoor
+        : HandAction.openDoor;
+  }
+  if (device.has(CapabilityKind.motionSensor)) return HandAction.motion;
+  if (primaryToggle(device) != null) return HandAction.button;
+  return null;
+}
+
 /// What the devices panel shows.
 @immutable
 class DevicesPanelState {
@@ -48,8 +90,10 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
     Stream<bool>? away,
     bool initiallyAway = false,
     this.trafficShown = 40,
+    DateTime Function()? clock,
   }) : _home = home,
        _traffic = traffic,
+       _clock = clock ?? DateTime.now,
        super(DevicesPanelState(away: initiallyAway)) {
     _refresh();
     _subscriptions = [
@@ -62,6 +106,7 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
 
   final VirtualHome _home;
   final MqttTrafficLog _traffic;
+  final DateTime Function() _clock;
 
   /// How many of the latest messages the panel lists.
   final int trafficShown;
@@ -71,14 +116,44 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
   Future<void> setPlugged(String deviceId, {required bool plugged}) =>
       _home.setOnline(deviceId, online: plugged);
 
-  /// Presses the device's own button: its main switch flips, the device
-  /// reports the new state, and the app follows.
+  /// Uses the device's own hardware ([HandAction]): a lamp's button flips
+  /// its main switch, a keypad locks or unlocks, a door opens or closes, a
+  /// motion sensor sees someone. The device reports the new state, with no
+  /// command and no ack, and the app follows.
   Future<void> press(String deviceId) async {
     final device = _home.device(deviceId);
     if (device == null) return;
-    final toggle = primaryToggle(_view(device));
-    if (toggle == null) return;
-    await device.pressLocal(toggle.patchesFor(on: !toggle.on));
+    final view = _view(device);
+    final action = handAction(view);
+    switch (action) {
+      case null:
+        return;
+      case HandAction.lock || HandAction.unlock:
+        final lock = view.capabilitiesOf(CapabilityKind.lock).first;
+        await device.pressLocal({
+          lock.id: CapabilityPatch.lock(locked: action == HandAction.lock),
+        });
+      case HandAction.openDoor || HandAction.closeDoor:
+        await device.sense({
+          for (final contact in view.capabilitiesOf(
+            CapabilityKind.contactSensor,
+          ))
+            contact.id: CapabilityState.contactSensor(
+              open: action == HandAction.openDoor,
+            ),
+        });
+      case HandAction.motion:
+        await device.sense({
+          for (final sensor in view.capabilitiesOf(CapabilityKind.motionSensor))
+            sensor.id: CapabilityState.motionSensor(
+              motion: true,
+              lastMotionAt: _clock().millisecondsSinceEpoch,
+            ),
+        });
+      case HandAction.button:
+        final toggle = primaryToggle(view)!;
+        await device.pressLocal(toggle.patchesFor(on: !toggle.on));
+    }
   }
 
   Device _view(VirtualDevice device) =>

@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide LockState;
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:glowhaus/app/router/routes.dart';
 import 'package:glowhaus/features/connection/data/connection_settings.dart';
@@ -8,6 +9,8 @@ import 'package:glowhaus/features/demo/cubit/devices_panel_cubit.dart';
 import 'package:glowhaus/features/demo/data/demo_browser.dart';
 import 'package:glowhaus/features/demo/view/demo_panel_host.dart';
 import 'package:glowhaus/features/demo/view/devices_panel.dart';
+import 'package:glowhaus/l10n/framework_localizations.dart';
+import 'package:glowhaus/l10n/generated/app_localizations.dart';
 import 'package:glowhaus_domain/glowhaus_domain.dart';
 import 'package:glowhaus_transport/glowhaus_transport.dart';
 import 'package:glowhaus_ui/glowhaus_ui.dart';
@@ -103,6 +106,78 @@ void main() {
       expect(reported.state.values.whereType<OnOffState>().single.on, !before);
     });
 
+    Device of(String id) => panel.state.devices.firstWhere((d) => d.id == id);
+
+    test('each device offers the hand action its hardware has', () {
+      expect(handAction(of('lr-ceiling')), HandAction.button);
+      expect(handAction(of('kt-switch')), HandAction.button);
+      expect(handAction(of('kt-outlet')), HandAction.button);
+      expect(handAction(of('lr-thermostat')), HandAction.button);
+      expect(handAction(of('en-lock')), HandAction.unlock);
+      expect(handAction(of('en-door')), HandAction.openDoor);
+      expect(handAction(of('kt-motion')), HandAction.motion);
+      expect(handAction(of('lr-curtain')), isNull);
+      expect(handAction(of('br-climate')), isNull);
+      expect(handAction(of('en-camera')), isNull);
+    });
+
+    test('the keypad unlocks and locks; no command, only state', () async {
+      await panel.press('en-lock');
+      await pumpEventQueue();
+      expect(of('en-lock').firstState<LockState>()!.locked, isFalse);
+      expect(handAction(of('en-lock')), HandAction.lock);
+      expect(
+        panel.state.traffic.map((t) => t.topic),
+        isNot(contains('glowhaus/demo-home/en-lock/ack')),
+      );
+      await panel.press('en-lock');
+      await pumpEventQueue();
+      expect(of('en-lock').firstState<LockState>()!.locked, isTrue);
+    });
+
+    test('the door opens and closes, and the app hears it', () async {
+      await panel.press('en-door');
+      await pumpEventQueue();
+      expect(of('en-door').firstState<ContactSensorState>()!.open, isTrue);
+      final reported = events
+          .whereType<DeviceStateChanged>()
+          .where((e) => e.deviceId == 'en-door')
+          .last;
+      expect(
+        reported.state.values.whereType<ContactSensorState>().single.open,
+        isTrue,
+      );
+      await panel.press('en-door');
+      await pumpEventQueue();
+      expect(of('en-door').firstState<ContactSensorState>()!.open, isFalse);
+    });
+
+    test('motion needs power: unplugged it sees nothing, plugged in it '
+        'reports the time', () async {
+      final at = DateTime.utc(2026, 11, 14, 9);
+      final timed = DevicesPanelCubit(
+        home: demo.home,
+        traffic: demo.traffic,
+        clock: () => at,
+      );
+      addTearDown(timed.close);
+      await timed.press('kt-motion');
+      await pumpEventQueue();
+      expect(of('kt-motion').firstState<MotionSensorState>()!.motion, isFalse);
+
+      await timed.setPlugged('kt-motion', plugged: true);
+      await pumpEventQueue();
+      await timed.press('kt-motion');
+      await pumpEventQueue();
+      expect(
+        of('kt-motion').firstState<MotionSensorState>(),
+        MotionSensorState(
+          motion: true,
+          lastMotionAt: at.millisecondsSinceEpoch,
+        ),
+      );
+    });
+
     test('pulling the plug takes the device off the network', () async {
       await panel.setPlugged('lr-lamp', plugged: false);
       await pumpEventQueue();
@@ -132,6 +207,93 @@ void main() {
       expect(followed.state.away, isFalse);
       await followed.close();
       await away.close();
+    });
+  });
+
+  group('the panel', () {
+    Future<DevicesPanelCubit> pumpPanel(
+      WidgetTester tester,
+      SimulatedTransport demo,
+    ) async {
+      // Phone width, tall enough that every device row is built.
+      tester.view
+        ..physicalSize = Size(phone.width, 2400)
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.runAsync(demo.connect);
+      final cubit = DevicesPanelCubit(home: demo.home, traffic: demo.traffic);
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            ...FrameworkLocalizations.delegates,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          theme: GlowhausTheme.build(brightness: Brightness.light),
+          home: Scaffold(
+            body: BlocProvider.value(value: cubit, child: const DevicesPanel()),
+          ),
+        ),
+      );
+      await tester.pump();
+      return cubit;
+    }
+
+    testWidgets("says what it is for, and keeps a device's own button "
+        'apart from its power plug', (tester) async {
+      final demo = SimulatedTransport(
+        homeId: DemoHome.homeId,
+        devices: DemoHome.devices(),
+        connectDelay: Duration.zero,
+        ambientInterval: null,
+      );
+      final cubit = await pumpPanel(tester, demo);
+
+      expect(
+        find.text(
+          "This is the device side: press a device's own buttons, or "
+          'unplug it to see the app react.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Press its button'), findsWidgets);
+      expect(find.text('Power'), findsWidgets);
+      expect(find.text('Trigger motion'), findsOneWidget);
+      expect(find.text('Keypad: unlock'), findsOneWidget);
+      expect(find.text('Open the door'), findsOneWidget);
+      expect(find.text('Power'), findsNWidgets(12));
+
+      // The button changes what the device does; it stays online.
+      final wasOn = demo.home.device('lr-ceiling')!.state['onOff']!;
+      await tester.runAsync(() async {
+        await tester.tap(
+          find.bySemanticsLabel('Ceiling light: Press its button'),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+      });
+      await tester.pump();
+      expect(demo.home.device('lr-ceiling')!.state['onOff'], isNot(wasOn));
+      expect(demo.home.device('lr-ceiling')!.online, isTrue);
+
+      // The plug takes it off the network; its button is then dimmed and
+      // does nothing.
+      await tester.runAsync(() async {
+        await tester.tap(find.bySemanticsLabel('Power plug of Ceiling light'));
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+      });
+      await tester.pump();
+      expect(demo.home.device('lr-ceiling')!.online, isFalse);
+      expect(
+        tester.getSemantics(
+          find.bySemanticsLabel('Ceiling light: Press its button'),
+        ),
+        isSemantics(isButton: true, hasEnabledState: true, isEnabled: false),
+      );
+
+      await tester.runAsync(() async {
+        await cubit.close();
+        await demo.dispose();
+      });
     });
   });
 

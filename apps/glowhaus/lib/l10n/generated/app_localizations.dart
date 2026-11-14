@@ -1282,23 +1282,71 @@ abstract class AppLocalizations {
   /// **'Open in a new tab'**
   String get panelOpenTab;
 
+  /// No description provided for @panelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the device side: press a device\'s own buttons, or unplug it to see the app react.'**
+  String get panelHint;
+
+  /// No description provided for @panelPower.
+  ///
+  /// In en, this message translates to:
+  /// **'Power'**
+  String get panelPower;
+
+  /// No description provided for @panelPowerDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Power plug of {device}'**
+  String panelPowerDevice(String device);
+
+  /// No description provided for @panelHandOn.
+  ///
+  /// In en, this message translates to:
+  /// **'{device}: {action}'**
+  String panelHandOn(String device, String action);
+
+  /// No description provided for @panelHandButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Press its button'**
+  String get panelHandButton;
+
+  /// No description provided for @panelHandLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Keypad: lock'**
+  String get panelHandLock;
+
+  /// No description provided for @panelHandUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Keypad: unlock'**
+  String get panelHandUnlock;
+
+  /// No description provided for @panelHandOpenDoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the door'**
+  String get panelHandOpenDoor;
+
+  /// No description provided for @panelHandCloseDoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Close the door'**
+  String get panelHandCloseDoor;
+
+  /// No description provided for @panelHandMotion.
+  ///
+  /// In en, this message translates to:
+  /// **'Trigger motion'**
+  String get panelHandMotion;
+
   /// No description provided for @panelPlugged.
   ///
   /// In en, this message translates to:
   /// **'Plugged in'**
   String get panelPlugged;
-
-  /// No description provided for @panelPlugDevice.
-  ///
-  /// In en, this message translates to:
-  /// **'{device} plugged in'**
-  String panelPlugDevice(String device);
-
-  /// No description provided for @panelPress.
-  ///
-  /// In en, this message translates to:
-  /// **'Press the button on {device}'**
-  String panelPress(String device);
 
   /// No description provided for @panelTraffic.
   ///

@@ -713,17 +713,42 @@ class AppLocalizationsTr extends AppLocalizations {
   String get panelOpenTab => 'Yeni sekmede aç';
 
   @override
+  String get panelHint =>
+      'Burası cihaz tarafı: bir cihazın kendi düğmelerine bas ya da fişini çekip uygulamanın tepkisini gör.';
+
+  @override
+  String get panelPower => 'Güç';
+
+  @override
+  String panelPowerDevice(String device) {
+    return '$device fişi';
+  }
+
+  @override
+  String panelHandOn(String device, String action) {
+    return '$device: $action';
+  }
+
+  @override
+  String get panelHandButton => 'Düğmesine bas';
+
+  @override
+  String get panelHandLock => 'Tuş takımı: kilitle';
+
+  @override
+  String get panelHandUnlock => 'Tuş takımı: kilidi aç';
+
+  @override
+  String get panelHandOpenDoor => 'Kapıyı aç';
+
+  @override
+  String get panelHandCloseDoor => 'Kapıyı kapat';
+
+  @override
+  String get panelHandMotion => 'Hareket tetikle';
+
+  @override
   String get panelPlugged => 'Prize takılı';
-
-  @override
-  String panelPlugDevice(String device) {
-    return '$device prize takılı';
-  }
-
-  @override
-  String panelPress(String device) {
-    return '$device üzerindeki düğmeye bas';
-  }
 
   @override
   String get panelTraffic => 'MQTT trafiği';

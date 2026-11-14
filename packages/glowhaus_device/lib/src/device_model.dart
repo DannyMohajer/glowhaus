@@ -166,6 +166,27 @@ class DeviceModel {
     return changed;
   }
 
+  /// What the device's own sensors notice: a door opening, someone walking
+  /// past. Readings are not commands, so they can change read-only
+  /// capabilities. A reading replaces the state of the capability with that
+  /// id when it is of the same kind; anything else is ignored. Returns
+  /// whether anything changed.
+  bool applyReadings(Map<String, CapabilityState> readings) {
+    var changed = false;
+    for (final MapEntry(key: id, value: reading) in readings.entries) {
+      final current = state[id];
+      if (current == null || current.runtimeType != reading.runtimeType) {
+        continue;
+      }
+      if (current != reading) {
+        state[id] = reading;
+        changed = true;
+      }
+    }
+    if (changed) _derive();
+    return changed;
+  }
+
   /// Takes over [snapshot] as the current state, for a device that moves
   /// to another runtime (the demo's second browser tab) and must carry on
   /// where it was. Capabilities it does not have are ignored.
