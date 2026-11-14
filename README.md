@@ -6,12 +6,13 @@ rollback, a capability-based device model, a device side that anyone can
 implement from the spec, adaptive phone / tablet / desktop layouts, light and
 dark themes, and English, Persian (RTL) and Turkish.
 
-![The app with its devices panel: a tap in the app, a press on a device's own button, the live MQTT traffic, and a lost command rolled back after the timeout](docs/screenshots/demo.gif)
+![The app with its devices panel: a tap in the app, a press on a device's own button, the live MQTT traffic, a lost command rolled back after the timeout, and a device unplugged](docs/screenshots/demo.gif)
 
 *Left, the app. Right, the devices panel: the other end of the protocol. A
 tap in the app is a `set` the device acks and answers with retained
 `state`; the device's own button is a `state` report with no command; a
-command that is never acked is undone after five seconds.*
+command that is never acked is undone after five seconds; pulling a
+device's plug takes it offline with a goodbye.*
 
 **Live:** [the app](https://dannymohajer.github.io/glowhaus/)
 · [with the devices panel](https://dannymohajer.github.io/glowhaus/#/demo)

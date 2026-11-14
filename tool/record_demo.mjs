@@ -1,6 +1,7 @@
 // Records the README animation: the app and its devices panel at `#/demo`,
 // a tap in the app, a press on a device's own button, the live MQTT traffic,
-// and a lost command that the app rolls back after the timeout.
+// a lost command that the app rolls back after the timeout, and a device
+// unplugged with its Power switch.
 //
 //   node tool/record_demo.mjs [baseUrl] [out.gif]
 //
@@ -25,9 +26,9 @@ const out = process.argv[3] ?? 'docs/screenshots/demo.gif';
 const chrome =
   process.env.CHROME ??
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-// Tall enough that the traffic list shows a command's set, ack and state
-// between the devices' ambient readings.
-const viewport = { width: 1280, height: 1240 };
+// Tall enough that the traffic list, below the twelve device rows, shows a
+// command's set, ack and state between the devices' ambient readings.
+const viewport = { width: 1280, height: 1800 };
 const maxTakes = 30;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -187,7 +188,7 @@ async function record(cdp, dir) {
     // 2. The device's own button: a state report, no command.
     await caption("The device's own button: it reports, the app follows");
     await sleep(1200);
-    await click('Press the button on Ceiling light', 'button');
+    await click('Ceiling light: Press its button', 'button');
     await sleep(3200);
 
     // 3. A lost command: pending, then rolled back when the timeout ends.
@@ -206,7 +207,17 @@ async function record(cdp, dir) {
     if (!/didn.t respond/.test(text)) {
       return { ok: false, note: 'second tap was rejected, not lost', list };
     }
-    await sleep(3200);
+    await sleep(2400);
+
+    // 4. The plug, not the device's switch: it says goodbye, the app shows
+    // it offline.
+    await caption('Pull the plug: the device says goodbye, the app shows it offline');
+    await sleep(1200);
+    await click('Power plug of Coffee machine', 'switch');
+    await sleep(3000);
+    if (!(await panelRow('Coffee machine')).includes('Offline')) {
+      return { ok: false, note: 'unplugged device not shown offline', list };
+    }
     await caption('');
     await sleep(600);
     return { ok: true, note: 'usable', list };
