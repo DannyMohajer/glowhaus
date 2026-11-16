@@ -83,7 +83,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1068.SettingsStore>(),
         gh<_i893.SimulationControl>(),
         gh<_i693.LanguagePreparer>(),
-        gh<_i920.AppPlatform>(),
       ),
     );
     return this;

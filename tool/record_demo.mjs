@@ -36,7 +36,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 // Saved settings the app reads at start (shared_preferences on the web keeps
 // JSON-encoded values under a `flutter.` prefix): a slow, unreliable link so
 // the pending state is visible and a command can get lost.
-const settings = { themeMode: 'light', latencyMs: 900, failureRate: 0.5, showWelcome: false };
+const settings = { themeMode: 'light', latencyMs: 900, failureRate: 0.5, showIntro: false };
 
 // A tap marker and a caption, drawn over the Flutter view. Both are plain DOM
 // with pointer-events off, so they never get in the way of the clicks.

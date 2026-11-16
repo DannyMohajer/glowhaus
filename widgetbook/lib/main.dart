@@ -55,6 +55,7 @@ class GlowhausWidgetbook extends StatelessWidget {
             _component('StatusDot', _statusDots),
             _component('ConnectionBadge', _connection),
             _component('GlowTextField', (_) => const _TextFields()),
+            _component('GlowIntroPanel', _intro, padded: false),
           ],
         ),
         WidgetbookFolder(
@@ -371,6 +372,37 @@ class _TextFieldsState extends State<_TextFields> {
       ],
     );
   }
+}
+
+/// The intro screen's one shape, headline, button and link. Light, dark and
+/// Persian (right to left) come from the catalog's addons.
+Widget _intro(BuildContext context) {
+  final s = Samples.of(context);
+  return Center(
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(
+        maxWidth: GlowIntroShape.maxWidth,
+        maxHeight: 760,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          GlowSpace.x4,
+          GlowSpace.x4,
+          GlowSpace.x4,
+          GlowSpace.x6,
+        ),
+        child: GlowIntroPanel(
+          title: s.introTitle,
+          titleRest: s.introTitleRest,
+          startLabel: s.start,
+          onStart: () {},
+          footerText: s.introCurious,
+          linkLabel: s.introGitHub,
+          onLink: () {},
+        ),
+      ),
+    ),
+  );
 }
 
 Widget _deviceTile(BuildContext context) {

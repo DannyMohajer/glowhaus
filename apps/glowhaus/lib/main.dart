@@ -77,8 +77,8 @@ Future<void> main() async {
       router: createRouter(
         initialLocation: atDemo
             ? Routes.demo
-            : settings.shouldShowWelcome
-            ? Routes.welcome
+            : settings.shouldShowIntro
+            ? Routes.intro
             : Routes.home,
       ),
     ),

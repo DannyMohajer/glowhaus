@@ -22,17 +22,19 @@ class AppLocalizationsFa extends AppLocalizations {
   String get navSettings => 'تنظیمات';
 
   @override
-  String get welcomeTitle => 'به خانه هوشمندت';
+  String get introTitle => 'به گلوهاوس';
 
   @override
-  String get welcomeTitleAccent => 'خوش آمدی';
+  String get introTitleRest => 'خوش آمدی';
 
   @override
-  String get welcomeSubtitle =>
-      'روشنایی، تهویه و امنیت در یک جا. این یک نسخه نمایشی زنده با دستگاه‌های شبیه‌سازی‌شده است؛ هر چیزی را لمس کن.';
+  String get introStart => 'شروع کنیم';
 
   @override
-  String get welcomeStart => 'شروع کنیم';
+  String get introCurious => 'کنجکاوی که چطور کار می‌کند؟';
+
+  @override
+  String get introGitHub => 'دیدن در گیت‌هاب';
 
   @override
   String get settingsTitle => 'تنظیمات';
@@ -90,6 +92,12 @@ class AppLocalizationsFa extends AppLocalizations {
       'خاموش کردن پویانمایی‌ها و جابه‌جایی‌ها';
 
   @override
+  String get settingsShowIntro => 'نمایش دوبارهٔ صفحهٔ معرفی';
+
+  @override
+  String get settingsShowIntroHint => 'دفعهٔ بعد با صفحهٔ معرفی باز شود';
+
+  @override
   String get settingsSimulation => 'شبیه‌سازی';
 
   @override
@@ -136,12 +144,6 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get back => 'بازگشت';
-
-  @override
-  String get settingsShowWelcome => 'نمایش صفحه خوش‌آمد';
-
-  @override
-  String get settingsShowWelcomeHint => 'دفعه بعد با صفحه خوش‌آمد باز شود';
 
   @override
   String greetingHi(String name) {

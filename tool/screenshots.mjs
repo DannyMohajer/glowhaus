@@ -20,7 +20,7 @@ const chrome =
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 const screens = {
-  welcome: '#/welcome',
+  intro: '#/intro',
   dashboard: '#/home',
   room: '#/rooms/living-room',
   thermostat: '#/rooms/living-room/devices/lr-thermostat',

@@ -78,12 +78,10 @@ SettingsCubit buildSettings({
   FakeSettingsStore? store,
   FakeSimulationControl? simulation,
   FakeLanguagePreparer? languages,
-  bool isWeb = true,
 }) => SettingsCubit(
   store ?? FakeSettingsStore(saved),
   simulation ?? FakeSimulationControl(),
   languages ?? FakeLanguagePreparer(),
-  AppPlatform(isWeb: isWeb),
 );
 
 class FakeConnectionStore implements ConnectionStore {
@@ -244,7 +242,7 @@ extension AppTester on WidgetTester {
   /// Pumps the whole app at [location] in a window of [size].
   Future<GoRouter> pumpApp({
     Size size = phone,
-    String location = Routes.welcome,
+    String location = Routes.intro,
     SettingsCubit? settings,
     ConnectionSettingsCubit? connection,
     TestHome? home,

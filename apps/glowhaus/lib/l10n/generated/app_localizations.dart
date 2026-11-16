@@ -124,29 +124,35 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get navSettings;
 
-  /// No description provided for @welcomeTitle.
+  /// No description provided for @introTitle.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to your'**
-  String get welcomeTitle;
+  /// **'Welcome'**
+  String get introTitle;
 
-  /// No description provided for @welcomeTitleAccent.
+  /// No description provided for @introTitleRest.
   ///
   /// In en, this message translates to:
-  /// **'smart home'**
-  String get welcomeTitleAccent;
+  /// **'to Glowhaus'**
+  String get introTitleRest;
 
-  /// No description provided for @welcomeSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Lights, climate and security in one place. This is a live demo with simulated devices, so tap anything.'**
-  String get welcomeSubtitle;
-
-  /// No description provided for @welcomeStart.
+  /// No description provided for @introStart.
   ///
   /// In en, this message translates to:
   /// **'Let\'s start'**
-  String get welcomeStart;
+  String get introStart;
+
+  /// No description provided for @introCurious.
+  ///
+  /// In en, this message translates to:
+  /// **'Curious how it works?'**
+  String get introCurious;
+
+  /// No description provided for @introGitHub.
+  ///
+  /// In en, this message translates to:
+  /// **'View on GitHub'**
+  String get introGitHub;
 
   /// No description provided for @settingsTitle.
   ///
@@ -256,6 +262,18 @@ abstract class AppLocalizations {
   /// **'Turn off animations and transitions'**
   String get settingsReduceMotionHint;
 
+  /// No description provided for @settingsShowIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Show intro again'**
+  String get settingsShowIntro;
+
+  /// No description provided for @settingsShowIntroHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Open with the intro screen next time'**
+  String get settingsShowIntroHint;
+
   /// No description provided for @settingsSimulation.
   ///
   /// In en, this message translates to:
@@ -321,18 +339,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back'**
   String get back;
-
-  /// No description provided for @settingsShowWelcome.
-  ///
-  /// In en, this message translates to:
-  /// **'Show welcome screen'**
-  String get settingsShowWelcome;
-
-  /// No description provided for @settingsShowWelcomeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Open with the welcome screen next time'**
-  String get settingsShowWelcomeHint;
 
   /// No description provided for @greetingHi.
   ///

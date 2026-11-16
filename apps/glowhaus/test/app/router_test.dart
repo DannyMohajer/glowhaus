@@ -3,18 +3,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:glowhaus/app/router/routes.dart';
 import 'package:glowhaus/features/dashboard/view/dashboard_screen.dart';
 import 'package:glowhaus/features/device/view/device_pane.dart';
+import 'package:glowhaus/features/intro/view/intro_screen.dart';
 import 'package:glowhaus/features/rooms/view/rooms_panes.dart';
 import 'package:glowhaus/features/settings/cubit/settings_state.dart';
 import 'package:glowhaus/features/settings/view/settings_screen.dart';
-import 'package:glowhaus/features/welcome/view/welcome_screen.dart';
 import 'package:glowhaus_ui/glowhaus_ui.dart';
 
 import '../helpers/fakes.dart';
 
 void main() {
-  testWidgets('starts on welcome; the button opens the home', (tester) async {
+  testWidgets('starts on the intro; the button opens the home', (tester) async {
     await tester.pumpApp();
-    expect(find.byType(WelcomeScreen), findsOneWidget);
+    expect(find.byType(IntroScreen), findsOneWidget);
     expect(find.byType(GlowBottomNav), findsNothing);
 
     await tester.tap(find.text("Let's start"));
@@ -23,9 +23,9 @@ void main() {
     expect(find.byType(GlowBottomNav), findsOneWidget);
   });
 
-  testWidgets('the root path redirects to welcome', (tester) async {
+  testWidgets('the root path redirects to the intro', (tester) async {
     await tester.pumpApp(location: '/');
-    expect(find.byType(WelcomeScreen), findsOneWidget);
+    expect(find.byType(IntroScreen), findsOneWidget);
   });
 
   testWidgets('phone: bottom navigation switches destinations', (tester) async {

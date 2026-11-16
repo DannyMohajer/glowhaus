@@ -107,14 +107,12 @@ class SettingsScreen extends StatelessWidget {
                       onChanged: (value) =>
                           cubit.setReduceMotion(enabled: value),
                     ),
-                    if (cubit.welcomeToggleAvailable)
-                      SettingsSwitchRow(
-                        title: l10n.settingsShowWelcome,
-                        subtitle: l10n.settingsShowWelcomeHint,
-                        value: state.showWelcome,
-                        onChanged: (value) =>
-                            cubit.setShowWelcome(enabled: value),
-                      ),
+                    SettingsSwitchRow(
+                      title: l10n.settingsShowIntro,
+                      subtitle: l10n.settingsShowIntroHint,
+                      value: state.showIntro,
+                      onChanged: (value) => cubit.setShowIntro(enabled: value),
+                    ),
                   ],
                 ),
                 // The network knobs only mean something for the demo home.

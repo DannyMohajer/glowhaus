@@ -41,8 +41,9 @@ abstract class SettingsState with _$SettingsState {
     @Default(SettingsState.defaultLatencyMs) int latencyMs,
     @Default(0) double failureRate,
 
-    /// Native only: show the welcome screen at the next launch.
-    @Default(true) bool showWelcome,
+    /// Show the intro screen at the next launch. False once it has been
+    /// seen; "Show intro again" in settings puts it back.
+    @Default(true) bool showIntro,
   }) = _SettingsState;
 
   factory fromJson(Map<String, dynamic> json) => _$SettingsStateFromJson(json);

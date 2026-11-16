@@ -1,6 +1,6 @@
 /// Route paths. The URL is the navigation state on every form factor.
 abstract final class Routes {
-  static const String welcome = '/welcome';
+  static const String intro = '/intro';
   static const String home = '/home';
   static const String rooms = '/rooms';
   static const String settings = '/settings';

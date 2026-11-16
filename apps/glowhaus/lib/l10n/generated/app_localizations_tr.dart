@@ -22,17 +22,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get navSettings => 'Ayarlar';
 
   @override
-  String get welcomeTitle => 'Akıllı evine';
+  String get introTitle => 'Glowhaus\'a';
 
   @override
-  String get welcomeTitleAccent => 'hoş geldin';
+  String get introTitleRest => 'hoş geldin';
 
   @override
-  String get welcomeSubtitle =>
-      'Aydınlatma, iklim ve güvenlik tek bir yerde. Bu, simüle cihazlarla çalışan canlı bir demo; istediğine dokun.';
+  String get introStart => 'Başlayalım';
 
   @override
-  String get welcomeStart => 'Başlayalım';
+  String get introCurious => 'Nasıl çalıştığını merak ettin mi?';
+
+  @override
+  String get introGitHub => 'GitHub\'da gör';
 
   @override
   String get settingsTitle => 'Ayarlar';
@@ -89,6 +91,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsReduceMotionHint => 'Animasyonları ve geçişleri kapat';
 
   @override
+  String get settingsShowIntro => 'Tanıtımı yeniden göster';
+
+  @override
+  String get settingsShowIntroHint =>
+      'Bir dahaki açılışta tanıtım ekranıyla başla';
+
+  @override
   String get settingsSimulation => 'Simülasyon';
 
   @override
@@ -135,13 +144,6 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get back => 'Geri';
-
-  @override
-  String get settingsShowWelcome => 'Karşılama ekranını göster';
-
-  @override
-  String get settingsShowWelcomeHint =>
-      'Bir sonraki açılışta karşılama ekranıyla başla';
 
   @override
   String greetingHi(String name) {

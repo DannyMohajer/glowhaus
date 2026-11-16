@@ -23,6 +23,15 @@ class Samples {
   String get climate => _pick('Climate', 'تهویه', 'İklim');
   String get security => _pick('Security', 'امنیت', 'Güvenlik');
   String get start => _pick("Let's start", 'شروع کنیم', 'Başlayalım');
+  String get introTitle => _pick('Welcome', 'به گلوهاوس', "Glowhaus'a");
+  String get introTitleRest => _pick('to Glowhaus', 'خوش آمدی', 'hoş geldin');
+  String get introCurious => _pick(
+    'Curious how it works?',
+    'کنجکاوی که چطور کار می‌کند؟',
+    'Nasıl çalıştığını merak ettin mi?',
+  );
+  String get introGitHub =>
+      _pick('View on GitHub', 'دیدن در گیت‌هاب', "GitHub'da gör");
   String get addDevice => _pick('Add device', 'افزودن دستگاه', 'Cihaz ekle');
   String get notifications => _pick('Notifications', 'اعلان‌ها', 'Bildirimler');
   String get lamp => _pick('Floor lamp', 'آباژور', 'Lambader');

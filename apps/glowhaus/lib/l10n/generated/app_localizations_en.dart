@@ -22,17 +22,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSettings => 'Settings';
 
   @override
-  String get welcomeTitle => 'Welcome to your';
+  String get introTitle => 'Welcome';
 
   @override
-  String get welcomeTitleAccent => 'smart home';
+  String get introTitleRest => 'to Glowhaus';
 
   @override
-  String get welcomeSubtitle =>
-      'Lights, climate and security in one place. This is a live demo with simulated devices, so tap anything.';
+  String get introStart => 'Let\'s start';
 
   @override
-  String get welcomeStart => 'Let\'s start';
+  String get introCurious => 'Curious how it works?';
+
+  @override
+  String get introGitHub => 'View on GitHub';
 
   @override
   String get settingsTitle => 'Settings';
@@ -89,6 +91,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsReduceMotionHint => 'Turn off animations and transitions';
 
   @override
+  String get settingsShowIntro => 'Show intro again';
+
+  @override
+  String get settingsShowIntroHint => 'Open with the intro screen next time';
+
+  @override
   String get settingsSimulation => 'Simulation';
 
   @override
@@ -135,13 +143,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get back => 'Back';
-
-  @override
-  String get settingsShowWelcome => 'Show welcome screen';
-
-  @override
-  String get settingsShowWelcomeHint =>
-      'Open with the welcome screen next time';
 
   @override
   String greetingHi(String name) {

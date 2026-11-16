@@ -12,6 +12,7 @@ class GlowPressable extends StatefulWidget {
     this.selected,
     this.toggled,
     this.borderRadius = GlowRadius.pillAll,
+    this.pressedScale = 0.97,
     super.key,
   });
 
@@ -21,6 +22,9 @@ class GlowPressable extends StatefulWidget {
   final bool? selected;
   final bool? toggled;
   final BorderRadius borderRadius;
+
+  /// How far the child shrinks while held down.
+  final double pressedScale;
 
   @override
   State<GlowPressable> createState() => _GlowPressableState();
@@ -61,7 +65,7 @@ class _GlowPressableState extends State<GlowPressable> {
           onTapCancel: enabled ? () => _setPressed(false) : null,
           onTap: widget.onTap,
           child: AnimatedScale(
-            scale: _pressed ? 0.97 : 1,
+            scale: _pressed ? widget.pressedScale : 1,
             duration: motion.tap,
             curve: motion.curve,
             child: DecoratedBox(

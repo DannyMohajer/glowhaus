@@ -22,7 +22,7 @@ _SettingsState _$SettingsStateFromJson(Map<String, dynamic> json) =>
           (json['latencyMs'] as num?)?.toInt() ??
           SettingsState.defaultLatencyMs,
       failureRate: (json['failureRate'] as num?)?.toDouble() ?? 0,
-      showWelcome: json['showWelcome'] as bool? ?? true,
+      showIntro: json['showIntro'] as bool? ?? true,
     );
 
 Map<String, dynamic> _$SettingsStateToJson(_SettingsState instance) =>
@@ -33,7 +33,7 @@ Map<String, dynamic> _$SettingsStateToJson(_SettingsState instance) =>
       'reduceMotion': instance.reduceMotion,
       'latencyMs': instance.latencyMs,
       'failureRate': instance.failureRate,
-      'showWelcome': instance.showWelcome,
+      'showIntro': instance.showIntro,
     };
 
 const _$AppLanguageEnumMap = {

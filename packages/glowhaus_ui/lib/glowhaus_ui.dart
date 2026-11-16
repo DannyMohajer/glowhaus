@@ -5,6 +5,7 @@ library;
 
 export 'src/components/basics.dart';
 export 'src/components/device.dart';
+export 'src/components/intro.dart';
 export 'src/components/navigation.dart';
 export 'src/components/position_slider.dart';
 export 'src/components/pressable.dart';

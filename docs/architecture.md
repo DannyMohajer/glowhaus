@@ -176,7 +176,7 @@ One navigation system: `go_router`. The URL is the state.
 
 | Route | Phone | Wide (rail + panes) |
 |---|---|---|
-| `/welcome` | full screen | full screen |
+| `/intro` | full screen | full screen |
 | `/home` | dashboard | dashboard |
 | `/rooms` | rooms list | rooms list, hint |
 | `/rooms/:roomId` | room screen | rooms list, room |

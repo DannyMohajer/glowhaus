@@ -3,7 +3,7 @@
 ## 1. Foundation (done)
 
 Monorepo, design system + Widgetbook, capability-based domain model, protocol
-spec, `SimulatedTransport` with a seeded demo home, core screens (welcome,
+spec, `SimulatedTransport` with a seeded demo home, core screens (intro,
 dashboard, room, device detail, settings), optimistic UI, EN/FA/TR, CI.
 
 ## 2. Device controls and scenes UI

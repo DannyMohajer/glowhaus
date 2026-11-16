@@ -19,6 +19,8 @@ flutter:
   assets:
     # Loaded on demand the first time Persian is used.
     - assets/fonts/Vazirmatn-Variable.ttf
+    # The intro screen's photo; see assets/images/CREDITS.md.
+    - assets/images/intro_home.jpg
   fonts:
     - family: Manrope
       fonts:
