@@ -506,7 +506,11 @@ final List<_Face> _faces = [
     name: 'Door sensor',
     label: (s) => s.doorSensor,
     status: (s, {required on}) => on ? s.open : s.closed,
-    build: (s, {required on, required online}) => GlowDoorFace(open: on),
+    build: (s, {required on, required online}) => GlowDoorFace(
+      open: on,
+      onTap: online ? () {} : null,
+      semanticLabel: '${s.doorSensor}: ${s.press}',
+    ),
   ),
   (
     name: 'Climate sensor',
@@ -518,8 +522,12 @@ final List<_Face> _faces = [
   (
     name: 'Leak sensor',
     label: (s) => s.leakSensor,
-    status: (s, {required on}) => s.dry,
-    build: (s, {required on, required online}) => GlowLeakFace(wet: on),
+    status: (s, {required on}) => on ? s.leak : s.dry,
+    build: (s, {required on, required online}) => GlowLeakFace(
+      wet: on,
+      onTap: online ? () {} : null,
+      semanticLabel: '${s.leakSensor}: ${s.press}',
+    ),
   ),
   (
     name: 'Motion sensor',

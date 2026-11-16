@@ -598,6 +598,18 @@ abstract class AppLocalizations {
   /// **'Live'**
   String get stateLive;
 
+  /// No description provided for @stateDry.
+  ///
+  /// In en, this message translates to:
+  /// **'Dry'**
+  String get stateDry;
+
+  /// No description provided for @stateLeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Leak detected'**
+  String get stateLeak;
+
   /// No description provided for @stateStandby.
   ///
   /// In en, this message translates to:
@@ -832,6 +844,12 @@ abstract class AppLocalizations {
   /// **'Door'**
   String get detailContact;
 
+  /// No description provided for @detailLeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Water'**
+  String get detailLeak;
+
   /// No description provided for @detailCamera.
   ///
   /// In en, this message translates to:
@@ -987,6 +1005,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Doorbell camera'**
   String get demoDoorbellCamera;
+
+  /// No description provided for @demoLeakSensor.
+  ///
+  /// In en, this message translates to:
+  /// **'Leak sensor'**
+  String get demoLeakSensor;
 
   /// No description provided for @demoChannelCeiling.
   ///
@@ -1273,7 +1297,7 @@ abstract class AppLocalizations {
   /// No description provided for @panelSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'The other side of the protocol: twelve virtual devices on an MQTT broker inside this page.'**
+  /// **'The other side of the protocol: thirteen virtual devices on an MQTT broker inside this page.'**
   String get panelSubtitle;
 
   /// No description provided for @panelOpen.
@@ -1329,6 +1353,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Trigger motion'**
   String get panelHandMotion;
+
+  /// No description provided for @panelHandOpenDoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the door'**
+  String get panelHandOpenDoor;
+
+  /// No description provided for @panelHandCloseDoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Close the door'**
+  String get panelHandCloseDoor;
+
+  /// No description provided for @panelHandLeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Spill some water'**
+  String get panelHandLeak;
+
+  /// No description provided for @panelHandDry.
+  ///
+  /// In en, this message translates to:
+  /// **'Wipe it dry'**
+  String get panelHandDry;
 
   /// No description provided for @panelPlugged.
   ///

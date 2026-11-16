@@ -12,6 +12,7 @@ enum CapabilityKind {
   humiditySensor,
   motionSensor,
   contactSensor,
+  leakSensor,
   camera,
 
   /// A kind this version of the app does not know. Preserved in the
@@ -32,6 +33,7 @@ enum CapabilityKind {
     humiditySensor ||
     motionSensor ||
     contactSensor ||
+    leakSensor ||
     camera ||
     unknown => false,
   };

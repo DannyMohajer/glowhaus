@@ -94,6 +94,8 @@ class Samples {
   String get motionSensor =>
       _pick('Motion sensor', 'حسگر حرکت', 'Hareket sensörü');
   String get dry => _pick('Dry', 'خشک', 'Kuru');
+  String get leak =>
+      _pick('Leak detected', 'نشتی تشخیص داده شد', 'Sızıntı algılandı');
   String get noMotion => _pick('No motion', 'بدون حرکت', 'Hareket yok');
   String get cardBody => _pick(
     'A plain surface with a 28 px radius.',

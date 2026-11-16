@@ -328,6 +328,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get stateLive => 'Canlı';
 
   @override
+  String get stateDry => 'Kuru';
+
+  @override
+  String get stateLeak => 'Sızıntı algılandı';
+
+  @override
   String get stateStandby => 'Beklemede';
 
   @override
@@ -453,6 +459,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get detailContact => 'Kapı';
 
   @override
+  String get detailLeak => 'Su';
+
+  @override
   String get detailCamera => 'Kamera';
 
   @override
@@ -541,6 +550,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get demoDoorbellCamera => 'Kapı zili kamerası';
+
+  @override
+  String get demoLeakSensor => 'Sızıntı sensörü';
 
   @override
   String get demoChannelCeiling => 'Tavan';
@@ -706,7 +718,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get panelSubtitle =>
-      'Protokolün öbür ucu: bu sayfanın içindeki bir MQTT broker\'ına bağlı on iki sanal cihaz.';
+      'Protokolün öbür ucu: bu sayfanın içindeki bir MQTT broker\'ına bağlı on üç sanal cihaz.';
 
   @override
   String get panelOpen => 'Cihazlar';
@@ -737,6 +749,18 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get panelHandMotion => 'Hareket tetikle';
+
+  @override
+  String get panelHandOpenDoor => 'Kapıyı aç';
+
+  @override
+  String get panelHandCloseDoor => 'Kapıyı kapat';
+
+  @override
+  String get panelHandLeak => 'Biraz su dök';
+
+  @override
+  String get panelHandDry => 'Kurula';
 
   @override
   String get panelPlugged => 'Prize takılı';

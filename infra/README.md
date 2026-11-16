@@ -5,7 +5,7 @@ Everything the app needs to run against a real network, on one machine:
 | Service | Image | What | Ports on the host |
 |---|---|---|---|
 | `mosquitto` | `eclipse-mosquitto:2` | MQTT broker, password + ACL per identity | 1883 plain, 8883 TLS, 8884 WSS, all on loopback by default |
-| `simulator` | built from [`simulator/Dockerfile`](simulator/Dockerfile) | the demo home's twelve devices ([`../simulator`](../simulator)), with a watchdog | none |
+| `simulator` | built from [`simulator/Dockerfile`](simulator/Dockerfile) | the demo home's thirteen devices ([`../simulator`](../simulator)), with a watchdog | none |
 | `camera` | `bluenviron/mediamtx:latest-ffmpeg` | an RTSP test pattern as the doorbell camera | 8554 RTSP, 8888 HLS, loopback by default |
 
 ## Setup on a Mac
@@ -97,7 +97,7 @@ on the public internet that opens a connection to `localhost`.
 `apps/glowhaus/integration_test/broker_tls_test.dart` runs inside the
 real macOS app (its sandbox, its network entitlement, the keychain's trust
 in the mkcert CA). It connects through the app's Connection settings code
-to `mqtts://localhost:8883`, waits for all twelve devices, and switches the
+to `mqtts://localhost:8883`, waits for all thirteen devices, and switches the
 reading light on and off, each change acked and reported back:
 
 ```bash
@@ -144,7 +144,7 @@ info on `lr-ceiling` never reach the app, that it never receives `kt-motion`'s
 commands, that nothing crosses into `other-home`, and that a will on another
 device's availability is never published, while the same actions on its own
 topics work. The same job runs `MqttTransport` over the real `mqtt_client` adapter
-against the simulator container: all twelve devices are known, the offline
+against the simulator container: all thirteen devices are known, the offline
 motion sensor included, the online ones with retained state, and a command
 is acked and reflected in `state`. The job runs the file twice, over plain
 MQTT and over TLS with `infra/certs/ca.crt` as the only trusted CA.

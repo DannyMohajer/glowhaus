@@ -6,7 +6,7 @@ void main() {
   final devices = DemoHome.devices();
   final descriptors = devices.map((d) => d.descriptor).toList();
 
-  test('one home with four rooms and twelve devices', () {
+  test('one home with four rooms and thirteen devices', () {
     expect(DemoHome.home.id, DemoHome.homeId);
     expect(DemoHome.home.rooms.map((r) => r.name), [
       'Living Room',
@@ -14,12 +14,12 @@ void main() {
       'Kitchen',
       'Entrance',
     ]);
-    expect(devices, hasLength(12));
+    expect(devices, hasLength(13));
   });
 
   test('ids are valid and unique', () {
     expect(Ids.isValidHomeId(DemoHome.homeId), isTrue);
-    expect(descriptors.map((d) => d.id).toSet(), hasLength(12));
+    expect(descriptors.map((d) => d.id).toSet(), hasLength(13));
     for (final descriptor in descriptors) {
       expect(Ids.isValidDeviceId(descriptor.id), isTrue, reason: descriptor.id);
       for (final capability in descriptor.capabilities) {

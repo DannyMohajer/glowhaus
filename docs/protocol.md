@@ -1,4 +1,4 @@
-# Glowhaus protocol, version 1 (revision 1.1)
+# Glowhaus protocol, version 1 (revision 1.2)
 
 This document specifies how Glowhaus apps and devices talk over MQTT. It is
 written so that you can build a compatible device (or app) without reading any
@@ -10,6 +10,7 @@ The key words MUST, SHOULD and MAY are used as in RFC 2119.
 |---|---|
 | 1.0 | First published version |
 | 1.1 | Retained per-device `info` topic (section 5.4), so an app learns every device as soon as it subscribes, offline ones included. Additive: `v` stays `1` (section 4), and a 1.0 app or device simply never uses the topic |
+| 1.2 | `leakSensor` capability (section 9). Additive: `v` stays `1`, and an older app ignores the kind it does not know (section 4) |
 
 ## 1. Overview
 
@@ -452,6 +453,11 @@ Config: `minSetpoint`, `maxSetpoint`, `step` (number, required), `modes`
 | Field | Type | | Notes |
 |---|---|---|---|
 | `open` | bool | | |
+
+### `leakSensor`
+| Field | Type | | Notes |
+|---|---|---|---|
+| `wet` | bool | | Water detected at the probe |
 
 ### `camera`
 | Field | Type | | Notes |

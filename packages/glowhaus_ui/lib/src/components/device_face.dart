@@ -914,14 +914,18 @@ class GlowPlugFace extends StatelessWidget {
 
 /// A contact sensor on a door: the two halves part when the door opens.
 class GlowDoorFace extends StatelessWidget {
-  const new({required this.open, super.key});
+  const new({required this.open, this.onTap, this.semanticLabel, super.key});
 
   final bool open;
+  final VoidCallback? onTap;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     return GlowFaceFrame(
+      onTap: onTap,
+      semanticLabel: semanticLabel,
       child: Center(
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 400),
@@ -1002,14 +1006,18 @@ class GlowClimateFace extends StatelessWidget {
 
 /// A leak sensor: a droplet, blue while it is dry, red when it is not.
 class GlowLeakFace extends StatelessWidget {
-  const new({required this.wet, super.key});
+  const new({required this.wet, this.onTap, this.semanticLabel, super.key});
 
   final bool wet;
+  final VoidCallback? onTap;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     return GlowFaceFrame(
+      onTap: onTap,
+      semanticLabel: semanticLabel,
       child: Center(
         child: AnimatedScale(
           duration: context.motion.toggle,
@@ -1017,7 +1025,9 @@ class GlowLeakFace extends StatelessWidget {
           child: Icon(
             GlowIcons.droplets,
             size: 40,
-            color: wet ? colors.error : colors.cool,
+            // Wet reads as the accent, the colour the panel gives to a
+            // device that wants a look.
+            color: wet ? colors.accent : colors.cool,
           ),
         ),
       ),

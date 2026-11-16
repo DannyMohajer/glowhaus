@@ -43,7 +43,7 @@ void main() {
           'kitchen',
           'entrance',
         ]);
-        expect(state.rooms.map((r) => r.devices.length), [4, 2, 3, 3]);
+        expect(state.rooms.map((r) => r.devices.length), [4, 2, 4, 3]);
         // ceiling, lamp, thermostat, wall switch, outlet. The lock and the
         // offline sensor do not count.
         expect(state.activeCount, 5);
@@ -133,6 +133,7 @@ void main() {
           'kt-switch',
           'kt-outlet',
           'kt-motion',
+          'kt-leak',
         ]);
         expect(cubit.state.types, [
           DeviceType.wallSwitch,
@@ -156,7 +157,7 @@ void main() {
       },
       verify: (cubit) {
         expect(cubit.state.filter, isNull);
-        expect(cubit.state.visibleDevices, hasLength(2));
+        expect(cubit.state.visibleDevices, hasLength(3));
       },
     );
 

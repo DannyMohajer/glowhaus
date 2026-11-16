@@ -50,6 +50,8 @@ sealed class CapabilityState with _$CapabilityState {
 
   const factory contactSensor({required bool open}) = ContactSensorState;
 
+  const factory leakSensor({required bool wet}) = LeakSensorState;
+
   const factory camera({required bool streaming}) = CameraState;
 
   /// Tagged JSON (includes a `kind` key). Used for app-side persistence.
@@ -93,6 +95,7 @@ sealed class CapabilityState with _$CapabilityState {
     HumiditySensorState() => CapabilityKind.humiditySensor,
     MotionSensorState() => CapabilityKind.motionSensor,
     ContactSensorState() => CapabilityKind.contactSensor,
+    LeakSensorState() => CapabilityKind.leakSensor,
     CameraState() => CapabilityKind.camera,
   };
 }

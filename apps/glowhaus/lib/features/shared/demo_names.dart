@@ -26,6 +26,7 @@ String translatedName(
   DemoNames.frontDoorLock => l10n.demoFrontDoorLock,
   DemoNames.doorSensor => l10n.demoDoorSensor,
   DemoNames.doorbellCamera => l10n.demoDoorbellCamera,
+  DemoNames.leakSensor => l10n.demoLeakSensor,
   DemoNames.channelCeiling => l10n.demoChannelCeiling,
   DemoNames.channelCounter => l10n.demoChannelCounter,
   DemoNames.channelHood => l10n.demoChannelHood,

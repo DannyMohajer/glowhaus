@@ -326,6 +326,7 @@ void main() {
       CapabilityState.humiditySensor(percent: 1),
       CapabilityState.motionSensor(motion: false),
       CapabilityState.contactSensor(open: false),
+      CapabilityState.leakSensor(wet: false),
       CapabilityState.camera(streaming: true),
     ];
     expect(

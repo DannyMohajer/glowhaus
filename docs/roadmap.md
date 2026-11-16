@@ -12,7 +12,7 @@ All device controls polished; scenes UI.
 
 ## 3. Real MQTT (done)
 
-Protocol revision 1.1 (retained per-device `info`), a pure Dart device
+Protocol revision 1.1 (retained per-device `info`), revision 1.2 (`leakSensor`), a pure Dart device
 engine, `MqttTransport` (TLS on native, WSS on web) with acks, timeouts and
 reconnect, docker compose (Mosquitto with per-identity ACLs, the device
 simulator with a watchdog, a MediaMTX RTSP test camera), Connection settings

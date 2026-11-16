@@ -42,7 +42,7 @@ void main() {
 
   group('devices from transport events', () {
     test('builds every announced device with room, state and availability', () {
-      expect(repository.current, hasLength(12));
+      expect(repository.current, hasLength(13));
       final lamp = repository.device(_lamp)!.device;
       expect(lamp.homeId, DemoHome.homeId);
       expect(lamp.roomId, DemoHome.livingRoom);
@@ -80,7 +80,7 @@ void main() {
         const DeviceRemoved(homeId: DemoHome.homeId, deviceId: _lamp),
       );
       await pumpEventQueue();
-      expect(seen, [12, 11]);
+      expect(seen, [13, 12]);
       await sub.cancel();
     });
 

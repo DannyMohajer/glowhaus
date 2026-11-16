@@ -329,6 +329,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stateLive => 'Live';
 
   @override
+  String get stateDry => 'Dry';
+
+  @override
+  String get stateLeak => 'Leak detected';
+
+  @override
   String get stateStandby => 'Standby';
 
   @override
@@ -454,6 +460,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detailContact => 'Door';
 
   @override
+  String get detailLeak => 'Water';
+
+  @override
   String get detailCamera => 'Camera';
 
   @override
@@ -542,6 +551,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get demoDoorbellCamera => 'Doorbell camera';
+
+  @override
+  String get demoLeakSensor => 'Leak sensor';
 
   @override
   String get demoChannelCeiling => 'Ceiling';
@@ -706,7 +718,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get panelSubtitle =>
-      'The other side of the protocol: twelve virtual devices on an MQTT broker inside this page.';
+      'The other side of the protocol: thirteen virtual devices on an MQTT broker inside this page.';
 
   @override
   String get panelOpen => 'Devices';
@@ -737,6 +749,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get panelHandMotion => 'Trigger motion';
+
+  @override
+  String get panelHandOpenDoor => 'Open the door';
+
+  @override
+  String get panelHandCloseDoor => 'Close the door';
+
+  @override
+  String get panelHandLeak => 'Spill some water';
+
+  @override
+  String get panelHandDry => 'Wipe it dry';
 
   @override
   String get panelPlugged => 'Plugged in';

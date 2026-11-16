@@ -64,6 +64,10 @@ CapabilityState _$CapabilityStateFromJson(
           return ContactSensorState.fromJson(
             json
           );
+                case 'leakSensor':
+          return LeakSensorState.fromJson(
+            json
+          );
                 case 'camera':
           return CameraState.fromJson(
             json
@@ -126,7 +130,7 @@ extension CapabilityStatePatterns on CapabilityState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( OnOffState value)?  onOff,TResult Function( BrightnessState value)?  brightness,TResult Function( ColorState value)?  color,TResult Function( ColorTemperatureState value)?  colorTemperature,TResult Function( PositionState value)?  position,TResult Function( ThermostatState value)?  thermostat,TResult Function( PowerMeterState value)?  powerMeter,TResult Function( LockState value)?  lock,TResult Function( TemperatureSensorState value)?  temperatureSensor,TResult Function( HumiditySensorState value)?  humiditySensor,TResult Function( MotionSensorState value)?  motionSensor,TResult Function( ContactSensorState value)?  contactSensor,TResult Function( CameraState value)?  camera,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( OnOffState value)?  onOff,TResult Function( BrightnessState value)?  brightness,TResult Function( ColorState value)?  color,TResult Function( ColorTemperatureState value)?  colorTemperature,TResult Function( PositionState value)?  position,TResult Function( ThermostatState value)?  thermostat,TResult Function( PowerMeterState value)?  powerMeter,TResult Function( LockState value)?  lock,TResult Function( TemperatureSensorState value)?  temperatureSensor,TResult Function( HumiditySensorState value)?  humiditySensor,TResult Function( MotionSensorState value)?  motionSensor,TResult Function( ContactSensorState value)?  contactSensor,TResult Function( LeakSensorState value)?  leakSensor,TResult Function( CameraState value)?  camera,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case OnOffState() when onOff != null:
@@ -141,7 +145,8 @@ return lock(_that);case TemperatureSensorState() when temperatureSensor != null:
 return temperatureSensor(_that);case HumiditySensorState() when humiditySensor != null:
 return humiditySensor(_that);case MotionSensorState() when motionSensor != null:
 return motionSensor(_that);case ContactSensorState() when contactSensor != null:
-return contactSensor(_that);case CameraState() when camera != null:
+return contactSensor(_that);case LeakSensorState() when leakSensor != null:
+return leakSensor(_that);case CameraState() when camera != null:
 return camera(_that);case _:
   return orElse();
 
@@ -160,7 +165,7 @@ return camera(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( OnOffState value)  onOff,required TResult Function( BrightnessState value)  brightness,required TResult Function( ColorState value)  color,required TResult Function( ColorTemperatureState value)  colorTemperature,required TResult Function( PositionState value)  position,required TResult Function( ThermostatState value)  thermostat,required TResult Function( PowerMeterState value)  powerMeter,required TResult Function( LockState value)  lock,required TResult Function( TemperatureSensorState value)  temperatureSensor,required TResult Function( HumiditySensorState value)  humiditySensor,required TResult Function( MotionSensorState value)  motionSensor,required TResult Function( ContactSensorState value)  contactSensor,required TResult Function( CameraState value)  camera,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( OnOffState value)  onOff,required TResult Function( BrightnessState value)  brightness,required TResult Function( ColorState value)  color,required TResult Function( ColorTemperatureState value)  colorTemperature,required TResult Function( PositionState value)  position,required TResult Function( ThermostatState value)  thermostat,required TResult Function( PowerMeterState value)  powerMeter,required TResult Function( LockState value)  lock,required TResult Function( TemperatureSensorState value)  temperatureSensor,required TResult Function( HumiditySensorState value)  humiditySensor,required TResult Function( MotionSensorState value)  motionSensor,required TResult Function( ContactSensorState value)  contactSensor,required TResult Function( LeakSensorState value)  leakSensor,required TResult Function( CameraState value)  camera,}){
 final _that = this;
 switch (_that) {
 case OnOffState():
@@ -175,7 +180,8 @@ return lock(_that);case TemperatureSensorState():
 return temperatureSensor(_that);case HumiditySensorState():
 return humiditySensor(_that);case MotionSensorState():
 return motionSensor(_that);case ContactSensorState():
-return contactSensor(_that);case CameraState():
+return contactSensor(_that);case LeakSensorState():
+return leakSensor(_that);case CameraState():
 return camera(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
@@ -190,7 +196,7 @@ return camera(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( OnOffState value)?  onOff,TResult? Function( BrightnessState value)?  brightness,TResult? Function( ColorState value)?  color,TResult? Function( ColorTemperatureState value)?  colorTemperature,TResult? Function( PositionState value)?  position,TResult? Function( ThermostatState value)?  thermostat,TResult? Function( PowerMeterState value)?  powerMeter,TResult? Function( LockState value)?  lock,TResult? Function( TemperatureSensorState value)?  temperatureSensor,TResult? Function( HumiditySensorState value)?  humiditySensor,TResult? Function( MotionSensorState value)?  motionSensor,TResult? Function( ContactSensorState value)?  contactSensor,TResult? Function( CameraState value)?  camera,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( OnOffState value)?  onOff,TResult? Function( BrightnessState value)?  brightness,TResult? Function( ColorState value)?  color,TResult? Function( ColorTemperatureState value)?  colorTemperature,TResult? Function( PositionState value)?  position,TResult? Function( ThermostatState value)?  thermostat,TResult? Function( PowerMeterState value)?  powerMeter,TResult? Function( LockState value)?  lock,TResult? Function( TemperatureSensorState value)?  temperatureSensor,TResult? Function( HumiditySensorState value)?  humiditySensor,TResult? Function( MotionSensorState value)?  motionSensor,TResult? Function( ContactSensorState value)?  contactSensor,TResult? Function( LeakSensorState value)?  leakSensor,TResult? Function( CameraState value)?  camera,}){
 final _that = this;
 switch (_that) {
 case OnOffState() when onOff != null:
@@ -205,7 +211,8 @@ return lock(_that);case TemperatureSensorState() when temperatureSensor != null:
 return temperatureSensor(_that);case HumiditySensorState() when humiditySensor != null:
 return humiditySensor(_that);case MotionSensorState() when motionSensor != null:
 return motionSensor(_that);case ContactSensorState() when contactSensor != null:
-return contactSensor(_that);case CameraState() when camera != null:
+return contactSensor(_that);case LeakSensorState() when leakSensor != null:
+return leakSensor(_that);case CameraState() when camera != null:
 return camera(_that);case _:
   return null;
 
@@ -223,7 +230,7 @@ return camera(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( bool on)?  onOff,TResult Function( int level)?  brightness,TResult Function( int hue,  int saturation)?  color,TResult Function( int kelvin)?  colorTemperature,TResult Function( int position,  int target,  bool moving)?  position,TResult Function( double setpoint,  ThermostatMode mode,  FanMode? fan,  ThermostatAction action,  ThermostatMode? lastActiveMode)?  thermostat,TResult Function( double watts,  double? energyKwh)?  powerMeter,TResult Function( bool locked,  bool jammed)?  lock,TResult Function( double celsius)?  temperatureSensor,TResult Function( double percent)?  humiditySensor,TResult Function( bool motion,  int? lastMotionAt)?  motionSensor,TResult Function( bool open)?  contactSensor,TResult Function( bool streaming)?  camera,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( bool on)?  onOff,TResult Function( int level)?  brightness,TResult Function( int hue,  int saturation)?  color,TResult Function( int kelvin)?  colorTemperature,TResult Function( int position,  int target,  bool moving)?  position,TResult Function( double setpoint,  ThermostatMode mode,  FanMode? fan,  ThermostatAction action,  ThermostatMode? lastActiveMode)?  thermostat,TResult Function( double watts,  double? energyKwh)?  powerMeter,TResult Function( bool locked,  bool jammed)?  lock,TResult Function( double celsius)?  temperatureSensor,TResult Function( double percent)?  humiditySensor,TResult Function( bool motion,  int? lastMotionAt)?  motionSensor,TResult Function( bool open)?  contactSensor,TResult Function( bool wet)?  leakSensor,TResult Function( bool streaming)?  camera,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case OnOffState() when onOff != null:
 return onOff(_that.on);case BrightnessState() when brightness != null:
@@ -237,7 +244,8 @@ return lock(_that.locked,_that.jammed);case TemperatureSensorState() when temper
 return temperatureSensor(_that.celsius);case HumiditySensorState() when humiditySensor != null:
 return humiditySensor(_that.percent);case MotionSensorState() when motionSensor != null:
 return motionSensor(_that.motion,_that.lastMotionAt);case ContactSensorState() when contactSensor != null:
-return contactSensor(_that.open);case CameraState() when camera != null:
+return contactSensor(_that.open);case LeakSensorState() when leakSensor != null:
+return leakSensor(_that.wet);case CameraState() when camera != null:
 return camera(_that.streaming);case _:
   return orElse();
 
@@ -256,7 +264,7 @@ return camera(_that.streaming);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( bool on)  onOff,required TResult Function( int level)  brightness,required TResult Function( int hue,  int saturation)  color,required TResult Function( int kelvin)  colorTemperature,required TResult Function( int position,  int target,  bool moving)  position,required TResult Function( double setpoint,  ThermostatMode mode,  FanMode? fan,  ThermostatAction action,  ThermostatMode? lastActiveMode)  thermostat,required TResult Function( double watts,  double? energyKwh)  powerMeter,required TResult Function( bool locked,  bool jammed)  lock,required TResult Function( double celsius)  temperatureSensor,required TResult Function( double percent)  humiditySensor,required TResult Function( bool motion,  int? lastMotionAt)  motionSensor,required TResult Function( bool open)  contactSensor,required TResult Function( bool streaming)  camera,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( bool on)  onOff,required TResult Function( int level)  brightness,required TResult Function( int hue,  int saturation)  color,required TResult Function( int kelvin)  colorTemperature,required TResult Function( int position,  int target,  bool moving)  position,required TResult Function( double setpoint,  ThermostatMode mode,  FanMode? fan,  ThermostatAction action,  ThermostatMode? lastActiveMode)  thermostat,required TResult Function( double watts,  double? energyKwh)  powerMeter,required TResult Function( bool locked,  bool jammed)  lock,required TResult Function( double celsius)  temperatureSensor,required TResult Function( double percent)  humiditySensor,required TResult Function( bool motion,  int? lastMotionAt)  motionSensor,required TResult Function( bool open)  contactSensor,required TResult Function( bool wet)  leakSensor,required TResult Function( bool streaming)  camera,}) {final _that = this;
 switch (_that) {
 case OnOffState():
 return onOff(_that.on);case BrightnessState():
@@ -270,7 +278,8 @@ return lock(_that.locked,_that.jammed);case TemperatureSensorState():
 return temperatureSensor(_that.celsius);case HumiditySensorState():
 return humiditySensor(_that.percent);case MotionSensorState():
 return motionSensor(_that.motion,_that.lastMotionAt);case ContactSensorState():
-return contactSensor(_that.open);case CameraState():
+return contactSensor(_that.open);case LeakSensorState():
+return leakSensor(_that.wet);case CameraState():
 return camera(_that.streaming);}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -285,7 +294,7 @@ return camera(_that.streaming);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( bool on)?  onOff,TResult? Function( int level)?  brightness,TResult? Function( int hue,  int saturation)?  color,TResult? Function( int kelvin)?  colorTemperature,TResult? Function( int position,  int target,  bool moving)?  position,TResult? Function( double setpoint,  ThermostatMode mode,  FanMode? fan,  ThermostatAction action,  ThermostatMode? lastActiveMode)?  thermostat,TResult? Function( double watts,  double? energyKwh)?  powerMeter,TResult? Function( bool locked,  bool jammed)?  lock,TResult? Function( double celsius)?  temperatureSensor,TResult? Function( double percent)?  humiditySensor,TResult? Function( bool motion,  int? lastMotionAt)?  motionSensor,TResult? Function( bool open)?  contactSensor,TResult? Function( bool streaming)?  camera,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( bool on)?  onOff,TResult? Function( int level)?  brightness,TResult? Function( int hue,  int saturation)?  color,TResult? Function( int kelvin)?  colorTemperature,TResult? Function( int position,  int target,  bool moving)?  position,TResult? Function( double setpoint,  ThermostatMode mode,  FanMode? fan,  ThermostatAction action,  ThermostatMode? lastActiveMode)?  thermostat,TResult? Function( double watts,  double? energyKwh)?  powerMeter,TResult? Function( bool locked,  bool jammed)?  lock,TResult? Function( double celsius)?  temperatureSensor,TResult? Function( double percent)?  humiditySensor,TResult? Function( bool motion,  int? lastMotionAt)?  motionSensor,TResult? Function( bool open)?  contactSensor,TResult? Function( bool wet)?  leakSensor,TResult? Function( bool streaming)?  camera,}) {final _that = this;
 switch (_that) {
 case OnOffState() when onOff != null:
 return onOff(_that.on);case BrightnessState() when brightness != null:
@@ -299,7 +308,8 @@ return lock(_that.locked,_that.jammed);case TemperatureSensorState() when temper
 return temperatureSensor(_that.celsius);case HumiditySensorState() when humiditySensor != null:
 return humiditySensor(_that.percent);case MotionSensorState() when motionSensor != null:
 return motionSensor(_that.motion,_that.lastMotionAt);case ContactSensorState() when contactSensor != null:
-return contactSensor(_that.open);case CameraState() when camera != null:
+return contactSensor(_that.open);case LeakSensorState() when leakSensor != null:
+return leakSensor(_that.wet);case CameraState() when camera != null:
 return camera(_that.streaming);case _:
   return null;
 
@@ -1223,6 +1233,81 @@ class _$ContactSensorStateCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? open = null,}) {
   return _then(ContactSensorState(
 open: null == open ? _self.open : open // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class LeakSensorState extends CapabilityState {
+  const LeakSensorState({required this.wet,  String? $type}): $type = $type ?? 'leakSensor',super._();
+  factory LeakSensorState.fromJson(Map<String, dynamic> json) => _$LeakSensorStateFromJson(json);
+
+ final  bool wet;
+
+@JsonKey(name: 'kind')
+final String $type;
+
+
+/// Create a copy of CapabilityState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$LeakSensorStateCopyWith<LeakSensorState> get copyWith => _$LeakSensorStateCopyWithImpl<LeakSensorState>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$LeakSensorStateToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is LeakSensorState&&(identical(other.wet, wet) || other.wet == wet));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,wet);
+}
+
+@override
+String toString() {
+    return 'CapabilityState.leakSensor(wet: $wet)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $LeakSensorStateCopyWith<$Res> implements $CapabilityStateCopyWith<$Res> {
+  factory $LeakSensorStateCopyWith(LeakSensorState value, $Res Function(LeakSensorState) _then) = _$LeakSensorStateCopyWithImpl;
+@useResult
+$Res call({
+ bool wet
+});
+
+
+
+
+}
+/// @nodoc
+class _$LeakSensorStateCopyWithImpl<$Res>
+    implements $LeakSensorStateCopyWith<$Res> {
+  _$LeakSensorStateCopyWithImpl(this._self, this._then);
+
+  final LeakSensorState _self;
+  final $Res Function(LeakSensorState) _then;
+
+/// Create a copy of CapabilityState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? wet = null,}) {
+  return _then(LeakSensorState(
+wet: null == wet ? _self.wet : wet // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

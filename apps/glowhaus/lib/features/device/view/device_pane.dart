@@ -319,6 +319,15 @@ class _DeviceView extends StatelessWidget {
               value: open ? l10n.stateOpen : l10n.stateClosed,
             ),
           );
+        case LeakSensorState(:final wet):
+          sensorTiles.add(
+            _ReadingTile(
+              icon: GlowIcons.droplets,
+              color: wet ? colors.error : null,
+              label: l10n.detailLeak,
+              value: wet ? l10n.stateLeak : l10n.stateDry,
+            ),
+          );
         case CameraState():
           sections.add(const _CameraPlaceholder());
         case null:

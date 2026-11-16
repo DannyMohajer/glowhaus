@@ -123,6 +123,9 @@ DeviceTone deviceTone(Device device) {
   if (device.firstState<ContactSensorState>()?.open ?? false) {
     return DeviceTone.attention;
   }
+  if (device.firstState<LeakSensorState>()?.wet ?? false) {
+    return DeviceTone.attention;
+  }
   final toggle = primaryToggle(device);
   if (toggle != null) {
     return toggle.on ? DeviceTone.active : DeviceTone.neutral;
@@ -201,6 +204,7 @@ DeviceFaceKind faceKind(Device device) {
   if (device.has(CapabilityKind.thermostat)) return DeviceFaceKind.thermostat;
   if (device.has(CapabilityKind.camera)) return DeviceFaceKind.camera;
   if (device.has(CapabilityKind.contactSensor)) return DeviceFaceKind.door;
+  if (device.has(CapabilityKind.leakSensor)) return DeviceFaceKind.leak;
   if (device.has(CapabilityKind.motionSensor)) return DeviceFaceKind.motion;
   if (device.has(CapabilityKind.temperatureSensor) ||
       device.has(CapabilityKind.humiditySensor)) {
@@ -215,10 +219,7 @@ DeviceFaceKind faceKind(Device device) {
         ? DeviceFaceKind.plug
         : DeviceFaceKind.light;
   }
-  // Every other sensor reads as a leak detector: one reading, no control.
-  return device.type == DeviceType.sensor
-      ? DeviceFaceKind.leak
-      : DeviceFaceKind.unknown;
+  return DeviceFaceKind.unknown;
 }
 
 IconData roomIcon(RoomKind kind) => switch (kind) {
@@ -311,6 +312,8 @@ String deviceStatus(Readings readings, Device device) {
   }
   final contact = device.firstState<ContactSensorState>();
   if (contact != null) return contact.open ? l10n.stateOpen : l10n.stateClosed;
+  final leak = device.firstState<LeakSensorState>();
+  if (leak != null) return leak.wet ? l10n.stateLeak : l10n.stateDry;
   final camera = device.firstState<CameraState>();
   if (camera != null) {
     return camera.streaming ? l10n.stateLive : l10n.stateStandby;

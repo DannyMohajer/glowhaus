@@ -81,7 +81,7 @@ void main() {
     });
 
     test('lists every device as the device knows itself', () {
-      expect(panel.state.devices, hasLength(12));
+      expect(panel.state.devices, hasLength(13));
       final motion = panel.state.devices.firstWhere((d) => d.id == 'kt-motion');
       expect(motion.isOffline, isTrue);
     });
@@ -119,8 +119,9 @@ void main() {
       expect(handAction(of('kt-motion')), HandAction.motion);
       expect(handAction(of('lr-curtain')), HandAction.closeCurtain);
       expect(handAction(of('en-camera')), HandAction.doorbell);
-      // Sensors that only report have no hardware to press.
-      expect(handAction(of('en-door')), isNull);
+      expect(handAction(of('en-door')), HandAction.openDoor);
+      expect(handAction(of('kt-leak')), HandAction.leak);
+      // A climate sensor reads the room by itself.
       expect(handAction(of('br-climate')), isNull);
     });
 
@@ -151,6 +152,44 @@ void main() {
         expect(of('lr-curtain').firstState<PositionState>()!.target, 100);
       },
     );
+
+    test('the door opens and closes, and the app hears it', () async {
+      await panel.press('en-door');
+      await pumpEventQueue();
+      expect(of('en-door').firstState<ContactSensorState>()!.open, isTrue);
+      final reported = events
+          .whereType<DeviceStateChanged>()
+          .where((e) => e.deviceId == 'en-door')
+          .last;
+      expect(
+        reported.state.values.whereType<ContactSensorState>().single.open,
+        isTrue,
+      );
+      expect(handAction(of('en-door')), HandAction.closeDoor);
+
+      await panel.press('en-door');
+      await pumpEventQueue();
+      expect(of('en-door').firstState<ContactSensorState>()!.open, isFalse);
+    });
+
+    test('a spill wets the leak sensor, and wiping it dries it', () async {
+      expect(of('kt-leak').firstState<LeakSensorState>()!.wet, isFalse);
+      await panel.press('kt-leak');
+      await pumpEventQueue();
+      expect(of('kt-leak').firstState<LeakSensorState>()!.wet, isTrue);
+      final reported = events
+          .whereType<DeviceStateChanged>()
+          .where((e) => e.deviceId == 'kt-leak')
+          .last;
+      expect(
+        reported.state.values.whereType<LeakSensorState>().single.wet,
+        isTrue,
+      );
+
+      await panel.press('kt-leak');
+      await pumpEventQueue();
+      expect(of('kt-leak').firstState<LeakSensorState>()!.wet, isFalse);
+    });
 
     test('the doorbell wakes the camera, and the app hears it', () async {
       expect(of('en-camera').firstState<CameraState>()!.streaming, isTrue);
@@ -297,14 +336,20 @@ void main() {
       for (final room in ['Living Room', 'Bedroom', 'Kitchen', 'Entrance']) {
         expect(find.text(room), findsOneWidget, reason: room);
       }
-      expect(find.byType(GlowDeviceCard), findsNWidgets(12));
+      expect(find.byType(GlowDeviceCard), findsNWidgets(13));
       // Each card is one group a screen reader can read in a breath.
       expect(find.bySemanticsLabel('Ceiling light\nOn · 70%'), findsOneWidget);
-      // The motion sensor starts unplugged, the other eleven are powered.
-      expect(find.text('Plugged in'), findsNWidgets(11));
+      // The motion sensor starts unplugged, the other twelve are powered.
+      expect(find.text('Plugged in'), findsNWidgets(12));
       expect(find.text('Unplugged'), findsOneWidget);
-      // Sensors that only report are there to read, not to press.
-      expect(find.bySemanticsLabel('Door sensor: Open the door'), findsNothing);
+      expect(
+        find.bySemanticsLabel(RegExp('Door sensor: Open the door')),
+        findsOneWidget,
+      );
+      expect(
+        find.bySemanticsLabel(RegExp('Leak sensor: Spill some water')),
+        findsOneWidget,
+      );
 
       await tester.runAsync(() async {
         await cubit.close();

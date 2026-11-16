@@ -133,7 +133,7 @@ void main() {
       final repository = DeviceRepository(first);
       await repository.start();
       first.seed(DemoHome.devices());
-      expect(repository.current, hasLength(12));
+      expect(repository.current, hasLength(13));
 
       final statuses = <TransportStatus>[];
       repository.status.listen(statuses.add);
@@ -190,7 +190,7 @@ void main() {
       final c = cubit();
       await c.init();
       expect(c.state.active, ConnectionMode.demo);
-      expect(devices.current, hasLength(12));
+      expect(devices.current, hasLength(13));
       await c.close();
     });
 

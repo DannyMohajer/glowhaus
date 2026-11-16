@@ -62,7 +62,7 @@ class DemoBridgeHost {
   }
 }
 
-/// The devices tab of the demo: the twelve virtual devices, connected over a
+/// The devices tab of the demo: the thirteen virtual devices, connected over a
 /// [BridgePort] to the broker in the app's tab.
 class RemoteDemoHome {
   new _(this._guest, this.home, this.traffic) {

@@ -116,10 +116,10 @@ void main() {
     test('announces every device with availability and state', () {
       _run((h) {
         final announced = h.events.whereType<DeviceAnnounced>().toList();
-        expect(announced, hasLength(12));
-        expect(h.events.whereType<DeviceAvailabilityChanged>(), hasLength(12));
+        expect(announced, hasLength(13));
+        expect(h.events.whereType<DeviceAvailabilityChanged>(), hasLength(13));
         // The offline motion sensor publishes no state.
-        expect(h.events.whereType<DeviceStateChanged>(), hasLength(11));
+        expect(h.events.whereType<DeviceStateChanged>(), hasLength(12));
         expect(h.events.every((e) => e.homeId == DemoHome.homeId), isTrue);
 
         final offline = h.events.whereType<DeviceAvailabilityChanged>().where(

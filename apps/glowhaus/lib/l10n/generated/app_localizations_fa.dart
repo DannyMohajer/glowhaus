@@ -328,6 +328,12 @@ class AppLocalizationsFa extends AppLocalizations {
   String get stateLive => 'زنده';
 
   @override
+  String get stateDry => 'خشک';
+
+  @override
+  String get stateLeak => 'نشتی تشخیص داده شد';
+
+  @override
   String get stateStandby => 'آماده‌به‌کار';
 
   @override
@@ -453,6 +459,9 @@ class AppLocalizationsFa extends AppLocalizations {
   String get detailContact => 'در';
 
   @override
+  String get detailLeak => 'آب';
+
+  @override
   String get detailCamera => 'دوربین';
 
   @override
@@ -542,6 +551,9 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get demoDoorbellCamera => 'دوربین زنگ در';
+
+  @override
+  String get demoLeakSensor => 'حسگر نشتی';
 
   @override
   String get demoChannelCeiling => 'سقف';
@@ -707,7 +719,7 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get panelSubtitle =>
-      'آن سوی پروتکل: دوازده دستگاه مجازی روی یک بروکر MQTT درون همین صفحه.';
+      'آن سوی پروتکل: سیزده دستگاه مجازی روی یک بروکر MQTT درون همین صفحه.';
 
   @override
   String get panelOpen => 'دستگاه‌ها';
@@ -738,6 +750,18 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get panelHandMotion => 'از جلویش رد شو';
+
+  @override
+  String get panelHandOpenDoor => 'باز کردن در';
+
+  @override
+  String get panelHandCloseDoor => 'بستن در';
+
+  @override
+  String get panelHandLeak => 'ریختن کمی آب';
+
+  @override
+  String get panelHandDry => 'خشک کردن';
 
   @override
   String get panelPlugged => 'به برق وصل';

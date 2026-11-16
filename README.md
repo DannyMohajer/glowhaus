@@ -25,7 +25,7 @@ device's plug takes it offline with a goodbye.*
 
 | Mode | How | Broker | Devices | Works where |
 |---|---|---|---|---|
-| Demo | open the app | in memory, inside the page | the twelve virtual devices of the demo home, in the same page | every browser, every platform, offline |
+| Demo | open the app | in memory, inside the page | the thirteen virtual devices of the demo home, in the same page | every browser, every platform, offline |
 | Demo with the devices panel | open [`#/demo`](https://dannymohajer.github.io/glowhaus/#/demo), or the radar button on the rail | as above | as above, with their own faces, plugs and the MQTT traffic | as above; beside the app on wide windows, a sheet on phones |
 | Two tabs | the panel's arrow button opens `#/devices` | in memory, in the app tab | in the second tab, as MQTT clients relayed over a `BroadcastChannel` | two tabs of the same browser (see [known limits](#known-limits)) |
 | Docker broker | Settings → Connection → My broker | Mosquitto 2 with TLS, WSS and per-identity ACLs ([`infra/`](infra/README.md)) | the [simulator](simulator/README.md) container, each device with its own login | web over `wss://…:8884/mqtt`, native over `mqtts://…:8883` |
@@ -68,7 +68,7 @@ Wide windows show rooms, room and device side by side:
 
 **Protocol and devices**
 
-- [Glowhaus protocol v1, revision 1.1](docs/protocol.md): discovery with
+- [Glowhaus protocol v1, revision 1.2](docs/protocol.md): discovery with
   retained per-device `info`, retained `state` and `availability` with a
   last will, commands with exactly one ack, error codes and expiry
 - `glowhaus_device`: the device side as a pure Dart engine that depends only

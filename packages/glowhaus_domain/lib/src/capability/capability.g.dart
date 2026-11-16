@@ -50,6 +50,7 @@ const _$CapabilityKindEnumMap = {
   CapabilityKind.humiditySensor: 'humiditySensor',
   CapabilityKind.motionSensor: 'motionSensor',
   CapabilityKind.contactSensor: 'contactSensor',
+  CapabilityKind.leakSensor: 'leakSensor',
   CapabilityKind.camera: 'camera',
   CapabilityKind.unknown: 'unknown',
 };

@@ -229,6 +229,18 @@ ContactSensorState _$ContactSensorStateFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$ContactSensorStateToJson(ContactSensorState instance) =>
     <String, dynamic>{'open': instance.open, 'kind': instance.$type};
 
+LeakSensorState _$LeakSensorStateFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('LeakSensorState', json, ($checkedConvert) {
+      final val = LeakSensorState(
+        wet: $checkedConvert('wet', (v) => v as bool),
+        $type: $checkedConvert('kind', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'kind'});
+
+Map<String, dynamic> _$LeakSensorStateToJson(LeakSensorState instance) =>
+    <String, dynamic>{'wet': instance.wet, 'kind': instance.$type};
+
 CameraState _$CameraStateFromJson(Map<String, dynamic> json) =>
     $checkedCreate('CameraState', json, ($checkedConvert) {
       final val = CameraState(

@@ -8,7 +8,7 @@ import 'package:glowhaus_mqtt/glowhaus_mqtt.dart';
 
 const _usage =
     '''
-Runs the Glowhaus demo home (twelve virtual devices) against an MQTT broker.
+Runs the Glowhaus demo home (thirteen virtual devices) against an MQTT broker.
 
 Usage: dart run simulator/bin/simulator.dart [options]
 

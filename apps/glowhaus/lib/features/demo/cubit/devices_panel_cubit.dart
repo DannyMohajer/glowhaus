@@ -29,13 +29,22 @@ enum HandAction {
   /// The doorbell: the camera wakes up and streams.
   doorbell,
 
+  /// Opening the door a contact sensor watches.
+  openDoor,
+
+  /// Closing it again.
+  closeDoor,
+
+  /// Water at the leak sensor's probe, and wiping it dry again.
+  leak,
+
   /// Walking past a motion sensor.
   motion,
 }
 
 /// The hand action [device] offers right now, or null when it has none.
-/// Sensors that only report (a door contact, a climate sensor, a leak
-/// detector) have none: their faces are there to read, not to press.
+/// A climate sensor reads the room by itself, so it has none; a door and a
+/// leak sensor are pressed by what happens to them, not by a button.
 HandAction? handAction(Device device) {
   if (device.has(CapabilityKind.lock)) {
     return (device.firstState<LockState>()?.locked ?? false)
@@ -49,6 +58,12 @@ HandAction? handAction(Device device) {
     return heading > 0 ? HandAction.closeCurtain : HandAction.openCurtain;
   }
   if (device.has(CapabilityKind.camera)) return HandAction.doorbell;
+  if (device.has(CapabilityKind.contactSensor)) {
+    return (device.firstState<ContactSensorState>()?.open ?? false)
+        ? HandAction.closeDoor
+        : HandAction.openDoor;
+  }
+  if (device.has(CapabilityKind.leakSensor)) return HandAction.leak;
   if (device.has(CapabilityKind.motionSensor)) return HandAction.motion;
   if (primaryToggle(device) != null) return HandAction.button;
   return null;
@@ -152,6 +167,21 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
             position.id: CapabilityPatch.position(
               target: action == HandAction.openCurtain ? 100 : 0,
             ),
+        });
+      case HandAction.openDoor || HandAction.closeDoor:
+        await device.sense({
+          for (final contact in view.capabilitiesOf(
+            CapabilityKind.contactSensor,
+          ))
+            contact.id: CapabilityState.contactSensor(
+              open: action == HandAction.openDoor,
+            ),
+        });
+      case HandAction.leak:
+        final wet = view.firstState<LeakSensorState>()?.wet ?? false;
+        await device.sense({
+          for (final leak in view.capabilitiesOf(CapabilityKind.leakSensor))
+            leak.id: CapabilityState.leakSensor(wet: !wet),
         });
       case HandAction.doorbell:
         // Someone at the door: the camera wakes up, or goes back to sleep.

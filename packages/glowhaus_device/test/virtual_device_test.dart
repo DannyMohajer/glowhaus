@@ -225,7 +225,7 @@ void main() {
       // Twelve devices: eleven online, the motion sensor announced then
       // offline (section 5.1 and 6).
       final announces = wire.discovery.whereType<DiscoveryAnnounce>();
-      expect(announces.map((a) => a.device.id).toSet(), hasLength(12));
+      expect(announces.map((a) => a.device.id).toSet(), hasLength(13));
       expect(wire.availability('lr-lamp'), ['online']);
       expect(wire.availability('kt-motion'), ['offline']);
       expect(wire.states('lr-lamp'), hasLength(1));
@@ -271,7 +271,7 @@ void main() {
           .whereType<DiscoveryAnnounce>()
           .map((a) => a.device.id)
           .toSet();
-      expect(ids, hasLength(11));
+      expect(ids, hasLength(12));
       expect(ids, isNot(contains('kt-motion')), reason: 'offline stays quiet');
     });
   });

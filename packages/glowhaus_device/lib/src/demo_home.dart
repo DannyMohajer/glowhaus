@@ -23,6 +23,7 @@ abstract final class DemoNames {
   static const String frontDoorLock = 'demo.frontDoorLock';
   static const String doorSensor = 'demo.doorSensor';
   static const String doorbellCamera = 'demo.doorbellCamera';
+  static const String leakSensor = 'demo.leakSensor';
   static const String channelCeiling = 'demo.channelCeiling';
   static const String channelCounter = 'demo.channelCounter';
   static const String channelHood = 'demo.channelHood';
@@ -47,13 +48,14 @@ abstract final class DemoNames {
     frontDoorLock,
     doorSensor,
     doorbellCamera,
+    leakSensor,
     channelCeiling,
     channelCounter,
     channelHood,
   ];
 }
 
-/// The seeded demo: one home, four rooms, twelve devices covering every
+/// The seeded demo: one home, four rooms, thirteen devices covering every
 /// device type and capability.
 abstract final class DemoHome {
   static const String homeId = 'demo-home';
@@ -370,6 +372,22 @@ abstract final class DemoHome {
       },
       // Shows the offline state in the demo.
       online: false,
+    ),
+    DeviceSpec(
+      descriptor: DeviceDescriptor(
+        id: 'kt-leak',
+        type: DeviceType.sensor,
+        name: 'Leak sensor',
+        nameKey: DemoNames.leakSensor,
+        manufacturer: _maker,
+        model: 'GL-LEAK-1',
+        firmware: '1.0.1',
+        roomHint: kitchen,
+        capabilities: [_cap(CapabilityKind.leakSensor)],
+      ),
+      initialState: const {
+        'leakSensor': CapabilityState.leakSensor(wet: false),
+      },
     ),
     // Entrance
     DeviceSpec(

@@ -294,6 +294,12 @@ Widget _face(
     HandAction.openCurtain => l10n.panelHandOpenCurtain,
     HandAction.closeCurtain => l10n.panelHandCloseCurtain,
     HandAction.doorbell => l10n.panelHandDoorbell,
+    HandAction.openDoor => l10n.panelHandOpenDoor,
+    HandAction.closeDoor => l10n.panelHandCloseDoor,
+    HandAction.leak =>
+      (device.firstState<LeakSensorState>()?.wet ?? false)
+          ? l10n.panelHandDry
+          : l10n.panelHandLeak,
     HandAction.motion => l10n.panelHandMotion,
   };
   final semanticLabel = label == null ? null : l10n.panelHandOn(name, label);
@@ -361,6 +367,8 @@ Widget _face(
     case DeviceFaceKind.door:
       return GlowDoorFace(
         open: device.firstState<ContactSensorState>()?.open ?? false,
+        onTap: press,
+        semanticLabel: semanticLabel,
       );
     case DeviceFaceKind.climate:
       final temperature = device.firstState<TemperatureSensorState>();
@@ -370,7 +378,11 @@ Widget _face(
         humidity: readings.percent(humidity?.percent ?? 0),
       );
     case DeviceFaceKind.leak:
-      return const GlowLeakFace(wet: false);
+      return GlowLeakFace(
+        wet: device.firstState<LeakSensorState>()?.wet ?? false,
+        onTap: press,
+        semanticLabel: semanticLabel,
+      );
     case DeviceFaceKind.motion:
       return GlowMotionFace(
         motion: device.firstState<MotionSensorState>()?.motion ?? false,
