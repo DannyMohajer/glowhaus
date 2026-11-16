@@ -328,6 +328,9 @@ class AppLocalizationsFa extends AppLocalizations {
   String get stateLive => 'زنده';
 
   @override
+  String get stateStandby => 'آماده‌به‌کار';
+
+  @override
   String get stateUnknown => 'در انتظار دستگاه…';
 
   @override
@@ -717,15 +720,7 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get panelHint =>
-      'این سمت دستگاه‌هاست: دکمه‌های خود دستگاه را بزن، یا آن را از برق بکش تا واکنش برنامه را ببینی.';
-
-  @override
-  String get panelPower => 'برق';
-
-  @override
-  String panelPowerDevice(String device) {
-    return 'دوشاخه‌ی برق $device';
-  }
+      'دستگاه را همان‌طور که در خانه فشار می‌دهی لمس کن. برای آفلاین کردن، دوشاخه‌اش را بکش.';
 
   @override
   String panelHandOn(String device, String action) {
@@ -742,16 +737,38 @@ class AppLocalizationsFa extends AppLocalizations {
   String get panelHandUnlock => 'صفحه‌کلید: باز کن';
 
   @override
-  String get panelHandOpenDoor => 'در را باز کن';
-
-  @override
-  String get panelHandCloseDoor => 'در را ببند';
-
-  @override
   String get panelHandMotion => 'از جلویش رد شو';
 
   @override
   String get panelPlugged => 'به برق وصل';
+
+  @override
+  String get panelUnplugged => 'دوشاخه کشیده';
+
+  @override
+  String panelPlugOut(String device) {
+    return 'کشیدن دوشاخهٔ $device';
+  }
+
+  @override
+  String panelPlugIn(String device) {
+    return 'زدن دوبارهٔ دوشاخهٔ $device';
+  }
+
+  @override
+  String get panelHandOpenCurtain => 'باز کردن پرده';
+
+  @override
+  String get panelHandCloseCurtain => 'بستن پرده';
+
+  @override
+  String get panelHandDoorbell => 'زدن زنگ در';
+
+  @override
+  String get panelTrafficShow => 'نمایش ترافیک MQTT';
+
+  @override
+  String get panelTrafficHide => 'پنهان کردن ترافیک MQTT';
 
   @override
   String get panelTraffic => 'ترافیک MQTT';

@@ -61,6 +61,7 @@ class GlowhausWidgetbook extends StatelessWidget {
         WidgetbookFolder(
           name: 'Devices',
           children: [
+            _faceComponent(),
             _component('DeviceTile', _deviceTile),
             _component('RoomCard', _roomCard),
             _component('TickDial', _tickDial),
@@ -401,6 +402,159 @@ Widget _intro(BuildContext context) {
           onLink: () {},
         ),
       ),
+    ),
+  );
+}
+
+/// Every device face, in the three states a card can be in: doing
+/// something, idle, and unplugged (greyed out, "Offline").
+WidgetbookComponent _faceComponent() => WidgetbookComponent(
+  name: 'GlowDeviceCard',
+  useCases: [
+    for (final face in _faces)
+      WidgetbookUseCase(
+        name: face.name,
+        builder: (context) => _Frame(
+          padded: true,
+          builder: (context) => _faceStates(context, face),
+        ),
+      ),
+  ],
+);
+
+/// One face: its name, and how it looks when it is on and when it is off.
+typedef _Face = ({
+  String name,
+  String Function(Samples s) label,
+  String Function(Samples s, {required bool on}) status,
+  Widget Function(Samples s, {required bool on, required bool online}) build,
+});
+
+final List<_Face> _faces = [
+  (
+    name: 'Light',
+    label: (s) => s.lamp,
+    status: (s, {required on}) => on ? s.on : s.off,
+    build: (s, {required on, required online}) => GlowLightFace(
+      on: on,
+      onTap: online ? () {} : null,
+      semanticLabel: '${s.lamp}: ${s.press}',
+    ),
+  ),
+  (
+    name: 'Curtain',
+    label: (s) => s.curtain,
+    status: (s, {required on}) => on ? s.open : s.closed,
+    build: (s, {required on, required online}) => GlowCurtainFace(
+      openPercent: on ? 80 : 0,
+      onTap: online ? () {} : null,
+      semanticLabel: '${s.curtain}: ${s.press}',
+    ),
+  ),
+  (
+    name: 'Thermostat',
+    label: (s) => s.thermostat,
+    status: (s, {required on}) => on ? s.heating : s.off,
+    build: (s, {required on, required online}) => GlowThermostatFace(
+      reading: '22.5°',
+      running: on,
+      onTap: online ? () {} : null,
+      semanticLabel: '${s.thermostat}: ${s.press}',
+    ),
+  ),
+  (
+    name: 'Wall switch',
+    label: (s) => s.wallSwitch,
+    status: (s, {required on}) => on ? s.on : s.off,
+    build: (s, {required on, required online}) => GlowSwitchFace(
+      gangs: [on, false, on],
+      labelOf: (index) => '${s.wallSwitch} ${index + 1}',
+      onPress: online ? (_) {} : null,
+    ),
+  ),
+  (
+    name: 'Lock',
+    label: (s) => s.lock,
+    status: (s, {required on}) => on ? s.locked : s.unlocked,
+    build: (s, {required on, required online}) => GlowLockFace(
+      locked: on,
+      onTap: online ? () {} : null,
+      semanticLabel: '${s.lock}: ${s.press}',
+    ),
+  ),
+  (
+    name: 'Doorbell camera',
+    label: (s) => s.doorbell,
+    status: (s, {required on}) => on ? s.on : s.off,
+    build: (s, {required on, required online}) => GlowCameraFace(
+      ringTick: on ? 1 : 0,
+      onTap: online ? () {} : null,
+      semanticLabel: '${s.doorbell}: ${s.press}',
+    ),
+  ),
+  (
+    name: 'Smart plug',
+    label: (s) => s.plug,
+    status: (s, {required on}) => on ? s.on : s.off,
+    build: (s, {required on, required online}) => GlowPlugFace(
+      on: on,
+      onTap: online ? () {} : null,
+      semanticLabel: '${s.plug}: ${s.press}',
+    ),
+  ),
+  (
+    name: 'Door sensor',
+    label: (s) => s.doorSensor,
+    status: (s, {required on}) => on ? s.open : s.closed,
+    build: (s, {required on, required online}) => GlowDoorFace(open: on),
+  ),
+  (
+    name: 'Climate sensor',
+    label: (s) => s.climateSensor,
+    status: (s, {required on}) => '21.4°',
+    build: (s, {required on, required online}) =>
+        const GlowClimateFace(temperature: '21.4°', humidity: '47%'),
+  ),
+  (
+    name: 'Leak sensor',
+    label: (s) => s.leakSensor,
+    status: (s, {required on}) => s.dry,
+    build: (s, {required on, required online}) => GlowLeakFace(wet: on),
+  ),
+  (
+    name: 'Motion sensor',
+    label: (s) => s.motionSensor,
+    status: (s, {required on}) => on ? s.on : s.noMotion,
+    build: (s, {required on, required online}) => GlowMotionFace(
+      motion: on,
+      onTap: online ? () {} : null,
+      semanticLabel: '${s.motionSensor}: ${s.press}',
+    ),
+  ),
+];
+
+Widget _faceStates(BuildContext context, _Face face) {
+  final s = Samples.of(context);
+  Widget card({required bool on, required bool online}) => GlowDeviceCard(
+    name: face.label(s),
+    status: online ? face.status(s, on: on) : s.offline,
+    face: face.build(s, on: on, online: online),
+    online: online,
+    active: on && online,
+    plugLabel: online ? s.plugged : s.unplugged,
+    plugSemanticLabel: '${face.label(s)}: ${online ? s.plugged : s.unplugged}',
+    onPlug: () {},
+  );
+  return IntrinsicHeight(
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(child: card(on: true, online: true)),
+        const SizedBox(width: GlowSpace.x3),
+        Expanded(child: card(on: false, online: true)),
+        const SizedBox(width: GlowSpace.x3),
+        Expanded(child: card(on: false, online: false)),
+      ],
     ),
   );
 }

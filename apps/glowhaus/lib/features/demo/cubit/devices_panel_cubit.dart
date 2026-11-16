@@ -20,29 +20,35 @@ enum HandAction {
   /// The lock's keypad, unlocking it.
   unlock,
 
-  /// Opening the door a contact sensor watches.
-  openDoor,
+  /// The curtain's own wall button, opening it.
+  openCurtain,
 
-  /// Closing it again.
-  closeDoor,
+  /// The same button, closing it.
+  closeCurtain,
+
+  /// The doorbell: the camera wakes up and streams.
+  doorbell,
 
   /// Walking past a motion sensor.
   motion,
 }
 
-/// The hand action [device] offers right now, or null when it has none (a
-/// curtain, a climate sensor, a camera).
+/// The hand action [device] offers right now, or null when it has none.
+/// Sensors that only report (a door contact, a climate sensor, a leak
+/// detector) have none: their faces are there to read, not to press.
 HandAction? handAction(Device device) {
   if (device.has(CapabilityKind.lock)) {
     return (device.firstState<LockState>()?.locked ?? false)
         ? HandAction.unlock
         : HandAction.lock;
   }
-  if (device.has(CapabilityKind.contactSensor)) {
-    return (device.firstState<ContactSensorState>()?.open ?? false)
-        ? HandAction.closeDoor
-        : HandAction.openDoor;
+  final position = device.firstState<PositionState>();
+  if (position != null) {
+    // While it travels, the button offers the opposite of where it is going.
+    final heading = position.moving ? position.target : position.position;
+    return heading > 0 ? HandAction.closeCurtain : HandAction.openCurtain;
   }
+  if (device.has(CapabilityKind.camera)) return HandAction.doorbell;
   if (device.has(CapabilityKind.motionSensor)) return HandAction.motion;
   if (primaryToggle(device) != null) return HandAction.button;
   return null;
@@ -54,6 +60,7 @@ class DevicesPanelState {
   const new({
     this.devices = const [],
     this.traffic = const [],
+    this.publishes = const {},
     this.away = false,
   });
 
@@ -64,16 +71,22 @@ class DevicesPanelState {
   /// Newest first.
   final List<MqttTraffic> traffic;
 
+  /// How many messages each device has published since the panel opened.
+  /// The cards only watch for a change: one more dot leaves the card.
+  final Map<String, int> publishes;
+
   /// The devices run in another tab; this one has nothing to show.
   final bool away;
 
   DevicesPanelState copyWith({
     List<Device>? devices,
     List<MqttTraffic>? traffic,
+    Map<String, int>? publishes,
     bool? away,
   }) => DevicesPanelState(
     devices: devices ?? this.devices,
     traffic: traffic ?? this.traffic,
+    publishes: publishes ?? this.publishes,
     away: away ?? this.away,
   );
 }
@@ -98,7 +111,7 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
     _refresh();
     _subscriptions = [
       home.changes.listen((_) => _refresh()),
-      traffic.stream.listen((_) => _refresh()),
+      traffic.stream.listen(_record),
       if (away != null)
         away.listen((value) => emit(state.copyWith(away: value))),
     ];
@@ -133,14 +146,19 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
         await device.pressLocal({
           lock.id: CapabilityPatch.lock(locked: action == HandAction.lock),
         });
-      case HandAction.openDoor || HandAction.closeDoor:
-        await device.sense({
-          for (final contact in view.capabilitiesOf(
-            CapabilityKind.contactSensor,
-          ))
-            contact.id: CapabilityState.contactSensor(
-              open: action == HandAction.openDoor,
+      case HandAction.openCurtain || HandAction.closeCurtain:
+        await device.pressLocal({
+          for (final position in view.capabilitiesOf(CapabilityKind.position))
+            position.id: CapabilityPatch.position(
+              target: action == HandAction.openCurtain ? 100 : 0,
             ),
+        });
+      case HandAction.doorbell:
+        // Someone at the door: the camera wakes up, or goes back to sleep.
+        final streaming = view.firstState<CameraState>()?.streaming ?? false;
+        await device.sense({
+          for (final camera in view.capabilitiesOf(CapabilityKind.camera))
+            camera.id: CapabilityState.camera(streaming: !streaming),
         });
       case HandAction.motion:
         await device.sense({
@@ -154,6 +172,25 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
         final toggle = primaryToggle(view)!;
         await device.pressLocal(toggle.patchesFor(on: !toggle.on));
     }
+  }
+
+  /// Counts what a device sends, so its card can show it leaving.
+  void _record(MqttTraffic entry) {
+    if (entry.direction == TrafficDirection.sent) {
+      _published[entry.who] = (_published[entry.who] ?? 0) + 1;
+    }
+    _refresh();
+  }
+
+  final Map<String, int> _published = {};
+
+  /// Presses one rocker of a multi-channel wall switch.
+  Future<void> pressChannel(String deviceId, String capabilityId) async {
+    final device = _home.device(deviceId);
+    if (device == null) return;
+    final view = _view(device);
+    final on = view.stateOf<OnOffState>(capabilityId)?.on ?? false;
+    await device.pressLocal({capabilityId: CapabilityPatch.onOff(on: !on)});
   }
 
   Device _view(VirtualDevice device) =>
@@ -173,6 +210,7 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
     emit(
       state.copyWith(
         devices: [for (final device in _home.devices.values) _view(device)],
+        publishes: Map.unmodifiable(_published),
         traffic: [
           for (
             var i = entries.length - 1;

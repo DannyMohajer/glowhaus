@@ -598,6 +598,12 @@ abstract class AppLocalizations {
   /// **'Live'**
   String get stateLive;
 
+  /// No description provided for @stateStandby.
+  ///
+  /// In en, this message translates to:
+  /// **'Standby'**
+  String get stateStandby;
+
   /// No description provided for @stateUnknown.
   ///
   /// In en, this message translates to:
@@ -1291,20 +1297,8 @@ abstract class AppLocalizations {
   /// No description provided for @panelHint.
   ///
   /// In en, this message translates to:
-  /// **'This is the device side: press a device\'s own buttons, or unplug it to see the app react.'**
+  /// **'Press a device like someone at home would. Pull its plug to take it offline.'**
   String get panelHint;
-
-  /// No description provided for @panelPower.
-  ///
-  /// In en, this message translates to:
-  /// **'Power'**
-  String get panelPower;
-
-  /// No description provided for @panelPowerDevice.
-  ///
-  /// In en, this message translates to:
-  /// **'Power plug of {device}'**
-  String panelPowerDevice(String device);
 
   /// No description provided for @panelHandOn.
   ///
@@ -1330,18 +1324,6 @@ abstract class AppLocalizations {
   /// **'Keypad: unlock'**
   String get panelHandUnlock;
 
-  /// No description provided for @panelHandOpenDoor.
-  ///
-  /// In en, this message translates to:
-  /// **'Open the door'**
-  String get panelHandOpenDoor;
-
-  /// No description provided for @panelHandCloseDoor.
-  ///
-  /// In en, this message translates to:
-  /// **'Close the door'**
-  String get panelHandCloseDoor;
-
   /// No description provided for @panelHandMotion.
   ///
   /// In en, this message translates to:
@@ -1353,6 +1335,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Plugged in'**
   String get panelPlugged;
+
+  /// No description provided for @panelUnplugged.
+  ///
+  /// In en, this message translates to:
+  /// **'Unplugged'**
+  String get panelUnplugged;
+
+  /// No description provided for @panelPlugOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Unplug {device}'**
+  String panelPlugOut(String device);
+
+  /// No description provided for @panelPlugIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Plug {device} back in'**
+  String panelPlugIn(String device);
+
+  /// No description provided for @panelHandOpenCurtain.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the curtain'**
+  String get panelHandOpenCurtain;
+
+  /// No description provided for @panelHandCloseCurtain.
+  ///
+  /// In en, this message translates to:
+  /// **'Close the curtain'**
+  String get panelHandCloseCurtain;
+
+  /// No description provided for @panelHandDoorbell.
+  ///
+  /// In en, this message translates to:
+  /// **'Ring the doorbell'**
+  String get panelHandDoorbell;
+
+  /// No description provided for @panelTrafficShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the MQTT traffic'**
+  String get panelTrafficShow;
+
+  /// No description provided for @panelTrafficHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide the MQTT traffic'**
+  String get panelTrafficHide;
 
   /// No description provided for @panelTraffic.
   ///

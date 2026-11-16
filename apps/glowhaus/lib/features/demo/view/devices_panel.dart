@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide LockState;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:glowhaus/features/demo/cubit/devices_panel_cubit.dart';
 import 'package:glowhaus/features/shared/demo_names.dart';
@@ -8,9 +8,9 @@ import 'package:glowhaus_domain/glowhaus_domain.dart';
 import 'package:glowhaus_transport/glowhaus_transport.dart';
 import 'package:glowhaus_ui/glowhaus_ui.dart';
 
-/// The demo's device side: every virtual device with its own hardware
-/// (button, keypad, door, motion) and its power plug, and the MQTT messages
-/// they send and receive.
+/// The demo's device side: every virtual device as a card with its own face
+/// — the drawing of the hardware, pressed the way a person at home would —
+/// its plug, and the MQTT messages the devices send.
 class DevicesPanel extends StatelessWidget {
   const new({this.onClose, this.onOpenTab, this.footer, super.key});
 
@@ -23,123 +23,97 @@ class DevicesPanel extends StatelessWidget {
   /// Shown under the header, e.g. what the devices tab is.
   final String? footer;
 
+  /// How many messages the log at the bottom keeps.
+  static const int logLength = 4;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = context.colors;
     final type = context.type;
     return BlocBuilder<DevicesPanelCubit, DevicesPanelState>(
-      builder: (context, state) => CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
-              GlowSpace.x5,
-              GlowSpace.x5,
-              GlowSpace.x5,
-              GlowSpace.x3,
-            ),
-            sliver: SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Semantics(
-                          header: true,
-                          child: Text(l10n.panelTitle, style: type.heading),
+      builder: (context, state) => Column(
+        children: [
+          Expanded(
+            child: CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(
+                    GlowSpace.x4,
+                    GlowSpace.x5,
+                    GlowSpace.x4,
+                    GlowSpace.x3,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Semantics(
+                                header: true,
+                                child: Text(
+                                  l10n.panelTitle,
+                                  style: type.heading,
+                                ),
+                              ),
+                            ),
+                            if (onOpenTab != null && !state.away)
+                              IconButtonRound(
+                                icon: GlowIcons.arrowRight,
+                                semanticLabel: l10n.panelOpenTab,
+                                onTap: onOpenTab,
+                                size: 40,
+                              ),
+                            if (onClose != null) ...[
+                              const SizedBox(width: GlowSpace.x2),
+                              IconButtonRound(
+                                icon: GlowIcons.x,
+                                semanticLabel: l10n.panelClose,
+                                onTap: onClose,
+                                size: 40,
+                              ),
+                            ],
+                          ],
                         ),
-                      ),
-                      if (onOpenTab != null && !state.away)
-                        IconButtonRound(
-                          icon: GlowIcons.arrowRight,
-                          semanticLabel: l10n.panelOpenTab,
-                          onTap: onOpenTab,
-                          size: 40,
+                        const SizedBox(height: GlowSpace.x1),
+                        Text(
+                          footer ?? l10n.panelSubtitle,
+                          style: type.caption.copyWith(color: colors.textMuted),
                         ),
-                      if (onClose != null) ...[
-                        const SizedBox(width: GlowSpace.x2),
-                        IconButtonRound(
-                          icon: GlowIcons.x,
-                          semanticLabel: l10n.panelClose,
-                          onTap: onClose,
-                          size: 40,
-                        ),
+                        if (!state.away) ...[
+                          const SizedBox(height: GlowSpace.x3),
+                          const _Hint(),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
-                  const SizedBox(height: GlowSpace.x1),
-                  Text(
-                    footer ?? l10n.panelSubtitle,
-                    style: type.caption.copyWith(color: colors.textMuted),
+                ),
+                if (state.away)
+                  SliverPadding(
+                    padding: const EdgeInsets.all(GlowSpace.x5),
+                    sliver: SliverToBoxAdapter(
+                      child: Semantics(
+                        liveRegion: true,
+                        child: Text(l10n.panelAway, style: type.body),
+                      ),
+                    ),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(
+                      GlowSpace.x4,
+                      0,
+                      GlowSpace.x4,
+                      GlowSpace.x5,
+                    ),
+                    sliver: SliverToBoxAdapter(child: _Rooms(state: state)),
                   ),
-                  if (!state.away) ...[
-                    const SizedBox(height: GlowSpace.x3),
-                    const _Hint(),
-                  ],
-                ],
-              ),
+              ],
             ),
           ),
-          if (state.away)
-            SliverPadding(
-              padding: const EdgeInsets.all(GlowSpace.x5),
-              sliver: SliverToBoxAdapter(
-                child: Semantics(
-                  liveRegion: true,
-                  child: Text(l10n.panelAway, style: type.body),
-                ),
-              ),
-            )
-          else ...[
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: GlowSpace.x3),
-              sliver: SliverList.list(
-                children: [
-                  for (final device in state.devices)
-                    _DeviceRow(device: device),
-                ],
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
-                GlowSpace.x5,
-                GlowSpace.x5,
-                GlowSpace.x5,
-                GlowSpace.x2,
-              ),
-              sliver: SliverToBoxAdapter(
-                child: Semantics(
-                  header: true,
-                  child: Text(l10n.panelTraffic, style: type.body.weight(700)),
-                ),
-              ),
-            ),
-            if (state.traffic.isEmpty)
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: GlowSpace.x5),
-                sliver: SliverToBoxAdapter(
-                  child: Text(
-                    l10n.panelTrafficEmpty,
-                    style: type.caption.copyWith(color: colors.textMuted),
-                  ),
-                ),
-              )
-            else
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(
-                  GlowSpace.x5,
-                  0,
-                  GlowSpace.x5,
-                  GlowSpace.x8,
-                ),
-                sliver: SliverList.builder(
-                  itemCount: state.traffic.length,
-                  itemBuilder: (context, i) =>
-                      _TrafficRow(entry: state.traffic[i]),
-                ),
-              ),
-          ],
+          if (!state.away) _TrafficLog(entries: state.traffic),
         ],
       ),
     );
@@ -182,261 +156,363 @@ class _Hint extends StatelessWidget {
   }
 }
 
-/// One device: what it is and shows, then its two kinds of control, kept
-/// apart and labelled so neither is mistaken for the other:
-///
-/// - its own hardware ([HandAction]: a button, a keypad, a door, someone
-///   walking past), which changes what the device does;
-/// - its power plug, which takes it off the network (it says goodbye on its
-///   availability topic) and back.
-class _DeviceRow extends StatelessWidget {
-  const new({required this.device});
+/// The devices, grouped by the room they are in: two columns in the side
+/// panel and on phones, three or four on a wide page.
+class _Rooms extends StatelessWidget {
+  const new({required this.state});
 
-  final Device device;
+  final DevicesPanelState state;
+
+  /// The demo's rooms, in the order the home lists them; devices with an
+  /// unknown room come last, under no heading.
+  List<(Room?, List<Device>)> _groups() {
+    final byRoom = <String?, List<Device>>{};
+    for (final device in state.devices) {
+      byRoom.putIfAbsent(device.roomId, () => []).add(device);
+    }
+    return [
+      for (final room in DemoHome.home.rooms)
+        if (byRoom.remove(room.id) case final devices?) (room, devices),
+      for (final devices in byRoom.values) (null, devices),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = context.colors;
-    final name = device.displayName(l10n);
-    final online = !device.isOffline;
-    final action = handAction(device);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: GlowSpace.x2),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // What the device is, not a control.
-          ExcludeSemantics(
-            child: _DeviceDisc(
-              icon: deviceIcon(device),
-              lit: online && device.isOn,
-            ),
-          ),
-          const SizedBox(width: GlowSpace.x3),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: context.type.body.weight(600),
-                          ),
-                          Text(
-                            deviceStatus(Readings(l10n), device),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: context.type.caption.copyWith(
-                              color: colors.textMuted,
-                            ),
-                          ),
-                        ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final columns = width >= 1000
+            ? 4
+            : width >= 720
+            ? 3
+            : 2;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final (room, devices) in _groups()) ...[
+              if (room != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    GlowSpace.x1,
+                    GlowSpace.x3,
+                    GlowSpace.x1,
+                    GlowSpace.x2,
+                  ),
+                  child: Semantics(
+                    header: true,
+                    child: Text(
+                      room.displayName(l10n),
+                      style: context.type.caption.copyWith(
+                        color: colors.textMuted,
                       ),
                     ),
-                    const SizedBox(width: GlowSpace.x2),
-                    _PowerSwitch(device: device, name: name),
-                  ],
+                  ),
                 ),
-                if (action != null) ...[
-                  const SizedBox(height: GlowSpace.x2),
-                  _HandButton(device: device, name: name, action: action),
-                ],
-              ],
-            ),
-          ),
+              for (var start = 0; start < devices.length; start += columns)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: GlowSpace.x3),
+                  child: IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (var column = 0; column < columns; column++) ...[
+                          if (column > 0) const SizedBox(width: GlowSpace.x3),
+                          Expanded(
+                            child: start + column < devices.length
+                                ? _DeviceCard(
+                                    device: devices[start + column],
+                                    publishes:
+                                        state.publishes[devices[start + column]
+                                            .id] ??
+                                        0,
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// One device: its face, which presses the device's own hardware, and its
+/// plug, which takes it off the network and back.
+class _DeviceCard extends StatelessWidget {
+  const new({required this.device, required this.publishes});
+
+  final Device device;
+  final int publishes;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final cubit = context.read<DevicesPanelCubit>();
+    final name = device.displayName(l10n);
+    final online = !device.isOffline;
+    return GlowDeviceCard(
+      name: name,
+      status: deviceStatus(Readings(l10n), device),
+      face: _face(context, device: device, name: name, online: online),
+      online: online,
+      active: device.isActive,
+      publishTick: publishes,
+      plugLabel: online ? l10n.panelPlugged : l10n.panelUnplugged,
+      plugSemanticLabel: online
+          ? l10n.panelPlugOut(name)
+          : l10n.panelPlugIn(name),
+      onPlug: () => cubit.setPlugged(device.id, plugged: !online),
+    );
+  }
+}
+
+/// The drawing for [device]: which one comes from its capabilities, what it
+/// does when pressed from its hand action. A device without power ignores
+/// every press, so its face is not a button while it is unplugged.
+Widget _face(
+  BuildContext context, {
+  required Device device,
+  required String name,
+  required bool online,
+}) {
+  final l10n = AppLocalizations.of(context);
+  final cubit = context.read<DevicesPanelCubit>();
+  final action = handAction(device);
+  final label = switch (action) {
+    null => null,
+    HandAction.button => l10n.panelHandButton,
+    HandAction.lock => l10n.panelHandLock,
+    HandAction.unlock => l10n.panelHandUnlock,
+    HandAction.openCurtain => l10n.panelHandOpenCurtain,
+    HandAction.closeCurtain => l10n.panelHandCloseCurtain,
+    HandAction.doorbell => l10n.panelHandDoorbell,
+    HandAction.motion => l10n.panelHandMotion,
+  };
+  final semanticLabel = label == null ? null : l10n.panelHandOn(name, label);
+  final press = online && action != null ? () => cubit.press(device.id) : null;
+  final readings = Readings(l10n);
+
+  switch (faceKind(device)) {
+    case DeviceFaceKind.light:
+      return GlowLightFace(
+        on: device.isOn,
+        onTap: press,
+        semanticLabel: semanticLabel,
+      );
+    case DeviceFaceKind.curtain:
+      return GlowCurtainFace(
+        openPercent: device.firstState<PositionState>()?.position ?? 0,
+        onTap: press,
+        semanticLabel: semanticLabel,
+      );
+    case DeviceFaceKind.thermostat:
+      final thermostat = device.firstState<ThermostatState>();
+      return GlowThermostatFace(
+        reading: readings.temperature(thermostat?.setpoint ?? 0),
+        running:
+            thermostat != null && thermostat.action != ThermostatAction.idle,
+        cooling: thermostat?.action == ThermostatAction.cooling,
+        onTap: press,
+        semanticLabel: semanticLabel,
+      );
+    case DeviceFaceKind.wallSwitch:
+      final channels = device.capabilitiesOf(CapabilityKind.onOff).toList();
+      return GlowSwitchFace(
+        gangs: [
+          for (final channel in channels)
+            device.stateOf<OnOffState>(channel.id)?.on ?? false,
         ],
-      ),
-    );
+        labelOf: (index) => l10n.panelHandOn(
+          name,
+          channels[index].displayLabel(l10n) ?? l10n.panelHandButton,
+        ),
+        onPress: online
+            ? (index) => cubit.pressChannel(device.id, channels[index].id)
+            : null,
+      );
+    case DeviceFaceKind.lock:
+      return GlowLockFace(
+        locked: device.firstState<LockState>()?.locked ?? false,
+        onTap: press,
+        semanticLabel: semanticLabel,
+      );
+    case DeviceFaceKind.camera:
+      return GlowCameraFace(
+        ringTick: (device.firstState<CameraState>()?.streaming ?? false)
+            ? 1
+            : 0,
+        onTap: press,
+        semanticLabel: semanticLabel,
+      );
+    case DeviceFaceKind.plug:
+      return GlowPlugFace(
+        on: device.isOn,
+        onTap: press,
+        semanticLabel: semanticLabel,
+      );
+    case DeviceFaceKind.door:
+      return GlowDoorFace(
+        open: device.firstState<ContactSensorState>()?.open ?? false,
+      );
+    case DeviceFaceKind.climate:
+      final temperature = device.firstState<TemperatureSensorState>();
+      final humidity = device.firstState<HumiditySensorState>();
+      return GlowClimateFace(
+        temperature: readings.temperature(temperature?.celsius ?? 0),
+        humidity: readings.percent(humidity?.percent ?? 0),
+      );
+    case DeviceFaceKind.leak:
+      return const GlowLeakFace(wet: false);
+    case DeviceFaceKind.motion:
+      return GlowMotionFace(
+        motion: device.firstState<MotionSensorState>()?.motion ?? false,
+        onTap: press,
+        semanticLabel: semanticLabel,
+      );
+    case DeviceFaceKind.unknown:
+      return const GlowFaceFrame(child: SizedBox.shrink());
   }
 }
 
-class _DeviceDisc extends StatelessWidget {
-  const new({required this.icon, required this.lit});
+/// The protocol, as it happens: the last few messages, newest first. On a
+/// phone only the newest line shows until it is tapped.
+class _TrafficLog extends StatefulWidget {
+  const new({required this.entries});
 
-  final IconData icon;
-  final bool lit;
+  final List<MqttTraffic> entries;
 
   @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return AnimatedContainer(
-      duration: context.motion.toggle,
-      width: GlowSize.touch,
-      height: GlowSize.touch,
-      decoration: BoxDecoration(
-        color: lit ? colors.accent : colors.surfaceAlt,
-        shape: BoxShape.circle,
-      ),
-      child: Icon(
-        icon,
-        size: GlowSize.icon,
-        color: lit ? colors.onAccent : colors.textMuted,
-      ),
-    );
-  }
+  State<_TrafficLog> createState() => _TrafficLogState();
 }
 
-/// The device's own hardware, with what it does written on it. A device
-/// without power ignores it, so it is dimmed while unplugged.
-class _HandButton extends StatelessWidget {
-  const new({required this.device, required this.name, required this.action});
-
-  final Device device;
-  final String name;
-  final HandAction action;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final online = !device.isOffline;
-    final (icon, label) = switch (action) {
-      HandAction.button => (GlowIcons.power, l10n.panelHandButton),
-      HandAction.lock => (GlowIcons.lock, l10n.panelHandLock),
-      HandAction.unlock => (GlowIcons.lockOpen, l10n.panelHandUnlock),
-      HandAction.openDoor => (GlowIcons.doorOpen, l10n.panelHandOpenDoor),
-      HandAction.closeDoor => (GlowIcons.doorClosed, l10n.panelHandCloseDoor),
-      HandAction.motion => (GlowIcons.activity, l10n.panelHandMotion),
-    };
-    final onTap = online
-        ? () => context.read<DevicesPanelCubit>().press(device.id)
-        : null;
-    return Semantics(
-      container: true,
-      button: true,
-      enabled: online,
-      label: l10n.panelHandOn(name, label),
-      onTap: onTap,
-      excludeSemantics: true,
-      child: Opacity(
-        opacity: online ? 1 : 0.45,
-        child: GlowChip(icon: icon, label: label, onTap: onTap),
-      ),
-    );
-  }
-}
-
-/// The power plug: a plug icon, the word for it, and a switch. Off takes
-/// the device off the network; on brings it back.
-class _PowerSwitch extends StatelessWidget {
-  const new({required this.device, required this.name});
-
-  final Device device;
-  final String name;
+class _TrafficLogState extends State<_TrafficLog> {
+  bool _expanded = false;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = context.colors;
-    final online = !device.isOffline;
+    final compact = GlowWindowSize.of(context) == GlowWindowSize.compact;
+    final entries = widget.entries.take(DevicesPanel.logLength).toList();
+    final shown = compact && !_expanded ? entries.take(1).toList() : entries;
     return Container(
-      padding: const EdgeInsetsDirectional.only(
-        start: GlowSpace.x3,
-        end: GlowSpace.x1,
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(
+        GlowSpace.x4,
+        GlowSpace.x3,
+        GlowSpace.x4,
+        GlowSpace.x4,
       ),
       decoration: BoxDecoration(
-        borderRadius: GlowRadius.pillAll,
-        border: Border.all(color: colors.border),
+        color: colors.surfaceAlt,
+        border: Border(top: BorderSide(color: colors.border)),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          ExcludeSemantics(
+          GlowPressable(
+            onTap: compact
+                ? () => setState(() => _expanded = !_expanded)
+                : null,
+            semanticLabel: compact
+                ? (_expanded ? l10n.panelTrafficHide : l10n.panelTrafficShow)
+                : null,
+            borderRadius: GlowRadius.tileAll,
             child: Row(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  GlowIcons.plug,
-                  size: 18,
-                  color: online ? colors.text : colors.textMuted,
+                const StatusDot(tone: StatusTone.success),
+                const SizedBox(width: GlowSpace.x2),
+                Expanded(
+                  child: Semantics(
+                    header: !compact,
+                    child: Text(
+                      l10n.panelTraffic,
+                      style: context.type.caption.weight(700),
+                    ),
+                  ),
                 ),
-                const SizedBox(width: GlowSpace.x1),
-                Text(l10n.panelPower, style: context.type.caption.weight(600)),
+                if (compact)
+                  Icon(
+                    _expanded ? GlowIcons.chevronDown : GlowIcons.chevronUp,
+                    size: 16,
+                    color: colors.textMuted,
+                  ),
               ],
             ),
           ),
-          const SizedBox(width: GlowSpace.x2),
-          ToggleSwitch(
-            value: online,
-            // Not the accent: plugged in is "connected", not "on".
-            activeColor: colors.success,
-            semanticLabel: l10n.panelPowerDevice(name),
-            onChanged: (plugged) => context
-                .read<DevicesPanelCubit>()
-                .setPlugged(device.id, plugged: plugged),
-          ),
+          const SizedBox(height: GlowSpace.x2),
+          if (entries.isEmpty)
+            Text(
+              l10n.panelTrafficEmpty,
+              style: context.type.caption.copyWith(color: colors.textMuted),
+            )
+          else
+            for (final entry in shown) _TrafficRow(entry: entry),
         ],
       ),
     );
   }
 }
 
+/// One message: when it was sent, its topic with the last part in the
+/// accent, and its payload.
 class _TrafficRow extends StatelessWidget {
   const new({required this.entry});
 
   final MqttTraffic entry;
+
+  static String _two(int value) => value.toString().padLeft(2, '0');
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = context.colors;
     final sent = entry.direction == TrafficDirection.sent;
+    final at = entry.at;
+    final time = '${_two(at.hour)}:${_two(at.minute)}:${_two(at.second)}';
     // Topic and payload are protocol text: left to right in every locale.
-    final topic = entry.topic.split('/').skip(2).join('/');
+    final topic = entry.topic.split('/');
+    final suffix = topic.last;
+    final prefix = topic.take(topic.length - 1).join('/');
     return Semantics(
       container: true,
       label: sent
           ? l10n.panelTrafficSent(entry.who)
           : l10n.panelTrafficReceived(entry.who),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: GlowSpace.x1),
+        padding: const EdgeInsets.only(top: GlowSpace.x1),
         child: Directionality(
           textDirection: TextDirection.ltr,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                sent ? GlowIcons.arrowRight : GlowIcons.arrowLeft,
-                size: 14,
-                color: sent ? colors.accent : colors.textMuted,
-              ),
-              const SizedBox(width: GlowSpace.x2),
-              Expanded(
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: topic,
-                        style: context.type.caption.weight(600),
-                      ),
-                      if (entry.retained)
-                        TextSpan(
-                          text: '  retained',
-                          style: context.type.caption.copyWith(
-                            color: colors.textFaint,
-                          ),
-                        ),
-                      TextSpan(
-                        text: '\n${entry.text.isEmpty ? '∅' : entry.text}',
-                        style: context.type.caption.copyWith(
-                          color: colors.textMuted,
-                        ),
-                      ),
-                    ],
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
+          child: Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: '$time  ',
+                  style: TextStyle(color: colors.textFaint),
                 ),
-              ),
-            ],
+                TextSpan(text: '$prefix/'),
+                TextSpan(
+                  text: suffix,
+                  style: TextStyle(color: colors.accentStrong),
+                ),
+                TextSpan(
+                  text: '  ${entry.text.isEmpty ? '∅' : entry.text}',
+                  style: TextStyle(color: colors.textMuted),
+                ),
+              ],
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.type.caption.numeric.copyWith(color: colors.text),
           ),
         ),
       ),

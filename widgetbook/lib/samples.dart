@@ -78,6 +78,23 @@ class Samples {
     'نام کاربری یا گذرواژه نادرست است',
     'Kullanıcı adı veya parola yanlış',
   );
+  String get plugged => _pick('Plugged in', 'دوشاخه زده', 'Fişi takılı');
+  String get unplugged => _pick('Unplugged', 'دوشاخه کشیده', 'Fişi çekildi');
+  String get press => _pick('Press it', 'فشارش بده', 'Ona bas');
+  String get thermostat => _pick('Thermostat', 'ترموستات', 'Termostat');
+  String get wallSwitch =>
+      _pick('Wall switch', 'کلید دیواری', 'Duvar anahtarı');
+  String get plug => _pick('Smart plug', 'پریز هوشمند', 'Akıllı priz');
+  String get doorbell =>
+      _pick('Doorbell camera', 'دوربین زنگ در', 'Kapı zili kamerası');
+  String get doorSensor => _pick('Door sensor', 'حسگر در', 'Kapı sensörü');
+  String get climateSensor =>
+      _pick('Climate sensor', 'حسگر آب‌وهوا', 'İklim sensörü');
+  String get leakSensor => _pick('Leak sensor', 'حسگر نشتی', 'Sızıntı sensörü');
+  String get motionSensor =>
+      _pick('Motion sensor', 'حسگر حرکت', 'Hareket sensörü');
+  String get dry => _pick('Dry', 'خشک', 'Kuru');
+  String get noMotion => _pick('No motion', 'بدون حرکت', 'Hareket yok');
   String get cardBody => _pick(
     'A plain surface with a 28 px radius.',
     'یک سطح ساده با گوشه‌های ۲۸ پیکسلی.',

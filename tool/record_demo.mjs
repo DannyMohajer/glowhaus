@@ -1,7 +1,7 @@
 // Records the README animation: the app and its devices panel at `#/demo`,
 // a tap in the app, a press on a device's own button, the live MQTT traffic,
 // a lost command that the app rolls back after the timeout, and a device
-// unplugged with its Power switch.
+// unplugged by pulling its plug.
 //
 //   node tool/record_demo.mjs [baseUrl] [out.gif]
 //
@@ -26,9 +26,9 @@ const out = process.argv[3] ?? 'docs/screenshots/demo.gif';
 const chrome =
   process.env.CHROME ??
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-// Tall enough that the traffic list, below the twelve device rows, shows a
-// command's set, ack and state between the devices' ambient readings.
-const viewport = { width: 1280, height: 1800 };
+// Tall enough that the whole devices panel fits beside the app: four rooms
+// of device cards, with the MQTT log pinned under them.
+const viewport = { width: 1280, height: 1600 };
 const maxTakes = 30;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -213,7 +213,7 @@ async function record(cdp, dir) {
     // it offline.
     await caption('Pull the plug: the device says goodbye, the app shows it offline');
     await sleep(1200);
-    await click('Power plug of Coffee machine', 'switch');
+    await click('Unplug Coffee machine', 'button');
     await sleep(3000);
     if (!(await panelRow('Coffee machine')).includes('Offline')) {
       return { ok: false, note: 'unplugged device not shown offline', list };

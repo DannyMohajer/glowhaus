@@ -158,6 +158,7 @@
     }
   },
   "stateLive": "Live",
+  "stateStandby": "Standby",
   "stateUnknown": "Waiting for device…",
   "temperatureValue": "{value}°",
   "@temperatureValue": {
@@ -379,16 +380,7 @@
   "panelOpen": "Devices",
   "panelClose": "Close the devices panel",
   "panelOpenTab": "Open in a new tab",
-  "panelHint": "This is the device side: press a device's own buttons, or unplug it to see the app react.",
-  "panelPower": "Power",
-  "panelPowerDevice": "Power plug of {device}",
-  "@panelPowerDevice": {
-    "placeholders": {
-      "device": {
-        "type": "String"
-      }
-    }
-  },
+  "panelHint": "Press a device like someone at home would. Pull its plug to take it offline.",
   "panelHandOn": "{device}: {action}",
   "@panelHandOn": {
     "placeholders": {
@@ -403,10 +395,30 @@
   "panelHandButton": "Press its button",
   "panelHandLock": "Keypad: lock",
   "panelHandUnlock": "Keypad: unlock",
-  "panelHandOpenDoor": "Open the door",
-  "panelHandCloseDoor": "Close the door",
   "panelHandMotion": "Trigger motion",
   "panelPlugged": "Plugged in",
+  "panelUnplugged": "Unplugged",
+  "panelPlugOut": "Unplug {device}",
+  "@panelPlugOut": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "panelPlugIn": "Plug {device} back in",
+  "@panelPlugIn": {
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "panelHandOpenCurtain": "Open the curtain",
+  "panelHandCloseCurtain": "Close the curtain",
+  "panelHandDoorbell": "Ring the doorbell",
+  "panelTrafficShow": "Show the MQTT traffic",
+  "panelTrafficHide": "Hide the MQTT traffic",
   "panelTraffic": "MQTT traffic",
   "panelTrafficEmpty": "Nothing yet. Tap something in the app.",
   "panelTrafficSent": "{device} sent",

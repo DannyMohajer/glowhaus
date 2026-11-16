@@ -91,7 +91,8 @@ void openDevicesPanel(BuildContext context) {
         child: BlocProvider<DevicesPanelCubit>.value(
           value: panel,
           child: SizedBox(
-            height: height * 0.85,
+            // Half the window: the app stays visible above the sheet.
+            height: height * 0.5,
             child: DemoDevicesPanel(onClose: () => Navigator.of(sheet).pop()),
           ),
         ),

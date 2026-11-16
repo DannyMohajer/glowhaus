@@ -9,6 +9,8 @@ import 'package:glowhaus/features/demo/cubit/devices_panel_cubit.dart';
 import 'package:glowhaus/features/demo/data/demo_browser.dart';
 import 'package:glowhaus/features/demo/view/demo_panel_host.dart';
 import 'package:glowhaus/features/demo/view/devices_panel.dart';
+import 'package:glowhaus/features/settings/cubit/settings_cubit.dart';
+import 'package:glowhaus/features/settings/cubit/settings_state.dart';
 import 'package:glowhaus/l10n/framework_localizations.dart';
 import 'package:glowhaus/l10n/generated/app_localizations.dart';
 import 'package:glowhaus_domain/glowhaus_domain.dart';
@@ -114,11 +116,12 @@ void main() {
       expect(handAction(of('kt-outlet')), HandAction.button);
       expect(handAction(of('lr-thermostat')), HandAction.button);
       expect(handAction(of('en-lock')), HandAction.unlock);
-      expect(handAction(of('en-door')), HandAction.openDoor);
       expect(handAction(of('kt-motion')), HandAction.motion);
-      expect(handAction(of('lr-curtain')), isNull);
+      expect(handAction(of('lr-curtain')), HandAction.closeCurtain);
+      expect(handAction(of('en-camera')), HandAction.doorbell);
+      // Sensors that only report have no hardware to press.
+      expect(handAction(of('en-door')), isNull);
       expect(handAction(of('br-climate')), isNull);
-      expect(handAction(of('en-camera')), isNull);
     });
 
     test('the keypad unlocks and locks; no command, only state', () async {
@@ -135,21 +138,52 @@ void main() {
       expect(of('en-lock').firstState<LockState>()!.locked, isTrue);
     });
 
-    test('the door opens and closes, and the app hears it', () async {
-      await panel.press('en-door');
+    test(
+      'the curtain button closes and opens it, and the app hears it',
+      () async {
+        await panel.press('lr-curtain');
+        await pumpEventQueue();
+        expect(of('lr-curtain').firstState<PositionState>()!.target, 0);
+        expect(handAction(of('lr-curtain')), HandAction.openCurtain);
+
+        await panel.press('lr-curtain');
+        await pumpEventQueue();
+        expect(of('lr-curtain').firstState<PositionState>()!.target, 100);
+      },
+    );
+
+    test('the doorbell wakes the camera, and the app hears it', () async {
+      expect(of('en-camera').firstState<CameraState>()!.streaming, isTrue);
+      await panel.press('en-camera');
       await pumpEventQueue();
-      expect(of('en-door').firstState<ContactSensorState>()!.open, isTrue);
+      expect(of('en-camera').firstState<CameraState>()!.streaming, isFalse);
       final reported = events
           .whereType<DeviceStateChanged>()
-          .where((e) => e.deviceId == 'en-door')
+          .where((e) => e.deviceId == 'en-camera')
           .last;
       expect(
-        reported.state.values.whereType<ContactSensorState>().single.open,
-        isTrue,
+        reported.state.values.whereType<CameraState>().single.streaming,
+        isFalse,
       );
-      await panel.press('en-door');
+    });
+
+    test('a rocker of the wall switch is pressed on its own', () async {
+      final channels = of('kt-switch')
+          .capabilitiesOf(CapabilityKind.onOff)
+          .toList();
+      expect(channels, hasLength(3));
+      final before = [
+        for (final channel in channels)
+          of('kt-switch').stateOf<OnOffState>(channel.id)!.on,
+      ];
+      await panel.pressChannel('kt-switch', channels.first.id);
       await pumpEventQueue();
-      expect(of('en-door').firstState<ContactSensorState>()!.open, isFalse);
+      final after = [
+        for (final channel in channels)
+          of('kt-switch').stateOf<OnOffState>(channel.id)!.on,
+      ];
+      expect(after.first, !before.first);
+      expect(after.skip(1), before.skip(1), reason: 'the others stay put');
     });
 
     test('motion needs power: unplugged it sees nothing, plugged in it '
@@ -211,13 +245,21 @@ void main() {
   });
 
   group('the panel', () {
+    SimulatedTransport seededDemo() => SimulatedTransport(
+      homeId: DemoHome.homeId,
+      devices: DemoHome.devices(),
+      connectDelay: Duration.zero,
+      ambientInterval: null,
+    );
+
     Future<DevicesPanelCubit> pumpPanel(
       WidgetTester tester,
-      SimulatedTransport demo,
-    ) async {
-      // Phone width, tall enough that every device row is built.
+      SimulatedTransport demo, {
+      double width = 0,
+    }) async {
+      // Tall enough that every device card is built.
       tester.view
-        ..physicalSize = Size(phone.width, 2400)
+        ..physicalSize = Size(width == 0 ? phone.width : width, 2400)
         ..devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       await tester.runAsync(demo.connect);
@@ -239,31 +281,42 @@ void main() {
       return cubit;
     }
 
-    testWidgets("says what it is for, and keeps a device's own button "
-        'apart from its power plug', (tester) async {
-      final demo = SimulatedTransport(
-        homeId: DemoHome.homeId,
-        devices: DemoHome.devices(),
-        connectDelay: Duration.zero,
-        ambientInterval: null,
-      );
+    testWidgets('groups the devices by room, and says what it is for', (
+      tester,
+    ) async {
+      final demo = seededDemo();
       final cubit = await pumpPanel(tester, demo);
 
       expect(
         find.text(
-          "This is the device side: press a device's own buttons, or "
-          'unplug it to see the app react.',
+          'Press a device like someone at home would. Pull its plug to '
+          'take it offline.',
         ),
         findsOneWidget,
       );
-      expect(find.text('Press its button'), findsWidgets);
-      expect(find.text('Power'), findsWidgets);
-      expect(find.text('Trigger motion'), findsOneWidget);
-      expect(find.text('Keypad: unlock'), findsOneWidget);
-      expect(find.text('Open the door'), findsOneWidget);
-      expect(find.text('Power'), findsNWidgets(12));
+      for (final room in ['Living Room', 'Bedroom', 'Kitchen', 'Entrance']) {
+        expect(find.text(room), findsOneWidget, reason: room);
+      }
+      expect(find.byType(GlowDeviceCard), findsNWidgets(12));
+      // The motion sensor starts unplugged, the other eleven are powered.
+      expect(find.text('Plugged in'), findsNWidgets(11));
+      expect(find.text('Unplugged'), findsOneWidget);
+      // Sensors that only report are there to read, not to press.
+      expect(find.bySemanticsLabel('Door sensor: Open the door'), findsNothing);
 
-      // The button changes what the device does; it stays online.
+      await tester.runAsync(() async {
+        await cubit.close();
+        await demo.dispose();
+      });
+    });
+
+    testWidgets("pressing a device's face is not pulling its plug", (
+      tester,
+    ) async {
+      final demo = seededDemo();
+      final cubit = await pumpPanel(tester, demo);
+
+      // The face presses the device's own button; it stays online.
       final wasOn = demo.home.device('lr-ceiling')!.state['onOff']!;
       await tester.runAsync(() async {
         await tester.tap(
@@ -275,10 +328,10 @@ void main() {
       expect(demo.home.device('lr-ceiling')!.state['onOff'], isNot(wasOn));
       expect(demo.home.device('lr-ceiling')!.online, isTrue);
 
-      // The plug takes it off the network; its button is then dimmed and
-      // does nothing.
+      // The plug takes it off the network; its face is then no longer a
+      // button, and the card says so.
       await tester.runAsync(() async {
-        await tester.tap(find.bySemanticsLabel('Power plug of Ceiling light'));
+        await tester.tap(find.bySemanticsLabel('Unplug Ceiling light'));
         await Future<void>.delayed(const Duration(milliseconds: 200));
       });
       await tester.pump();
@@ -289,6 +342,108 @@ void main() {
         ),
         isSemantics(isButton: true, hasEnabledState: true, isEnabled: false),
       );
+      expect(find.text('Unplugged'), findsNWidgets(2));
+      expect(
+        find.bySemanticsLabel('Plug Ceiling light back in'),
+        findsOneWidget,
+      );
+
+      await tester.runAsync(() async {
+        await cubit.close();
+        await demo.dispose();
+      });
+    });
+
+    testWidgets('one rocker of the wall switch at a time', (tester) async {
+      final demo = seededDemo();
+      final cubit = await pumpPanel(tester, demo);
+      final device = demo.home.device('kt-switch')!;
+      final before = Map.of(device.state);
+
+      await tester.runAsync(() async {
+        await tester.tap(find.bySemanticsLabel('Wall switch: Counter'));
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+      });
+      await tester.pump();
+      expect(device.state['ch2'], isNot(before['ch2']));
+      expect(device.state['ch1'], before['ch1']);
+
+      await tester.runAsync(() async {
+        await cubit.close();
+        await demo.dispose();
+      });
+    });
+
+    testWidgets('a wide page lays a room out in four columns', (tester) async {
+      final demo = seededDemo();
+      final cubit = await pumpPanel(tester, demo, width: 1280);
+
+      // The living room has four devices: one row of four on a wide page.
+      final first = tester.getCenter(find.text('Ceiling light'));
+      final last = tester.getCenter(find.text('Thermostat'));
+      expect(last.dy, first.dy, reason: 'same row');
+      expect(last.dx, greaterThan(first.dx));
+
+      await tester.runAsync(() async {
+        await cubit.close();
+        await demo.dispose();
+      });
+    });
+
+    testWidgets('on a phone the log is one line until it is tapped', (
+      tester,
+    ) async {
+      final demo = seededDemo();
+      final cubit = await pumpPanel(tester, demo);
+      await tester.runAsync(() async {
+        await cubit.press('lr-ceiling');
+        await cubit.press('lr-lamp');
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+      });
+      await tester.pump();
+
+      List<String> lines() => tester
+          .widgetList<Text>(find.byType(Text))
+          .map((text) => text.textSpan?.toPlainText() ?? '')
+          .where((line) => line.contains('glowhaus/demo-home/'))
+          .toList();
+      expect(lines(), hasLength(1));
+
+      await tester.tap(find.bySemanticsLabel(RegExp('Show the MQTT traffic')));
+      await tester.pump();
+      expect(lines().length, greaterThan(1));
+      expect(
+        find.bySemanticsLabel(RegExp('Hide the MQTT traffic')),
+        findsOneWidget,
+      );
+
+      await tester.runAsync(() async {
+        await cubit.close();
+        await demo.dispose();
+      });
+    });
+
+    testWidgets('the log shows the last four messages, newest first', (
+      tester,
+    ) async {
+      final demo = seededDemo();
+      final cubit = await pumpPanel(tester, demo);
+      await tester.runAsync(() async {
+        await cubit.press('lr-ceiling');
+        await cubit.press('lr-lamp');
+        await cubit.press('br-reading');
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+      });
+      await tester.pump();
+
+      expect(find.text('MQTT traffic'), findsOneWidget);
+      final rows = tester
+          .widgetList<Text>(find.byType(Text))
+          .map((text) => text.textSpan?.toPlainText() ?? '')
+          .where((line) => line.contains('glowhaus/demo-home/'))
+          .toList();
+      expect(rows, hasLength(lessThanOrEqualTo(DevicesPanel.logLength)));
+      expect(rows.first, contains('br-reading'));
 
       await tester.runAsync(() async {
         await cubit.close();
@@ -298,6 +453,12 @@ void main() {
   });
 
   group('in the app', () {
+    // A device panel is never still: the camera's recording light blinks and
+    // a running thermostat breathes. These tests settle the app instead, so
+    // they turn the endless animations off the way a person can.
+    SettingsCubit still() =>
+        buildSettings(saved: const SettingsState(reduceMotion: true));
+
     testWidgets('desktop: the rail button opens the panel beside the app', (
       tester,
     ) async {
@@ -306,6 +467,7 @@ void main() {
       await tester.pumpApp(
         size: desktop,
         location: Routes.home,
+        settings: still(),
         demo: DemoSetup(demo: demo, browser: browser),
       );
       expect(find.byType(DevicesPanel), findsNothing);
@@ -328,6 +490,7 @@ void main() {
       final router = await tester.pumpApp(
         size: desktop,
         location: Routes.demo,
+        settings: still(),
         demo: DemoSetup(demo: _idleDemo(), browser: _Browser()),
         panelOpen: true,
       );
@@ -354,6 +517,7 @@ void main() {
         'the sheet closes', (tester) async {
       final router = await tester.pumpApp(
         location: Routes.demo,
+        settings: still(),
         demo: DemoSetup(demo: _idleDemo(), browser: _Browser()),
         panelOpen: true,
       );
@@ -372,6 +536,7 @@ void main() {
     ) async {
       await tester.pumpApp(
         location: Routes.home,
+        settings: still(),
         demo: DemoSetup(demo: _idleDemo(), browser: _Browser()),
       );
       await tester.tap(find.widgetWithText(GlowChip, 'Devices'));
@@ -407,6 +572,7 @@ void main() {
       await tester.pumpApp(
         size: desktop,
         location: Routes.home,
+        settings: still(),
         home: home,
         connection: connection,
         demo: DemoSetup(demo: _idleDemo(), browser: _Browser()),

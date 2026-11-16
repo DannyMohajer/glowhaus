@@ -328,6 +328,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get stateLive => 'Canlı';
 
   @override
+  String get stateStandby => 'Beklemede';
+
+  @override
   String get stateUnknown => 'Cihaz bekleniyor…';
 
   @override
@@ -716,15 +719,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get panelHint =>
-      'Burası cihaz tarafı: bir cihazın kendi düğmelerine bas ya da fişini çekip uygulamanın tepkisini gör.';
-
-  @override
-  String get panelPower => 'Güç';
-
-  @override
-  String panelPowerDevice(String device) {
-    return '$device fişi';
-  }
+      'Cihaza evdeki biri gibi bas. Çevrimdışı yapmak için fişini çek.';
 
   @override
   String panelHandOn(String device, String action) {
@@ -741,16 +736,38 @@ class AppLocalizationsTr extends AppLocalizations {
   String get panelHandUnlock => 'Tuş takımı: kilidi aç';
 
   @override
-  String get panelHandOpenDoor => 'Kapıyı aç';
-
-  @override
-  String get panelHandCloseDoor => 'Kapıyı kapat';
-
-  @override
   String get panelHandMotion => 'Hareket tetikle';
 
   @override
   String get panelPlugged => 'Prize takılı';
+
+  @override
+  String get panelUnplugged => 'Fişi çekildi';
+
+  @override
+  String panelPlugOut(String device) {
+    return '$device cihazının fişini çek';
+  }
+
+  @override
+  String panelPlugIn(String device) {
+    return '$device cihazının fişini tak';
+  }
+
+  @override
+  String get panelHandOpenCurtain => 'Perdeyi aç';
+
+  @override
+  String get panelHandCloseCurtain => 'Perdeyi kapat';
+
+  @override
+  String get panelHandDoorbell => 'Kapı zilini çal';
+
+  @override
+  String get panelTrafficShow => 'MQTT trafiğini göster';
+
+  @override
+  String get panelTrafficHide => 'MQTT trafiğini gizle';
 
   @override
   String get panelTraffic => 'MQTT trafiği';

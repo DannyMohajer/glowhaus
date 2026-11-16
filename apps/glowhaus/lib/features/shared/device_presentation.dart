@@ -172,6 +172,55 @@ Color? deviceActiveColor(GlowhausColors colors, Device device) =>
       _ => null,
     };
 
+/// Which drawing a device gets in the devices panel.
+///
+/// Derived from capabilities; the device type only separates lamps from
+/// outlets and wall switches, which all speak on/off.
+enum DeviceFaceKind {
+  light,
+  curtain,
+  thermostat,
+  wallSwitch,
+  lock,
+  camera,
+  plug,
+
+  /// Read-only sensor faces.
+  door,
+  climate,
+  leak,
+  motion,
+
+  /// A device this panel has no drawing for.
+  unknown,
+}
+
+DeviceFaceKind faceKind(Device device) {
+  if (device.has(CapabilityKind.lock)) return DeviceFaceKind.lock;
+  if (device.has(CapabilityKind.position)) return DeviceFaceKind.curtain;
+  if (device.has(CapabilityKind.thermostat)) return DeviceFaceKind.thermostat;
+  if (device.has(CapabilityKind.camera)) return DeviceFaceKind.camera;
+  if (device.has(CapabilityKind.contactSensor)) return DeviceFaceKind.door;
+  if (device.has(CapabilityKind.motionSensor)) return DeviceFaceKind.motion;
+  if (device.has(CapabilityKind.temperatureSensor) ||
+      device.has(CapabilityKind.humiditySensor)) {
+    return DeviceFaceKind.climate;
+  }
+  if (device.capabilitiesOf(CapabilityKind.onOff).length > 1 ||
+      device.type == DeviceType.wallSwitch) {
+    return DeviceFaceKind.wallSwitch;
+  }
+  if (device.has(CapabilityKind.onOff)) {
+    return device.type == DeviceType.outlet
+        ? DeviceFaceKind.plug
+        : DeviceFaceKind.light;
+  }
+  // Every other sensor reads as a leak detector: one reading, no control.
+  return device.type == DeviceType.sensor
+      ? DeviceFaceKind.leak
+      : DeviceFaceKind.unknown;
+}
+
 IconData roomIcon(RoomKind kind) => switch (kind) {
   RoomKind.livingRoom => GlowIcons.sofa,
   RoomKind.bedroom => GlowIcons.bed,
@@ -262,6 +311,9 @@ String deviceStatus(Readings readings, Device device) {
   }
   final contact = device.firstState<ContactSensorState>();
   if (contact != null) return contact.open ? l10n.stateOpen : l10n.stateClosed;
-  if (device.firstState<CameraState>() != null) return l10n.stateLive;
+  final camera = device.firstState<CameraState>();
+  if (camera != null) {
+    return camera.streaming ? l10n.stateLive : l10n.stateStandby;
+  }
   return l10n.stateUnknown;
 }

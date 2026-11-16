@@ -64,6 +64,11 @@ abstract final class GlowIcons {
     fontFamily: _family,
     fontPackage: _package,
   );
+  static const IconData chevronDown = IconData(
+    0xE06D,
+    fontFamily: _family,
+    fontPackage: _package,
+  );
   static const IconData chevronLeft = IconData(
     0xE06E,
     fontFamily: _family,
@@ -71,6 +76,11 @@ abstract final class GlowIcons {
   );
   static const IconData chevronRight = IconData(
     0xE06F,
+    fontFamily: _family,
+    fontPackage: _package,
+  );
+  static const IconData chevronUp = IconData(
+    0xE070,
     fontFamily: _family,
     fontPackage: _package,
   );

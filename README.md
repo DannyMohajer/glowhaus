@@ -26,7 +26,7 @@ device's plug takes it offline with a goodbye.*
 | Mode | How | Broker | Devices | Works where |
 |---|---|---|---|---|
 | Demo | open the app | in memory, inside the page | the twelve virtual devices of the demo home, in the same page | every browser, every platform, offline |
-| Demo with the devices panel | open [`#/demo`](https://dannymohajer.github.io/glowhaus/#/demo), or the radar button on the rail | as above | as above, with their own buttons, plugs and the MQTT traffic | as above; beside the app on wide windows, a sheet on phones |
+| Demo with the devices panel | open [`#/demo`](https://dannymohajer.github.io/glowhaus/#/demo), or the radar button on the rail | as above | as above, with their own faces, plugs and the MQTT traffic | as above; beside the app on wide windows, a sheet on phones |
 | Two tabs | the panel's arrow button opens `#/devices` | in memory, in the app tab | in the second tab, as MQTT clients relayed over a `BroadcastChannel` | two tabs of the same browser (see [known limits](#known-limits)) |
 | Docker broker | Settings → Connection → My broker | Mosquitto 2 with TLS, WSS and per-identity ACLs ([`infra/`](infra/README.md)) | the [simulator](simulator/README.md) container, each device with its own login | web over `wss://…:8884/mqtt`, native over `mqtts://…:8883` |
 | A phone on the LAN | [LAN mode](infra/README.md#lan-mode-a-real-phone-on-the-same-wi-fi) of the Docker broker | as above | as above | a real Android phone or iPhone on the same Wi-Fi |
@@ -74,9 +74,9 @@ Wide windows show rooms, room and device side by side:
 - `glowhaus_device`: the device side as a pure Dart engine that depends only
   on the protocol package, the proof that the document is enough to build
   a device
-- The devices panel: each device's own hardware (button, keypad, door,
-  motion) and its power plug, and every MQTT message the devices send and
-  receive
+- The devices panel: a card per device with a drawing of the hardware —
+  press the lamp, the dial, the rockers, the bolt, the doorbell — and the
+  plug that takes it off the network, with every MQTT message underneath
 - Two-tab mode: the devices move to a second tab with their state and keep
   talking MQTT to the app's broker; they come back when the tab closes,
   online even if it vanished without a goodbye

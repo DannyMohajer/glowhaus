@@ -329,6 +329,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stateLive => 'Live';
 
   @override
+  String get stateStandby => 'Standby';
+
+  @override
   String get stateUnknown => 'Waiting for device…';
 
   @override
@@ -716,15 +719,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get panelHint =>
-      'This is the device side: press a device\'s own buttons, or unplug it to see the app react.';
-
-  @override
-  String get panelPower => 'Power';
-
-  @override
-  String panelPowerDevice(String device) {
-    return 'Power plug of $device';
-  }
+      'Press a device like someone at home would. Pull its plug to take it offline.';
 
   @override
   String panelHandOn(String device, String action) {
@@ -741,16 +736,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get panelHandUnlock => 'Keypad: unlock';
 
   @override
-  String get panelHandOpenDoor => 'Open the door';
-
-  @override
-  String get panelHandCloseDoor => 'Close the door';
-
-  @override
   String get panelHandMotion => 'Trigger motion';
 
   @override
   String get panelPlugged => 'Plugged in';
+
+  @override
+  String get panelUnplugged => 'Unplugged';
+
+  @override
+  String panelPlugOut(String device) {
+    return 'Unplug $device';
+  }
+
+  @override
+  String panelPlugIn(String device) {
+    return 'Plug $device back in';
+  }
+
+  @override
+  String get panelHandOpenCurtain => 'Open the curtain';
+
+  @override
+  String get panelHandCloseCurtain => 'Close the curtain';
+
+  @override
+  String get panelHandDoorbell => 'Ring the doorbell';
+
+  @override
+  String get panelTrafficShow => 'Show the MQTT traffic';
+
+  @override
+  String get panelTrafficHide => 'Hide the MQTT traffic';
 
   @override
   String get panelTraffic => 'MQTT traffic';

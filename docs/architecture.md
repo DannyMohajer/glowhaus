@@ -272,15 +272,25 @@ Other decisions:
 
 The devices panel (`features/demo`) talks to the `VirtualHome` inside
 `SimulatedTransport` directly, never through the app's repository: it is
-the other end of the protocol. Each device row keeps two controls apart
-and labels both. The device's own hardware (`HandAction`: a lamp's button,
-the lock's keypad, opening or closing the door, walking past the motion
+the other end of the protocol. Each device is a card with a drawing of the
+hardware — a lamp with its cone of light, a curtain, a thermostat dial, a
+plate of rockers, a bolt, a lens, a socket — pressed where the hardware
+would be pressed. Which drawing a device gets comes from its capabilities
+(`faceKind`), never from its type alone; sensors that only report (a door
+contact, a climate sensor, a leak detector) have no hand action and their
+faces are there to read, not to press.
+
+The device's own hardware (`HandAction`: a lamp's button, the lock's
+keypad, the curtain's wall button, the doorbell, walking past the motion
 sensor) is a local change that the device reports as `state`, with no
 command and no ack. Buttons and the keypad go through
 `VirtualDevice.pressLocal`; sensor readings, which no command may set, go
-through `VirtualDevice.sense`. The "Power" switch with the plug icon pulls
-the device off the broker with a clean goodbye, and plugs it back in. Every
-device connection is tapped by an `MqttTrafficLog`, which the panel lists.
+through `VirtualDevice.sense`. The plug button across the card's bottom
+edge pulls the device off the broker with a clean goodbye, and plugs it
+back in; an unplugged card greys out and reads "Offline". Every device
+connection is tapped by an `MqttTrafficLog`; the panel keeps the last four
+messages under the cards, and every message a device publishes sends a dot
+flying off its card.
 
 Two-tab mode: `DemoBridgeHost` (app tab) and `RemoteDemoHome` (`#/devices`
 tab) talk over a `BridgePort`, a `BroadcastChannel` in the browser. The
