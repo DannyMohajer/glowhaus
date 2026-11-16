@@ -298,6 +298,8 @@ void main() {
         expect(find.text(room), findsOneWidget, reason: room);
       }
       expect(find.byType(GlowDeviceCard), findsNWidgets(12));
+      // Each card is one group a screen reader can read in a breath.
+      expect(find.bySemanticsLabel('Ceiling light\nOn · 70%'), findsOneWidget);
       // The motion sensor starts unplugged, the other eleven are powered.
       expect(find.text('Plugged in'), findsNWidgets(11));
       expect(find.text('Unplugged'), findsOneWidget);

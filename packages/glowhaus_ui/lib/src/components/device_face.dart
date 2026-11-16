@@ -65,71 +65,84 @@ class GlowDeviceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  name,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: context.type.body.weight(600),
+          // The card's own name and status are the group's label (below);
+          // the drawing and the plug stay buttons of their own.
+          ExcludeSemantics(
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: context.type.body.weight(600),
+                  ),
                 ),
-              ),
-              const SizedBox(width: GlowSpace.x2),
-              StatusDot(tone: online ? StatusTone.success : StatusTone.offline),
-            ],
+                const SizedBox(width: GlowSpace.x2),
+                StatusDot(
+                  tone: online ? StatusTone.success : StatusTone.offline,
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: GlowSpace.x2),
           _Greyed(greyed: !online, child: face),
           const SizedBox(height: GlowSpace.x2),
-          Text(
-            status,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: context.type.caption.copyWith(color: colors.textMuted),
+          ExcludeSemantics(
+            child: Text(
+              status,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.type.caption.copyWith(color: colors.textMuted),
+            ),
           ),
         ],
       ),
     );
 
-    return AnimatedContainer(
-      duration: motion.toggle,
-      curve: motion.curve,
-      decoration: BoxDecoration(
-        color: colors.surface,
-        borderRadius: GlowRadius.tileAll,
-        border: Border.all(
-          color: active && online ? colors.accent : colors.border,
+    return Semantics(
+      container: true,
+      explicitChildNodes: true,
+      label: '$name\n$status',
+      child: AnimatedContainer(
+        duration: motion.toggle,
+        curve: motion.curve,
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: GlowRadius.tileAll,
+          border: Border.all(
+            color: active && online ? colors.accent : colors.border,
+          ),
         ),
-      ),
-      child: ClipRRect(
-        borderRadius: GlowRadius.tileAll,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    GlowSpace.x3,
-                    GlowSpace.x3,
-                    GlowSpace.x3,
-                    GlowSpace.x2,
+        child: ClipRRect(
+          borderRadius: GlowRadius.tileAll,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      GlowSpace.x3,
+                      GlowSpace.x3,
+                      GlowSpace.x3,
+                      GlowSpace.x2,
+                    ),
+                    child: dim,
                   ),
-                  child: dim,
-                ),
-                Positioned.fill(
-                  child: IgnorePointer(child: _PublishDot(tick: publishTick)),
-                ),
-              ],
-            ),
-            _PlugButton(
-              label: plugLabel,
-              semanticLabel: plugSemanticLabel,
-              pluggedIn: online,
-              onTap: onPlug,
-            ),
-          ],
+                  Positioned.fill(
+                    child: IgnorePointer(child: _PublishDot(tick: publishTick)),
+                  ),
+                ],
+              ),
+              _PlugButton(
+                label: plugLabel,
+                semanticLabel: plugSemanticLabel,
+                pluggedIn: online,
+                onTap: onPlug,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -178,8 +191,9 @@ class _PlugButton extends StatelessWidget {
     final motion = context.motion;
     return GlowPressable(
       onTap: onTap,
+      // A button, not a switch: its label says what pressing it does
+      // ("Unplug the ceiling light", "Plug it back in").
       semanticLabel: semanticLabel,
-      toggled: pluggedIn,
       borderRadius: const BorderRadius.vertical(
         bottom: Radius.circular(GlowRadius.tile),
       ),
