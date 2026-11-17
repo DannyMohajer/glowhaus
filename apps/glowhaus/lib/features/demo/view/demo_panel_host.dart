@@ -138,6 +138,9 @@ void openDevicesPanel(BuildContext context) {
           child: DraggableScrollableSheet(
             controller: drag,
             snap: true,
+            // The peek is a rest, not a dismissal: only the close button
+            // or a tap above the sheet puts the devices away.
+            shouldCloseOnMinExtent: false,
             // It opens at half the window, which is this sheet's default
             // size as well as its middle snap.
             minChildSize: snaps.first,

@@ -244,11 +244,12 @@ class _SheetHeader extends StatelessWidget {
         : snapSizes.reduce(
             (a, b) => (a - size).abs() <= (b - size).abs() ? a : b,
           );
-    controller.animateTo(
-      target,
-      duration: context.motion.toggle,
-      curve: context.motion.curve,
-    );
+    final motion = context.motion;
+    if (motion.reduced) {
+      controller.jumpTo(target);
+      return;
+    }
+    controller.animateTo(target, duration: motion.toggle, curve: motion.curve);
   }
 
   @override
