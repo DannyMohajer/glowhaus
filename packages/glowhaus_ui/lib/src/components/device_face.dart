@@ -12,11 +12,33 @@ import 'package:glowhaus_ui/src/tokens/typography.dart';
 /// Every face takes plain values (on, open, locked) and callbacks. Which
 /// face a device gets is decided by the app, from its capabilities.
 
-/// Height of a face drawing inside a card.
+/// Height of a face drawing inside a card, at its natural size.
 const double _faceHeight = 96;
+
+/// Height of a face in a compact card (a phone's devices sheet).
+const double glowFaceHeightCompact = 56;
 
 /// How dim an unplugged device's card goes.
 const double _offlineOpacity = 0.35;
+
+/// How tall the faces below are drawn.
+///
+/// The drawings are not redrawn smaller: the same widgets are scaled, so a
+/// lamp in a phone's devices sheet is the lamp from the side panel at a
+/// different size.
+class GlowFaceScale extends InheritedWidget {
+  const new({required this.height, required super.child, super.key});
+
+  final double height;
+
+  /// The height faces are drawn at here; [_faceHeight] by default.
+  static double heightOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<GlowFaceScale>()?.height ??
+      _faceHeight;
+
+  @override
+  bool updateShouldNotify(GlowFaceScale old) => old.height != height;
+}
 
 /// One device in the devices panel: its name and a status LED, the drawing
 /// of the device (pressed directly), its status line, and the plug button
@@ -32,6 +54,7 @@ class GlowDeviceCard extends StatelessWidget {
     this.online = true,
     this.active = false,
     this.publishTick = 0,
+    this.compact = false,
     super.key,
   });
 
@@ -55,8 +78,13 @@ class GlowDeviceCard extends StatelessWidget {
   /// Any change sends a dot flying off the card: the device published.
   final int publishTick;
 
+  /// The phone card: a smaller face, tighter type, and the plug as an icon
+  /// button in the corner instead of a bar across the bottom.
+  final bool compact;
+
   @override
   Widget build(BuildContext context) {
+    if (compact) return _compact(context);
     final colors = context.colors;
     final motion = context.motion;
     final dim = AnimatedOpacity(
@@ -142,6 +170,145 @@ class GlowDeviceCard extends StatelessWidget {
                 onTap: onPlug,
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// The same card on a phone: the face scaled down, the name and status
+  /// under it, and the plug as a small button in the card's corner.
+  Widget _compact(BuildContext context) {
+    final colors = context.colors;
+    final motion = context.motion;
+    return Semantics(
+      container: true,
+      explicitChildNodes: true,
+      label: '$name\n$status',
+      child: AnimatedContainer(
+        duration: motion.toggle,
+        curve: motion.curve,
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: GlowRadius.tileAll,
+          border: Border.all(
+            color: active && online ? colors.accent : colors.border,
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: GlowRadius.tileAll,
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(GlowSpace.x2),
+                child: AnimatedOpacity(
+                  duration: motion.toggle,
+                  opacity: online ? 1 : _offlineOpacity,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _Greyed(
+                        greyed: !online,
+                        child: GlowFaceScale(
+                          height: glowFaceHeightCompact,
+                          child: face,
+                        ),
+                      ),
+                      const SizedBox(height: GlowSpace.x2),
+                      ExcludeSemantics(
+                        child: Text(
+                          name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.type.caption.weight(700),
+                        ),
+                      ),
+                      ExcludeSemantics(
+                        child: Text(
+                          status,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.type.caption.copyWith(
+                            color: colors.textMuted,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                child: IgnorePointer(child: _PublishDot(tick: publishTick)),
+              ),
+              PositionedDirectional(
+                top: 0,
+                end: 0,
+                child: _PlugIconButton(
+                  semanticLabel: plugSemanticLabel,
+                  pluggedIn: online,
+                  onTap: onPlug,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The plug on a compact card: a small button in the corner. Out, the plug
+/// tilts and goes accent, as it does on the full card's plug bar.
+class _PlugIconButton extends StatelessWidget {
+  const new({
+    required this.semanticLabel,
+    required this.pluggedIn,
+    required this.onTap,
+  });
+
+  final String semanticLabel;
+  final bool pluggedIn;
+  final VoidCallback onTap;
+
+  /// The disc; the button around it keeps a full touch target.
+  static const double _disc = 28;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final motion = context.motion;
+    return Tooltip(
+      message: semanticLabel,
+      excludeFromSemantics: true,
+      child: GlowPressable(
+        onTap: onTap,
+        semanticLabel: semanticLabel,
+        child: SizedBox(
+          width: GlowSize.touch,
+          height: GlowSize.touch,
+          child: Center(
+            child: AnimatedContainer(
+              duration: motion.toggle,
+              curve: motion.curve,
+              width: _disc,
+              height: _disc,
+              decoration: BoxDecoration(
+                color: pluggedIn ? colors.surfaceAlt : colors.accentSoft,
+                shape: BoxShape.circle,
+                border: Border.all(color: colors.border),
+              ),
+              child: AnimatedRotation(
+                duration: motion.toggle,
+                curve: motion.curve,
+                turns: pluggedIn ? 0 : 0.07,
+                child: Icon(
+                  GlowIcons.plug,
+                  size: 14,
+                  color: pluggedIn ? colors.textMuted : colors.accentStrong,
+                ),
+              ),
+            ),
           ),
         ),
       ),
@@ -342,15 +509,48 @@ class GlowFaceFrame extends StatelessWidget {
       ),
       child: child,
     );
-    if (onTap == null && semanticLabel == null) {
-      return decorative ? ExcludeSemantics(child: body) : body;
-    }
-    return GlowPressable(
-      onTap: onTap,
-      semanticLabel: semanticLabel,
-      pressedScale: 0.96,
-      borderRadius: BorderRadius.circular(14),
-      child: body,
+    final face = onTap == null && semanticLabel == null
+        ? (decorative ? ExcludeSemantics(child: body) : body)
+        : GlowPressable(
+            onTap: onTap,
+            semanticLabel: semanticLabel,
+            pressedScale: 0.96,
+            borderRadius: BorderRadius.circular(14),
+            child: body,
+          );
+    return _Scaled(child: face);
+  }
+}
+
+/// Draws its child at the height [GlowFaceScale] asks for: the drawing is
+/// laid out at its natural size and scaled, so nothing inside has to know.
+class _Scaled extends StatelessWidget {
+  const new({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final height = GlowFaceScale.heightOf(context);
+    if (height == _faceHeight) return child;
+    final scale = height / _faceHeight;
+    return SizedBox(
+      height: height,
+      child: LayoutBuilder(
+        builder: (context, constraints) => Transform.scale(
+          scale: scale,
+          // From the corner the drawing starts in, so the scaled box fills
+          // the width it was given in either reading direction.
+          alignment: AlignmentDirectional.topStart.resolve(
+            Directionality.of(context),
+          ),
+          child: SizedBox(
+            width: constraints.maxWidth / scale,
+            height: _faceHeight,
+            child: child,
+          ),
+        ),
+      ),
     );
   }
 }

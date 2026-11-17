@@ -53,6 +53,7 @@ class GlowhausWidgetbook extends StatelessWidget {
             _component('GlowCard', _card),
             _component('ToggleSwitch', _toggle),
             _component('StatusDot', _statusDots),
+            _component('GlowPulseRing', _pulseRing),
             _component('ConnectionBadge', _connection),
             _component('GlowTextField', (_) => const _TextFields()),
             _component('GlowIntroPanel', _intro, padded: false),
@@ -543,12 +544,16 @@ final List<_Face> _faces = [
 
 Widget _faceStates(BuildContext context, _Face face) {
   final s = Samples.of(context);
+  // The phone's devices sheet: three columns of smaller cards, the same
+  // drawings scaled down, the plug an icon button in the corner.
+  final compact = context.knobs.boolean(label: 'Compact (phone sheet)');
   Widget card({required bool on, required bool online}) => GlowDeviceCard(
     name: face.label(s),
     status: online ? face.status(s, on: on) : s.offline,
     face: face.build(s, on: on, online: online),
     online: online,
     active: on && online,
+    compact: compact,
     plugLabel: online ? s.plugged : s.unplugged,
     plugSemanticLabel: '${face.label(s)}: ${online ? s.plugged : s.unplugged}',
     onPlug: () {},
@@ -562,6 +567,28 @@ Widget _faceStates(BuildContext context, _Face face) {
         Expanded(child: card(on: false, online: true)),
         const SizedBox(width: GlowSpace.x3),
         Expanded(child: card(on: false, online: false)),
+      ],
+    ),
+  );
+}
+
+/// The ring the app's device chips show when that device publishes.
+Widget _pulseRing(BuildContext context) {
+  final s = Samples.of(context);
+  return _Stateful<int>(
+    initial: 0,
+    builder: (context, tick, set) => Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GlowPulseRing(
+          tick: tick,
+          child: RoomQuickControl(
+            icon: GlowIcons.lamp,
+            label: s.lamp,
+            on: true,
+            onTap: () => set(tick + 1),
+          ),
+        ),
       ],
     ),
   );

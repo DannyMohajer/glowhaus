@@ -132,6 +132,109 @@ class GlowChip extends StatelessWidget {
   }
 }
 
+/// The grab handle at the top of a bottom sheet.
+class GlowDragHandle extends StatelessWidget {
+  const new({super.key});
+
+  static const double width = 36;
+  static const double height = 4;
+
+  @override
+  Widget build(BuildContext context) => ExcludeSemantics(
+    child: Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: context.colors.border,
+        borderRadius: GlowRadius.pillAll,
+      ),
+    ),
+  );
+}
+
+/// A ring that pulses out of its child whenever [tick] changes: the accent
+/// (orange by default) swells around it for 600 ms and fades.
+///
+/// Used where something far from the child made it change — a device in the
+/// demo's devices sheet publishing a new state, which the app's chip for
+/// that device then follows.
+class GlowPulseRing extends StatefulWidget {
+  const new({
+    required this.tick,
+    required this.child,
+    this.borderRadius = GlowRadius.pillAll,
+    super.key,
+  });
+
+  /// Any change starts a pulse; 0 never pulses (nothing has happened yet).
+  final int tick;
+  final Widget child;
+  final BorderRadius borderRadius;
+
+  /// How long one pulse lasts.
+  static const Duration duration = Duration(milliseconds: 600);
+
+  @override
+  State<GlowPulseRing> createState() => _GlowPulseRingState();
+}
+
+class _GlowPulseRingState extends State<GlowPulseRing>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: GlowPulseRing.duration,
+  );
+
+  @override
+  void didUpdateWidget(GlowPulseRing old) {
+    super.didUpdateWidget(old);
+    if (old.tick != widget.tick &&
+        widget.tick != 0 &&
+        !context.motion.reduced) {
+      _controller.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Stack(
+      children: [
+        widget.child,
+        Positioned.fill(
+          child: IgnorePointer(
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, _) {
+                final t = _controller.value;
+                if (t == 0 || t == 1) return const SizedBox.shrink();
+                return Transform.scale(
+                  scale: 1 + 0.12 * t,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: widget.borderRadius,
+                      border: Border.all(
+                        color: colors.accent.withValues(alpha: 1 - t),
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// A circular 44 px icon button.
 class IconButtonRound extends StatelessWidget {
   const new({
