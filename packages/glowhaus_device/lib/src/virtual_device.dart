@@ -62,6 +62,10 @@ class VirtualDevice {
   /// How often sensors and meters change by themselves. Null disables it.
   final Duration? ambientInterval;
 
+  /// While true the changes on [ambientInterval] are skipped: no drift and no
+  /// state published for it. Commands and presses are answered as ever.
+  bool ambientPaused = false;
+
   /// First wait after the broker went away; doubles up to [reconnectMax].
   final Duration reconnectInitial;
   final Duration reconnectMax;
@@ -360,6 +364,7 @@ class VirtualDevice {
     final interval = ambientInterval;
     if (interval == null || _ambientTimer != null) return;
     _ambientTimer = Timer.periodic(interval, (_) {
+      if (ambientPaused) return;
       if (model.ambientTick(_random, elapsed: interval, now: _clock())) {
         unawaited(_publishState());
       }

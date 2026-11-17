@@ -56,6 +56,18 @@ class VirtualHome {
 
   bool get started => _started;
 
+  /// Pauses or resumes every device's ambient changes (power noise,
+  /// temperature drift); see [VirtualDevice.ambientPaused].
+  bool get ambientPaused => _ambientPaused;
+  bool _ambientPaused = false;
+
+  set ambientPaused(bool value) {
+    _ambientPaused = value;
+    for (final device in devices.values) {
+      device.ambientPaused = value;
+    }
+  }
+
   VirtualDevice? device(String id) => devices[id];
 
   Map<String, CapabilityState>? stateOf(String id) => devices[id]?.state;

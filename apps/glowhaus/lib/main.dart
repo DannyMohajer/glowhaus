@@ -27,6 +27,7 @@ Future<void> main() async {
   await configureDependencies();
   final browser = createDemoBrowser();
   final route = browser.initialRoute;
+  final atDemo = route == DemoSetup.demoRoute;
 
   if (route == DemoSetup.devicesRoute) {
     // The demo's second tab: the devices only, nothing of the app.
@@ -45,6 +46,10 @@ Future<void> main() async {
   final settings = getIt<SettingsCubit>();
   await settings.init();
 
+  if (atDemo && _quiet(Uri.base)) {
+    getIt<SimulatedTransport>().home.ambientPaused = true;
+  }
+
   final devices = getIt<DeviceRepository>();
   // In broker mode this shows the broker's last-known devices until the
   // password is entered again; otherwise the demo home starts.
@@ -61,7 +66,6 @@ Future<void> main() async {
       ? null
       : DemoBridgeHost(simulated, port, hostId: 'app-${randomTag()}');
 
-  final atDemo = route == DemoSetup.demoRoute;
   runApp(
     GlowhausApp(
       settings: settings,
@@ -84,3 +88,11 @@ Future<void> main() async {
     ),
   );
 }
+
+/// `#/demo?quiet`: the demo's devices do not change by themselves (no power
+/// or temperature updates every 2 s), so a screen recording shows only what
+/// is pressed. Presses and commands work as ever. For recording only; nothing
+/// in the app mentions it.
+bool _quiet(Uri page) =>
+    page.queryParameters.containsKey('quiet') ||
+    Uri.parse(page.fragment).queryParameters.containsKey('quiet');

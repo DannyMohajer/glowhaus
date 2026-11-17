@@ -656,6 +656,34 @@ void main() {
     });
   });
 
+  test('paused ambient: no drift, commands and presses still answered', () {
+    _run(ambientInterval: const Duration(seconds: 1), (wire, home) {
+      home.ambientPaused = true;
+      wire.received.clear();
+      wire.async.elapse(const Duration(seconds: 10));
+      for (final id in ['kt-outlet', 'lr-thermostat', 'br-climate']) {
+        expect(wire.states(id), isEmpty, reason: id);
+      }
+
+      wire.set('lr-lamp', _lampOff);
+      wire.async.elapse(const Duration(milliseconds: 200));
+      expect(wire.acks('lr-lamp').single.ok, isTrue);
+      expect(wire.states('lr-lamp').last.state['onOff'], {'on': false});
+      unawaited(
+        home.device('br-reading')!.pressLocal(const {
+          'onOff': CapabilityPatch.onOff(on: true),
+        }),
+      );
+      wire.async.elapse(const Duration(milliseconds: 100));
+      expect(wire.states('br-reading').last.state['onOff'], {'on': true});
+
+      home.ambientPaused = false;
+      wire.received.clear();
+      wire.async.elapse(const Duration(seconds: 10));
+      expect(wire.states('kt-outlet').length, greaterThan(5), reason: 'watts');
+    });
+  });
+
   test('ambient drift publishes state without a command', () {
     _run(ambientInterval: const Duration(seconds: 1), (wire, home) {
       wire.received.clear();
