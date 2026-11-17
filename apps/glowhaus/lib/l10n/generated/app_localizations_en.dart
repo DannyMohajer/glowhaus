@@ -833,4 +833,84 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get devicesTabHint =>
       'These devices talk MQTT to the app in your other tab. Close this tab and they go home.';
+
+  @override
+  String get panelInfo => 'What this panel is';
+
+  @override
+  String get panelActivity => 'What just happened';
+
+  @override
+  String get activityTurnedOn => 'turned on';
+
+  @override
+  String get activityTurnedOff => 'turned off';
+
+  @override
+  String get activityLocked => 'locked';
+
+  @override
+  String get activityUnlocked => 'unlocked';
+
+  @override
+  String get activityJammed => 'jammed';
+
+  @override
+  String get activityOpened => 'opened';
+
+  @override
+  String get activityClosed => 'closed';
+
+  @override
+  String get activityOpening => 'opening';
+
+  @override
+  String get activityClosing => 'closing';
+
+  @override
+  String get activityLeak => 'found water';
+
+  @override
+  String get activityDry => 'dried off';
+
+  @override
+  String get activityMotion => 'saw motion';
+
+  @override
+  String get activityMotionStopped => 'sees nobody';
+
+  @override
+  String get activityStreaming => 'started streaming';
+
+  @override
+  String get activityStoppedStreaming => 'stopped streaming';
+
+  @override
+  String get activityHeating => 'started heating';
+
+  @override
+  String get activityCooling => 'started cooling';
+
+  @override
+  String get activityIdle => 'reached its setpoint';
+
+  @override
+  String get activityReading => 'sent a reading';
+
+  @override
+  String get activityOffline => 'went offline';
+
+  @override
+  String get activityOnline => 'came back';
+
+  @override
+  String get activityReported => 'sent an update';
+
+  @override
+  String get activityNow => 'now';
+
+  @override
+  String activityMinutesAgo(int minutes) {
+    return '$minutes min ago';
+  }
 }

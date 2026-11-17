@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide LockState;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:glowhaus/features/demo/cubit/device_activity.dart';
 import 'package:glowhaus/features/demo/cubit/devices_panel_cubit.dart';
 import 'package:glowhaus/features/shared/demo_names.dart';
 import 'package:glowhaus/features/shared/device_presentation.dart';
@@ -12,7 +13,16 @@ import 'package:glowhaus_ui/glowhaus_ui.dart';
 /// — the drawing of the hardware, pressed the way a person at home would —
 /// its plug, and the MQTT messages the devices send.
 class DevicesPanel extends StatelessWidget {
-  const new({this.onClose, this.onOpenTab, this.footer, super.key});
+  const new({
+    this.onClose,
+    this.onOpenTab,
+    this.footer,
+    this.compact = false,
+    this.scrollController,
+    this.dragController,
+    this.snapSizes = const [],
+    super.key,
+  });
 
   /// Shows a close button when set.
   final VoidCallback? onClose;
@@ -23,11 +33,28 @@ class DevicesPanel extends StatelessWidget {
   /// Shown under the header, e.g. what the devices tab is.
   final String? footer;
 
+  /// The phone sheet: a one-row sticky header with the description behind
+  /// an info button, three columns of small cards, and the last message in
+  /// plain words at the bottom.
+  final bool compact;
+
+  /// The sheet's scroll controller, so dragging the devices drags the
+  /// sheet. Only used while [compact].
+  final ScrollController? scrollController;
+
+  /// The sheet itself, so its header can be dragged as well as its
+  /// content, and let go at the nearest of [snapSizes].
+  final DraggableScrollableController? dragController;
+
+  /// Where the sheet rests, smallest first.
+  final List<double> snapSizes;
+
   /// How many messages the log at the bottom keeps.
   static const int logLength = 4;
 
   @override
   Widget build(BuildContext context) {
+    if (compact) return _sheet(context);
     final l10n = AppLocalizations.of(context);
     final colors = context.colors;
     final type = context.type;
@@ -118,7 +145,326 @@ class DevicesPanel extends StatelessWidget {
       ),
     );
   }
+
+  /// The phone sheet. The header stays put and the devices scroll under it;
+  /// the bottom line says what a device just did, and opens the MQTT log.
+  Widget _sheet(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = context.colors;
+    final type = context.type;
+    return BlocBuilder<DevicesPanelCubit, DevicesPanelState>(
+      builder: (context, state) => Column(
+        children: [
+          _SheetHeader(
+            onClose: onClose,
+            dragController: dragController,
+            snapSizes: snapSizes,
+          ),
+          Expanded(
+            child: CustomScrollView(
+              controller: scrollController,
+              slivers: [
+                if (state.away)
+                  SliverPadding(
+                    padding: const EdgeInsets.all(GlowSpace.x5),
+                    sliver: SliverToBoxAdapter(
+                      child: Semantics(
+                        liveRegion: true,
+                        child: Text(l10n.panelAway, style: type.body),
+                      ),
+                    ),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(
+                      GlowSpace.x3,
+                      GlowSpace.x2,
+                      GlowSpace.x3,
+                      GlowSpace.x4,
+                    ),
+                    sliver: SliverToBoxAdapter(
+                      child: _Rooms(state: state, compact: true),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          if (!state.away)
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: colors.surfaceAlt,
+                border: Border(top: BorderSide(color: colors.border)),
+              ),
+              child: SafeArea(top: false, child: _ActivityLine(state: state)),
+            ),
+        ],
+      ),
+    );
+  }
 }
+
+/// The sheet's one header row: the grab handle, the title, what the panel
+/// is behind an info button, and close.
+class _SheetHeader extends StatelessWidget {
+  const new({this.onClose, this.dragController, this.snapSizes = const []});
+
+  final VoidCallback? onClose;
+  final DraggableScrollableController? dragController;
+  final List<double> snapSizes;
+
+  /// A flick, rather than a slow drag, in fractions of the window a second.
+  static const double _flick = 0.6;
+
+  void _drag(BuildContext context, DragUpdateDetails details) {
+    final controller = dragController;
+    if (controller == null || !controller.isAttached) return;
+    final height = MediaQuery.sizeOf(context).height;
+    if (height == 0) return;
+    controller.jumpTo(
+      (controller.size - details.primaryDelta! / height).clamp(
+        snapSizes.first,
+        snapSizes.last,
+      ),
+    );
+  }
+
+  void _settle(BuildContext context, DragEndDetails details) {
+    final controller = dragController;
+    if (controller == null || !controller.isAttached) return;
+    final height = MediaQuery.sizeOf(context).height;
+    final speed = height == 0
+        ? 0.0
+        : -details.velocity.pixelsPerSecond.dy / height;
+    final size = controller.size;
+    final target = speed.abs() > _flick
+        ? snapSizes.firstWhere(
+            (snap) => speed > 0 ? snap > size + 0.01 : snap < size - 0.01,
+            orElse: () => speed > 0 ? snapSizes.last : snapSizes.first,
+          )
+        : snapSizes.reduce(
+            (a, b) => (a - size).abs() <= (b - size).abs() ? a : b,
+          );
+    controller.animateTo(
+      target,
+      duration: context.motion.toggle,
+      curve: context.motion.curve,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = context.colors;
+    final header = Container(
+      padding: const EdgeInsets.fromLTRB(
+        GlowSpace.x3,
+        GlowSpace.x2,
+        GlowSpace.x3,
+        GlowSpace.x2,
+      ),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        border: Border(bottom: BorderSide(color: colors.border)),
+      ),
+      child: Row(
+        children: [
+          const GlowDragHandle(),
+          const SizedBox(width: GlowSpace.x3),
+          Expanded(
+            child: Semantics(
+              header: true,
+              child: Text(l10n.panelTitle, style: context.type.title),
+            ),
+          ),
+          const _InfoButton(),
+          if (onClose != null) ...[
+            const SizedBox(width: GlowSpace.x1),
+            IconButtonRound(
+              icon: GlowIcons.x,
+              semanticLabel: l10n.panelClose,
+              onTap: onClose,
+              size: 36,
+            ),
+          ],
+        ],
+      ),
+    );
+    if (dragController == null || snapSizes.length < 2) return header;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onVerticalDragUpdate: (details) => _drag(context, details),
+      onVerticalDragEnd: (details) => _settle(context, details),
+      child: header,
+    );
+  }
+}
+
+/// What the panel is and how to use it, in a popover: the two lines the
+/// side panel has room to show all the time.
+class _InfoButton extends StatefulWidget {
+  const new();
+
+  @override
+  State<_InfoButton> createState() => _InfoButtonState();
+}
+
+class _InfoButtonState extends State<_InfoButton> {
+  final _tooltip = GlobalKey<TooltipState>();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = context.colors;
+    return Tooltip(
+      key: _tooltip,
+      message: '${l10n.panelSubtitle}\n\n${l10n.panelHint}',
+      triggerMode: TooltipTriggerMode.manual,
+      preferBelow: true,
+      showDuration: const Duration(seconds: 12),
+      margin: const EdgeInsets.symmetric(horizontal: GlowSpace.x4),
+      padding: const EdgeInsets.all(GlowSpace.x3),
+      textStyle: context.type.caption.copyWith(color: colors.text),
+      decoration: BoxDecoration(
+        color: colors.surfaceAlt,
+        borderRadius: GlowRadius.tileAll,
+        border: Border.all(color: colors.border),
+      ),
+      child: IconButtonRound(
+        icon: GlowIcons.info,
+        semanticLabel: l10n.panelInfo,
+        size: 36,
+        onTap: () => _tooltip.currentState?.ensureTooltipVisible(),
+      ),
+    );
+  }
+}
+
+/// The bottom line of the sheet: the last thing a device did, in words
+/// ("Reading light · turned on · now"). Tapping it opens the MQTT log the
+/// line is a reading of.
+class _ActivityLine extends StatefulWidget {
+  const new({required this.state});
+
+  final DevicesPanelState state;
+
+  @override
+  State<_ActivityLine> createState() => _ActivityLineState();
+}
+
+class _ActivityLineState extends State<_ActivityLine> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = context.colors;
+    final activity = widget.state.activity;
+    final entries = widget.state.traffic.take(DevicesPanel.logLength).toList();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        GlowSpace.x4,
+        GlowSpace.x2,
+        GlowSpace.x4,
+        GlowSpace.x2,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GlowPressable(
+            onTap: () => setState(() => _expanded = !_expanded),
+            semanticLabel: _expanded
+                ? l10n.panelTrafficHide
+                : l10n.panelTrafficShow,
+            borderRadius: GlowRadius.tileAll,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: GlowSpace.x2),
+              child: Row(
+                children: [
+                  const StatusDot(tone: StatusTone.success),
+                  const SizedBox(width: GlowSpace.x2),
+                  Expanded(
+                    child: ExcludeSemantics(
+                      child: Text(
+                        activity == null
+                            ? l10n.panelTrafficEmpty
+                            : _words(l10n, activity),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.type.caption.copyWith(
+                          color: colors.text,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    _expanded ? GlowIcons.chevronDown : GlowIcons.chevronUp,
+                    size: 16,
+                    color: colors.textMuted,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_expanded) ...[
+            const SizedBox(height: GlowSpace.x1),
+            if (entries.isEmpty)
+              Text(
+                l10n.panelTrafficEmpty,
+                style: context.type.caption.copyWith(color: colors.textMuted),
+              )
+            else
+              for (final entry in entries) _TrafficRow(entry: entry),
+            const SizedBox(height: GlowSpace.x2),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// "Reading light · turned on · now".
+  String _words(AppLocalizations l10n, DeviceActivity activity) {
+    final device = widget.state.devices
+        .where((device) => device.id == activity.deviceId)
+        .firstOrNull;
+    final minutes = DateTime.now().difference(activity.at).inMinutes;
+    final when = minutes < 1
+        ? l10n.activityNow
+        : l10n.activityMinutesAgo(minutes);
+    return joinParts(l10n, [
+      device?.displayName(l10n) ?? activity.deviceId,
+      activityWords(l10n, activity.kind),
+      when,
+    ]);
+  }
+}
+
+/// What a device did, in this language.
+String activityWords(AppLocalizations l10n, DeviceActivityKind kind) =>
+    switch (kind) {
+      DeviceActivityKind.turnedOn => l10n.activityTurnedOn,
+      DeviceActivityKind.turnedOff => l10n.activityTurnedOff,
+      DeviceActivityKind.locked => l10n.activityLocked,
+      DeviceActivityKind.unlocked => l10n.activityUnlocked,
+      DeviceActivityKind.jammed => l10n.activityJammed,
+      DeviceActivityKind.opened => l10n.activityOpened,
+      DeviceActivityKind.closed => l10n.activityClosed,
+      DeviceActivityKind.opening => l10n.activityOpening,
+      DeviceActivityKind.closing => l10n.activityClosing,
+      DeviceActivityKind.leakFound => l10n.activityLeak,
+      DeviceActivityKind.driedUp => l10n.activityDry,
+      DeviceActivityKind.sawMotion => l10n.activityMotion,
+      DeviceActivityKind.motionStopped => l10n.activityMotionStopped,
+      DeviceActivityKind.streaming => l10n.activityStreaming,
+      DeviceActivityKind.stoppedStreaming => l10n.activityStoppedStreaming,
+      DeviceActivityKind.heating => l10n.activityHeating,
+      DeviceActivityKind.cooling => l10n.activityCooling,
+      DeviceActivityKind.idle => l10n.activityIdle,
+      DeviceActivityKind.reading => l10n.activityReading,
+      DeviceActivityKind.wentOffline => l10n.activityOffline,
+      DeviceActivityKind.cameBack => l10n.activityOnline,
+      DeviceActivityKind.reported => l10n.activityReported,
+    };
 
 /// What the panel is for, in one line, above the devices.
 class _Hint extends StatelessWidget {
@@ -159,9 +505,12 @@ class _Hint extends StatelessWidget {
 /// The devices, grouped by the room they are in: two columns in the side
 /// panel and on phones, three or four on a wide page.
 class _Rooms extends StatelessWidget {
-  const new({required this.state});
+  const new({required this.state, this.compact = false});
 
   final DevicesPanelState state;
+
+  /// The phone sheet: three columns of small cards whatever the width.
+  final bool compact;
 
   /// The demo's rooms, in the order the home lists them; devices with an
   /// unknown room come last, under no heading.
@@ -184,20 +533,23 @@ class _Rooms extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final columns = width >= 1000
+        final columns = compact
+            ? 3
+            : width >= 1000
             ? 4
             : width >= 720
             ? 3
             : 2;
+        final gap = compact ? GlowSpace.x2 : GlowSpace.x3;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             for (final (room, devices) in _groups()) ...[
               if (room != null)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(
+                  padding: EdgeInsets.fromLTRB(
                     GlowSpace.x1,
-                    GlowSpace.x3,
+                    compact ? GlowSpace.x2 : GlowSpace.x3,
                     GlowSpace.x1,
                     GlowSpace.x2,
                   ),
@@ -213,17 +565,18 @@ class _Rooms extends StatelessWidget {
                 ),
               for (var start = 0; start < devices.length; start += columns)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: GlowSpace.x3),
+                  padding: EdgeInsets.only(bottom: gap),
                   child: IntrinsicHeight(
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         for (var column = 0; column < columns; column++) ...[
-                          if (column > 0) const SizedBox(width: GlowSpace.x3),
+                          if (column > 0) SizedBox(width: gap),
                           Expanded(
                             child: start + column < devices.length
                                 ? _DeviceCard(
                                     device: devices[start + column],
+                                    compact: compact,
                                     publishes:
                                         state.publishes[devices[start + column]
                                             .id] ??
@@ -247,10 +600,17 @@ class _Rooms extends StatelessWidget {
 /// One device: its face, which presses the device's own hardware, and its
 /// plug, which takes it off the network and back.
 class _DeviceCard extends StatelessWidget {
-  const new({required this.device, required this.publishes});
+  const new({
+    required this.device,
+    required this.publishes,
+    this.compact = false,
+  });
 
   final Device device;
   final int publishes;
+
+  /// The small card of the phone sheet.
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -264,6 +624,7 @@ class _DeviceCard extends StatelessWidget {
       face: _face(context, device: device, name: name, online: online),
       online: online,
       active: device.isActive,
+      compact: compact,
       publishTick: publishes,
       plugLabel: online ? l10n.panelPlugged : l10n.panelUnplugged,
       plugSemanticLabel: online

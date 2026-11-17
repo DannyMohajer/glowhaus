@@ -1497,6 +1497,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'These devices talk MQTT to the app in your other tab. Close this tab and they go home.'**
   String get devicesTabHint;
+
+  /// Devices sheet: button that opens what the panel is and how to use it
+  ///
+  /// In en, this message translates to:
+  /// **'What this panel is'**
+  String get panelInfo;
+
+  /// Devices sheet: the line that says in plain words what a device just did
+  ///
+  /// In en, this message translates to:
+  /// **'What just happened'**
+  String get panelActivity;
+
+  /// No description provided for @activityTurnedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'turned on'**
+  String get activityTurnedOn;
+
+  /// No description provided for @activityTurnedOff.
+  ///
+  /// In en, this message translates to:
+  /// **'turned off'**
+  String get activityTurnedOff;
+
+  /// No description provided for @activityLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'locked'**
+  String get activityLocked;
+
+  /// No description provided for @activityUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'unlocked'**
+  String get activityUnlocked;
+
+  /// No description provided for @activityJammed.
+  ///
+  /// In en, this message translates to:
+  /// **'jammed'**
+  String get activityJammed;
+
+  /// No description provided for @activityOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'opened'**
+  String get activityOpened;
+
+  /// No description provided for @activityClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'closed'**
+  String get activityClosed;
+
+  /// No description provided for @activityOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'opening'**
+  String get activityOpening;
+
+  /// No description provided for @activityClosing.
+  ///
+  /// In en, this message translates to:
+  /// **'closing'**
+  String get activityClosing;
+
+  /// No description provided for @activityLeak.
+  ///
+  /// In en, this message translates to:
+  /// **'found water'**
+  String get activityLeak;
+
+  /// No description provided for @activityDry.
+  ///
+  /// In en, this message translates to:
+  /// **'dried off'**
+  String get activityDry;
+
+  /// No description provided for @activityMotion.
+  ///
+  /// In en, this message translates to:
+  /// **'saw motion'**
+  String get activityMotion;
+
+  /// No description provided for @activityMotionStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'sees nobody'**
+  String get activityMotionStopped;
+
+  /// No description provided for @activityStreaming.
+  ///
+  /// In en, this message translates to:
+  /// **'started streaming'**
+  String get activityStreaming;
+
+  /// No description provided for @activityStoppedStreaming.
+  ///
+  /// In en, this message translates to:
+  /// **'stopped streaming'**
+  String get activityStoppedStreaming;
+
+  /// No description provided for @activityHeating.
+  ///
+  /// In en, this message translates to:
+  /// **'started heating'**
+  String get activityHeating;
+
+  /// No description provided for @activityCooling.
+  ///
+  /// In en, this message translates to:
+  /// **'started cooling'**
+  String get activityCooling;
+
+  /// No description provided for @activityIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'reached its setpoint'**
+  String get activityIdle;
+
+  /// No description provided for @activityReading.
+  ///
+  /// In en, this message translates to:
+  /// **'sent a reading'**
+  String get activityReading;
+
+  /// No description provided for @activityOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'went offline'**
+  String get activityOffline;
+
+  /// No description provided for @activityOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'came back'**
+  String get activityOnline;
+
+  /// No description provided for @activityReported.
+  ///
+  /// In en, this message translates to:
+  /// **'sent an update'**
+  String get activityReported;
+
+  /// No description provided for @activityNow.
+  ///
+  /// In en, this message translates to:
+  /// **'now'**
+  String get activityNow;
+
+  /// How long ago a device did something, when it was not just now
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min ago'**
+  String activityMinutesAgo(int minutes);
 }
 
 class _AppLocalizationsDelegate

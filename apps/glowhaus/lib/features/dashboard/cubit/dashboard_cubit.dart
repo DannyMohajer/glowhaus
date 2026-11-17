@@ -14,6 +14,10 @@ part 'dashboard_cubit.freezed.dart';
 abstract class DashboardState with _$DashboardState {
   const factory({
     required String userName,
+
+    /// The home's own name, shown when the greeting makes room for the
+    /// devices sheet.
+    required String homeName,
     @Default(<RoomOverview>[]) List<RoomOverview> rooms,
     @Default(<Scene>[]) List<Scene> scenes,
 
@@ -39,6 +43,7 @@ class DashboardCubit extends Cubit<DashboardState> {
     : _home = homes.currentHome,
       super(
         DashboardState(
+          homeName: homes.currentHome.name,
           userName:
               homes.currentHome.members
                   .where((m) => m.role == Role.owner)

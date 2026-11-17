@@ -42,20 +42,64 @@ bool demoPanelAvailable(BuildContext context) =>
 
 /// The panel with its buttons wired: close, and open in a new tab.
 class DemoDevicesPanel extends StatelessWidget {
-  const new({required this.onClose, super.key});
+  const new({
+    required this.onClose,
+    this.compact = false,
+    this.scrollController,
+    this.dragController,
+    this.snapSizes = const [],
+    super.key,
+  });
 
   final VoidCallback onClose;
+
+  /// The phone sheet; see [DevicesPanel.compact].
+  final bool compact;
+  final ScrollController? scrollController;
+
+  /// Lets the sheet be dragged by its header, not only by its content.
+  final DraggableScrollableController? dragController;
+  final List<double> snapSizes;
 
   @override
   Widget build(BuildContext context) {
     final browser = context.read<DemoSetup>().browser;
     return DevicesPanel(
       onClose: onClose,
-      onOpenTab: browser.supportsTabs
-          ? () => browser.openTab(DemoSetup.devicesRoute)
-          : null,
+      compact: compact,
+      scrollController: scrollController,
+      dragController: dragController,
+      snapSizes: snapSizes,
+      // A phone has the sheet; a second tab of a phone browser is not
+      // where this demo is read, and the sheet's header has no room for it.
+      onOpenTab: compact || !browser.supportsTabs
+          ? null
+          : () => browser.openTab(DemoSetup.devicesRoute),
     );
   }
+}
+
+/// Where the phone sheet rests: the header and the last line (peek), half
+/// the window, and nearly all of it.
+abstract final class DevicesSheet {
+  /// Height of the header plus the line at the bottom.
+  static const double peekHeight = 132;
+
+  static const double half = 0.5;
+  static const double full = 0.94;
+
+  /// [peekHeight] as a fraction of the room the sheet has.
+  static double peekOf(BuildContext context) {
+    final media = MediaQuery.of(context);
+    final usable = media.size.height - media.viewPadding.top;
+    return usable <= 0 ? 0.2 : (peekHeight / usable).clamp(0.12, 0.45);
+  }
+
+  static List<double> snapsOf(BuildContext context) => [
+    peekOf(context),
+    half,
+    full,
+  ];
 }
 
 /// Opens the devices panel: next to the app on expanded windows, as a sheet
@@ -66,13 +110,16 @@ void openDevicesPanel(BuildContext context) {
     return;
   }
   final panel = context.read<DevicesPanelCubit>();
+  final open = context.read<DemoSheetCubit>();
   final setup = context.read<DemoSetup>();
   final colors = context.colors;
-  final height = MediaQuery.sizeOf(context).height;
+  final snaps = DevicesSheet.snapsOf(context);
+  final drag = DraggableScrollableController();
   final router = GoRouter.maybeOf(context);
   // The address says what is showing, so it can be shared: `#/demo` while
   // the sheet is open over the dashboard.
   if (router != null && _path(router) == Routes.home) router.go(Routes.demo);
+  open.opened();
   unawaited(
     showModalBottomSheet<void>(
       context: context,
@@ -80,24 +127,48 @@ void openDevicesPanel(BuildContext context) {
       useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: colors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(GlowRadius.card),
-        ),
-      ),
+      // The sheet draws its own surface, at whatever height it is dragged
+      // to; the app above it stays in plain sight, not behind a scrim.
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.transparent,
       builder: (sheet) => RepositoryProvider<DemoSetup>.value(
         value: setup,
         child: BlocProvider<DevicesPanelCubit>.value(
           value: panel,
-          child: SizedBox(
-            // Half the window: the app stays visible above the sheet.
-            height: height * 0.5,
-            child: DemoDevicesPanel(onClose: () => Navigator.of(sheet).pop()),
+          child: DraggableScrollableSheet(
+            controller: drag,
+            snap: true,
+            // It opens at half the window, which is this sheet's default
+            // size as well as its middle snap.
+            minChildSize: snaps.first,
+            maxChildSize: DevicesSheet.full,
+            snapSizes: snaps,
+            builder: (context, scrollController) => DecoratedBox(
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(GlowRadius.card),
+                ),
+                boxShadow: glowFloatingShadow(context),
+              ),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(GlowRadius.card),
+                ),
+                child: DemoDevicesPanel(
+                  compact: true,
+                  scrollController: scrollController,
+                  dragController: drag,
+                  snapSizes: snaps,
+                  onClose: () => Navigator.of(sheet).pop(),
+                ),
+              ),
+            ),
           ),
         ),
       ),
     ).whenComplete(() {
+      open.closed();
       if (router != null && _path(router) == Routes.demo) {
         router.go(Routes.home);
       }

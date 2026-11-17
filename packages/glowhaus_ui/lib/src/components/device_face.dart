@@ -537,19 +537,29 @@ class _Scaled extends StatelessWidget {
     return SizedBox(
       height: height,
       child: LayoutBuilder(
-        builder: (context, constraints) => Transform.scale(
-          scale: scale,
-          // From the corner the drawing starts in, so the scaled box fills
-          // the width it was given in either reading direction.
-          alignment: AlignmentDirectional.topStart.resolve(
+        builder: (context, constraints) {
+          // The drawing is laid out at its full size — an OverflowBox, so
+          // the smaller box it goes in does not squeeze it — and scaled
+          // from the corner it starts in, which is the end in Persian.
+          final corner = AlignmentDirectional.topStart.resolve(
             Directionality.of(context),
-          ),
-          child: SizedBox(
-            width: constraints.maxWidth / scale,
-            height: _faceHeight,
-            child: child,
-          ),
-        ),
+          );
+          final width = constraints.maxWidth / scale;
+          return ClipRect(
+            child: OverflowBox(
+              alignment: corner,
+              minWidth: width,
+              maxWidth: width,
+              minHeight: _faceHeight,
+              maxHeight: _faceHeight,
+              child: Transform.scale(
+                scale: scale,
+                alignment: corner,
+                child: child,
+              ),
+            ),
+          );
+        },
       ),
     );
   }

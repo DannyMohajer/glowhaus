@@ -15,7 +15,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DashboardState {
 
- String get userName; List<RoomOverview> get rooms; List<Scene> get scenes;/// Null shows every room.
+ String get userName;/// The home's own name, shown when the greeting makes room for the
+/// devices sheet.
+ String get homeName; List<RoomOverview> get rooms; List<Scene> get scenes;/// Null shows every room.
  String? get selectedRoomId;/// False until the first devices have arrived.
  bool get loaded;
 /// Create a copy of DashboardState
@@ -29,20 +31,20 @@ $DashboardStateCopyWith<DashboardState> get copyWith => _$DashboardStateCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as DashboardState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DashboardState&&(identical(other.userName, _this.userName) || other.userName == _this.userName)&&const DeepCollectionEquality().equals(other.rooms, _this.rooms)&&const DeepCollectionEquality().equals(other.scenes, _this.scenes)&&(identical(other.selectedRoomId, _this.selectedRoomId) || other.selectedRoomId == _this.selectedRoomId)&&(identical(other.loaded, _this.loaded) || other.loaded == _this.loaded));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DashboardState&&(identical(other.userName, _this.userName) || other.userName == _this.userName)&&(identical(other.homeName, _this.homeName) || other.homeName == _this.homeName)&&const DeepCollectionEquality().equals(other.rooms, _this.rooms)&&const DeepCollectionEquality().equals(other.scenes, _this.scenes)&&(identical(other.selectedRoomId, _this.selectedRoomId) || other.selectedRoomId == _this.selectedRoomId)&&(identical(other.loaded, _this.loaded) || other.loaded == _this.loaded));
 }
 
 
 @override
 int get hashCode {
   final _this = this as DashboardState;
-  return Object.hash(runtimeType,_this.userName,const DeepCollectionEquality().hash(_this.rooms),const DeepCollectionEquality().hash(_this.scenes),_this.selectedRoomId,_this.loaded);
+  return Object.hash(runtimeType,_this.userName,_this.homeName,const DeepCollectionEquality().hash(_this.rooms),const DeepCollectionEquality().hash(_this.scenes),_this.selectedRoomId,_this.loaded);
 }
 
 @override
 String toString() {
   final _this = this as DashboardState;
-  return 'DashboardState(userName: ${_this.userName}, rooms: ${_this.rooms}, scenes: ${_this.scenes}, selectedRoomId: ${_this.selectedRoomId}, loaded: ${_this.loaded})';
+  return 'DashboardState(userName: ${_this.userName}, homeName: ${_this.homeName}, rooms: ${_this.rooms}, scenes: ${_this.scenes}, selectedRoomId: ${_this.selectedRoomId}, loaded: ${_this.loaded})';
 }
 
 
@@ -53,7 +55,7 @@ abstract mixin class $DashboardStateCopyWith<$Res>  {
   factory $DashboardStateCopyWith(DashboardState value, $Res Function(DashboardState) _then) = _$DashboardStateCopyWithImpl;
 @useResult
 $Res call({
- String userName, List<RoomOverview> rooms, List<Scene> scenes, String? selectedRoomId, bool loaded
+ String userName, String homeName, List<RoomOverview> rooms, List<Scene> scenes, String? selectedRoomId, bool loaded
 });
 
 
@@ -70,9 +72,10 @@ class _$DashboardStateCopyWithImpl<$Res>
 
 /// Create a copy of DashboardState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? userName = null,Object? rooms = null,Object? scenes = null,Object? selectedRoomId = freezed,Object? loaded = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? userName = null,Object? homeName = null,Object? rooms = null,Object? scenes = null,Object? selectedRoomId = freezed,Object? loaded = null,}) {
   return _then(DashboardState(
 userName: null == userName ? _self.userName : userName // ignore: cast_nullable_to_non_nullable
+as String,homeName: null == homeName ? _self.homeName : homeName // ignore: cast_nullable_to_non_nullable
 as String,rooms: null == rooms ? _self.rooms : rooms // ignore: cast_nullable_to_non_nullable
 as List<RoomOverview>,scenes: null == scenes ? _self.scenes : scenes // ignore: cast_nullable_to_non_nullable
 as List<Scene>,selectedRoomId: freezed == selectedRoomId ? _self.selectedRoomId : selectedRoomId // ignore: cast_nullable_to_non_nullable
@@ -162,10 +165,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String userName,  List<RoomOverview> rooms,  List<Scene> scenes,  String? selectedRoomId,  bool loaded)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String userName,  String homeName,  List<RoomOverview> rooms,  List<Scene> scenes,  String? selectedRoomId,  bool loaded)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DashboardState() when $default != null:
-return $default(_that.userName,_that.rooms,_that.scenes,_that.selectedRoomId,_that.loaded);case _:
+return $default(_that.userName,_that.homeName,_that.rooms,_that.scenes,_that.selectedRoomId,_that.loaded);case _:
   return orElse();
 
 }
@@ -183,10 +186,10 @@ return $default(_that.userName,_that.rooms,_that.scenes,_that.selectedRoomId,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String userName,  List<RoomOverview> rooms,  List<Scene> scenes,  String? selectedRoomId,  bool loaded)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String userName,  String homeName,  List<RoomOverview> rooms,  List<Scene> scenes,  String? selectedRoomId,  bool loaded)  $default,) {final _that = this;
 switch (_that) {
 case _DashboardState():
-return $default(_that.userName,_that.rooms,_that.scenes,_that.selectedRoomId,_that.loaded);case _:
+return $default(_that.userName,_that.homeName,_that.rooms,_that.scenes,_that.selectedRoomId,_that.loaded);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,10 +206,10 @@ return $default(_that.userName,_that.rooms,_that.scenes,_that.selectedRoomId,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String userName,  List<RoomOverview> rooms,  List<Scene> scenes,  String? selectedRoomId,  bool loaded)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String userName,  String homeName,  List<RoomOverview> rooms,  List<Scene> scenes,  String? selectedRoomId,  bool loaded)?  $default,) {final _that = this;
 switch (_that) {
 case _DashboardState() when $default != null:
-return $default(_that.userName,_that.rooms,_that.scenes,_that.selectedRoomId,_that.loaded);case _:
+return $default(_that.userName,_that.homeName,_that.rooms,_that.scenes,_that.selectedRoomId,_that.loaded);case _:
   return null;
 
 }
@@ -218,10 +221,13 @@ return $default(_that.userName,_that.rooms,_that.scenes,_that.selectedRoomId,_th
 
 
 class _DashboardState extends DashboardState {
-  const _DashboardState({required this.userName,  List<RoomOverview> rooms = const <RoomOverview>[],  List<Scene> scenes = const <Scene>[], this.selectedRoomId, this.loaded = false}): _rooms = rooms,_scenes = scenes,super._();
+  const _DashboardState({required this.userName, required this.homeName,  List<RoomOverview> rooms = const <RoomOverview>[],  List<Scene> scenes = const <Scene>[], this.selectedRoomId, this.loaded = false}): _rooms = rooms,_scenes = scenes,super._();
   
 
 @override final  String userName;
+/// The home's own name, shown when the greeting makes room for the
+/// devices sheet.
+@override final  String homeName;
  final  List<RoomOverview> _rooms;
 @override@JsonKey() List<RoomOverview> get rooms {
   if (_rooms is EqualUnmodifiableListView) return _rooms;
@@ -251,18 +257,18 @@ _$DashboardStateCopyWith<_DashboardState> get copyWith => __$DashboardStateCopyW
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DashboardState&&(identical(other.userName, userName) || other.userName == userName)&&const DeepCollectionEquality().equals(other.rooms, _rooms)&&const DeepCollectionEquality().equals(other.scenes, _scenes)&&(identical(other.selectedRoomId, selectedRoomId) || other.selectedRoomId == selectedRoomId)&&(identical(other.loaded, loaded) || other.loaded == loaded));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DashboardState&&(identical(other.userName, userName) || other.userName == userName)&&(identical(other.homeName, homeName) || other.homeName == homeName)&&const DeepCollectionEquality().equals(other.rooms, _rooms)&&const DeepCollectionEquality().equals(other.scenes, _scenes)&&(identical(other.selectedRoomId, selectedRoomId) || other.selectedRoomId == selectedRoomId)&&(identical(other.loaded, loaded) || other.loaded == loaded));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,userName,const DeepCollectionEquality().hash(_rooms),const DeepCollectionEquality().hash(_scenes),selectedRoomId,loaded);
+    return Object.hash(runtimeType,userName,homeName,const DeepCollectionEquality().hash(_rooms),const DeepCollectionEquality().hash(_scenes),selectedRoomId,loaded);
 }
 
 @override
 String toString() {
-    return 'DashboardState(userName: $userName, rooms: $rooms, scenes: $scenes, selectedRoomId: $selectedRoomId, loaded: $loaded)';
+    return 'DashboardState(userName: $userName, homeName: $homeName, rooms: $rooms, scenes: $scenes, selectedRoomId: $selectedRoomId, loaded: $loaded)';
 }
 
 
@@ -273,7 +279,7 @@ abstract mixin class _$DashboardStateCopyWith<$Res> implements $DashboardStateCo
   factory _$DashboardStateCopyWith(_DashboardState value, $Res Function(_DashboardState) _then) = __$DashboardStateCopyWithImpl;
 @override @useResult
 $Res call({
- String userName, List<RoomOverview> rooms, List<Scene> scenes, String? selectedRoomId, bool loaded
+ String userName, String homeName, List<RoomOverview> rooms, List<Scene> scenes, String? selectedRoomId, bool loaded
 });
 
 
@@ -290,9 +296,10 @@ class __$DashboardStateCopyWithImpl<$Res>
 
 /// Create a copy of DashboardState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? userName = null,Object? rooms = null,Object? scenes = null,Object? selectedRoomId = freezed,Object? loaded = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? userName = null,Object? homeName = null,Object? rooms = null,Object? scenes = null,Object? selectedRoomId = freezed,Object? loaded = null,}) {
   return _then(_DashboardState(
 userName: null == userName ? _self.userName : userName // ignore: cast_nullable_to_non_nullable
+as String,homeName: null == homeName ? _self.homeName : homeName // ignore: cast_nullable_to_non_nullable
 as String,rooms: null == rooms ? _self._rooms : rooms // ignore: cast_nullable_to_non_nullable
 as List<RoomOverview>,scenes: null == scenes ? _self._scenes : scenes // ignore: cast_nullable_to_non_nullable
 as List<Scene>,selectedRoomId: freezed == selectedRoomId ? _self.selectedRoomId : selectedRoomId // ignore: cast_nullable_to_non_nullable

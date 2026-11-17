@@ -61,6 +61,7 @@ class GlowhausApp extends StatelessWidget {
           BlocProvider<DemoPanelCubit>(
             create: (_) => DemoPanelCubit(open: panelOpen && demo != null),
           ),
+          BlocProvider<DemoSheetCubit>(create: (_) => DemoSheetCubit()),
           if (demo case final demo?)
             BlocProvider<DevicesPanelCubit>(
               create: (_) => DevicesPanelCubit(

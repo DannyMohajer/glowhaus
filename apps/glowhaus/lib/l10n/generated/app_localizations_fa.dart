@@ -834,4 +834,84 @@ class AppLocalizationsFa extends AppLocalizations {
   @override
   String get devicesTabHint =>
       'این دستگاه‌ها با برنامه در زبانه‌ی دیگرت از راه MQTT حرف می‌زنند. این زبانه را ببندی، به خانه برمی‌گردند.';
+
+  @override
+  String get panelInfo => 'این پنل چیست';
+
+  @override
+  String get panelActivity => 'همین حالا چه شد';
+
+  @override
+  String get activityTurnedOn => 'روشن شد';
+
+  @override
+  String get activityTurnedOff => 'خاموش شد';
+
+  @override
+  String get activityLocked => 'قفل شد';
+
+  @override
+  String get activityUnlocked => 'باز شد';
+
+  @override
+  String get activityJammed => 'گیر کرد';
+
+  @override
+  String get activityOpened => 'باز شد';
+
+  @override
+  String get activityClosed => 'بسته شد';
+
+  @override
+  String get activityOpening => 'در حال باز شدن';
+
+  @override
+  String get activityClosing => 'در حال بسته شدن';
+
+  @override
+  String get activityLeak => 'آب دید';
+
+  @override
+  String get activityDry => 'خشک شد';
+
+  @override
+  String get activityMotion => 'حرکت دید';
+
+  @override
+  String get activityMotionStopped => 'کسی را نمی‌بیند';
+
+  @override
+  String get activityStreaming => 'پخش را شروع کرد';
+
+  @override
+  String get activityStoppedStreaming => 'پخش را بست';
+
+  @override
+  String get activityHeating => 'گرمایش را شروع کرد';
+
+  @override
+  String get activityCooling => 'سرمایش را شروع کرد';
+
+  @override
+  String get activityIdle => 'به دمای خواسته رسید';
+
+  @override
+  String get activityReading => 'اندازه‌ای فرستاد';
+
+  @override
+  String get activityOffline => 'آفلاین شد';
+
+  @override
+  String get activityOnline => 'برگشت';
+
+  @override
+  String get activityReported => 'خبری فرستاد';
+
+  @override
+  String get activityNow => 'همین حالا';
+
+  @override
+  String activityMinutesAgo(int minutes) {
+    return '$minutes دقیقه پیش';
+  }
 }

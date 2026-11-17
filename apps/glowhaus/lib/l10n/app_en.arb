@@ -457,5 +457,45 @@
   "@devicesTabTakeOver": {
     "description": "Button: run the demo devices in this tab instead of the other one"
   },
-  "devicesTabHint": "These devices talk MQTT to the app in your other tab. Close this tab and they go home."
+  "devicesTabHint": "These devices talk MQTT to the app in your other tab. Close this tab and they go home.",
+  "panelInfo": "What this panel is",
+  "@panelInfo": {
+    "description": "Devices sheet: button that opens what the panel is and how to use it"
+  },
+  "panelActivity": "What just happened",
+  "@panelActivity": {
+    "description": "Devices sheet: the line that says in plain words what a device just did"
+  },
+  "activityTurnedOn": "turned on",
+  "activityTurnedOff": "turned off",
+  "activityLocked": "locked",
+  "activityUnlocked": "unlocked",
+  "activityJammed": "jammed",
+  "activityOpened": "opened",
+  "activityClosed": "closed",
+  "activityOpening": "opening",
+  "activityClosing": "closing",
+  "activityLeak": "found water",
+  "activityDry": "dried off",
+  "activityMotion": "saw motion",
+  "activityMotionStopped": "sees nobody",
+  "activityStreaming": "started streaming",
+  "activityStoppedStreaming": "stopped streaming",
+  "activityHeating": "started heating",
+  "activityCooling": "started cooling",
+  "activityIdle": "reached its setpoint",
+  "activityReading": "sent a reading",
+  "activityOffline": "went offline",
+  "activityOnline": "came back",
+  "activityReported": "sent an update",
+  "activityNow": "now",
+  "activityMinutesAgo": "{minutes} min ago",
+  "@activityMinutesAgo": {
+    "description": "How long ago a device did something, when it was not just now",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  }
 }

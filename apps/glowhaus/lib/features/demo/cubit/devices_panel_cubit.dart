@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:glowhaus/features/demo/cubit/device_activity.dart';
 import 'package:glowhaus/features/shared/device_presentation.dart';
 import 'package:glowhaus_domain/glowhaus_domain.dart';
 import 'package:glowhaus_transport/glowhaus_transport.dart';
@@ -76,6 +77,7 @@ class DevicesPanelState {
     this.devices = const [],
     this.traffic = const [],
     this.publishes = const {},
+    this.activity,
     this.away = false,
   });
 
@@ -90,6 +92,10 @@ class DevicesPanelState {
   /// The cards only watch for a change: one more dot leaves the card.
   final Map<String, int> publishes;
 
+  /// The last thing a device did, in plain words; null until one does
+  /// something.
+  final DeviceActivity? activity;
+
   /// The devices run in another tab; this one has nothing to show.
   final bool away;
 
@@ -97,11 +103,13 @@ class DevicesPanelState {
     List<Device>? devices,
     List<MqttTraffic>? traffic,
     Map<String, int>? publishes,
+    DeviceActivity? activity,
     bool? away,
   }) => DevicesPanelState(
     devices: devices ?? this.devices,
     traffic: traffic ?? this.traffic,
     publishes: publishes ?? this.publishes,
+    activity: activity ?? this.activity,
     away: away ?? this.away,
   );
 }
@@ -124,6 +132,9 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
        _clock = clock ?? DateTime.now,
        super(DevicesPanelState(away: initiallyAway)) {
     _refresh();
+    for (final device in home.devices.values) {
+      _before[device.id] = _view(device);
+    }
     _subscriptions = [
       home.changes.listen((_) => _refresh()),
       traffic.stream.listen(_record),
@@ -204,15 +215,30 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
     }
   }
 
-  /// Counts what a device sends, so its card can show it leaving.
+  /// Counts what a device sends, so its card can show it leaving, and says
+  /// in plain words what the message was about.
   void _record(MqttTraffic entry) {
     if (entry.direction == TrafficDirection.sent) {
       _published[entry.who] = (_published[entry.who] ?? 0) + 1;
+      final device = _home.device(entry.who);
+      if (device != null) {
+        final view = _view(device);
+        _activity = DeviceActivity(
+          deviceId: entry.who,
+          kind: activityKind(_before[entry.who], view),
+          at: entry.at,
+        );
+        _before[entry.who] = view;
+      }
     }
     _refresh();
   }
 
   final Map<String, int> _published = {};
+
+  /// Each device as it was when it last published, to say what changed.
+  final Map<String, Device> _before = {};
+  DeviceActivity? _activity;
 
   /// Presses one rocker of a multi-channel wall switch.
   Future<void> pressChannel(String deviceId, String capabilityId) async {
@@ -240,6 +266,7 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
     emit(
       state.copyWith(
         devices: [for (final device in _home.devices.values) _view(device)],
+        activity: _activity,
         publishes: Map.unmodifiable(_published),
         traffic: [
           for (
@@ -260,6 +287,19 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
     }
     await super.close();
   }
+}
+
+/// Whether the devices sheet is up over the app on a phone.
+///
+/// Separate from [DemoPanelCubit], which is the side panel on wide windows:
+/// the app behind the sheet makes room for it (a one-line greeting), which
+/// a side panel never asks for.
+class DemoSheetCubit extends Cubit<bool> {
+  new() : super(false);
+
+  void opened() => emit(true);
+
+  void closed() => emit(false);
 }
 
 /// Whether the devices panel is open next to the app.

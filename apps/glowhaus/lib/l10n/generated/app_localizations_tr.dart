@@ -834,4 +834,84 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get devicesTabHint =>
       'Bu cihazlar diğer sekmendeki uygulamayla MQTT üzerinden konuşur. Bu sekmeyi kapatırsan geri dönerler.';
+
+  @override
+  String get panelInfo => 'Bu panel nedir';
+
+  @override
+  String get panelActivity => 'Az önce ne oldu';
+
+  @override
+  String get activityTurnedOn => 'açıldı';
+
+  @override
+  String get activityTurnedOff => 'kapandı';
+
+  @override
+  String get activityLocked => 'kilitlendi';
+
+  @override
+  String get activityUnlocked => 'kilidi açıldı';
+
+  @override
+  String get activityJammed => 'sıkıştı';
+
+  @override
+  String get activityOpened => 'açıldı';
+
+  @override
+  String get activityClosed => 'kapandı';
+
+  @override
+  String get activityOpening => 'açılıyor';
+
+  @override
+  String get activityClosing => 'kapanıyor';
+
+  @override
+  String get activityLeak => 'su gördü';
+
+  @override
+  String get activityDry => 'kurudu';
+
+  @override
+  String get activityMotion => 'hareket gördü';
+
+  @override
+  String get activityMotionStopped => 'kimseyi görmüyor';
+
+  @override
+  String get activityStreaming => 'yayına başladı';
+
+  @override
+  String get activityStoppedStreaming => 'yayını kesti';
+
+  @override
+  String get activityHeating => 'ısıtmaya başladı';
+
+  @override
+  String get activityCooling => 'soğutmaya başladı';
+
+  @override
+  String get activityIdle => 'hedefine ulaştı';
+
+  @override
+  String get activityReading => 'bir ölçüm gönderdi';
+
+  @override
+  String get activityOffline => 'çevrimdışı oldu';
+
+  @override
+  String get activityOnline => 'geri döndü';
+
+  @override
+  String get activityReported => 'bir güncelleme gönderdi';
+
+  @override
+  String get activityNow => 'şimdi';
+
+  @override
+  String activityMinutesAgo(int minutes) {
+    return '$minutes dk önce';
+  }
 }

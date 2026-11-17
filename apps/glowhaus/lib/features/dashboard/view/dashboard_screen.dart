@@ -6,6 +6,7 @@ import 'package:glowhaus/data/home_repository.dart';
 import 'package:glowhaus/features/connection/cubit/connection_settings_cubit.dart';
 import 'package:glowhaus/features/connection/data/connection_settings.dart';
 import 'package:glowhaus/features/dashboard/cubit/dashboard_cubit.dart';
+import 'package:glowhaus/features/demo/cubit/devices_panel_cubit.dart';
 import 'package:glowhaus/features/demo/view/demo_panel_host.dart';
 import 'package:glowhaus/features/feedback/app_cubits.dart';
 import 'package:glowhaus/features/shared/demo_names.dart';
@@ -39,6 +40,10 @@ class _DashboardView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final cubit = context.read<DashboardCubit>();
+    // While the devices sheet is up over the app, the greeting gives the
+    // room away: one line, so the room cards and their device chips are
+    // in sight when a device in the sheet is pressed.
+    final sheetOpen = context.watch<DemoSheetCubit>().state;
 
     return SafeArea(
       bottom: false,
@@ -55,22 +60,42 @@ class _DashboardView extends StatelessWidget {
                 scrollBottomPadding(context),
               ),
               children: [
-                GreetingHeader(
-                  line1: l10n.greetingHi(state.userName),
-                  line2: l10n.greetingWelcomeHome,
-                ),
-                const SizedBox(height: GlowSpace.x4),
-                Wrap(
-                  spacing: GlowSpace.x2,
-                  runSpacing: GlowSpace.x2,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    _ActivePill(count: state.activeCount),
-                    const _ConnectionStatus(),
-                    const DemoPanelChip(),
-                  ],
-                ),
-                const SizedBox(height: GlowSpace.x5),
+                if (sheetOpen)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Semantics(
+                          header: true,
+                          child: Text(
+                            state.homeName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: context.type.title,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: GlowSpace.x3),
+                      _ActivePill(count: state.activeCount),
+                    ],
+                  )
+                else ...[
+                  GreetingHeader(
+                    line1: l10n.greetingHi(state.userName),
+                    line2: l10n.greetingWelcomeHome,
+                  ),
+                  const SizedBox(height: GlowSpace.x4),
+                  Wrap(
+                    spacing: GlowSpace.x2,
+                    runSpacing: GlowSpace.x2,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      _ActivePill(count: state.activeCount),
+                      const _ConnectionStatus(),
+                      const DemoPanelChip(),
+                    ],
+                  ),
+                ],
+                SizedBox(height: sheetOpen ? GlowSpace.x4 : GlowSpace.x5),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   clipBehavior: Clip.none,
@@ -240,18 +265,40 @@ class _RoomOverviewCard extends StatelessWidget {
       onTap: () => context.go(Routes.room(overview.room.id)),
       controls: [
         for (final view in controllable)
-          RoomQuickControl(
-            icon: deviceIcon(view.device),
-            label: view.device.displayName(l10n),
-            on: primaryToggle(view.device)!.on,
-            tone: deviceTone(view.device),
-            pending: view.pending,
-            onTap: view.device.isOffline
-                ? null
-                : () => cubit.toggle(view.device),
+          _PublishPulse(
+            deviceId: view.device.id,
+            child: RoomQuickControl(
+              icon: deviceIcon(view.device),
+              label: view.device.displayName(l10n),
+              on: primaryToggle(view.device)!.on,
+              tone: deviceTone(view.device),
+              pending: view.pending,
+              onTap: view.device.isOffline
+                  ? null
+                  : () => cubit.toggle(view.device),
+            ),
           ),
       ],
     );
+  }
+}
+
+/// Rings the chip of a device that has just published, so a press in the
+/// demo's devices sheet can be followed in the app above it. Outside the
+/// demo there is nothing to listen to and the chip is left alone.
+class _PublishPulse extends StatelessWidget {
+  const new({required this.deviceId, required this.child});
+
+  final String deviceId;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (context.read<DemoSetup?>() == null) return child;
+    final tick = context.select<DevicesPanelCubit, int>(
+      (cubit) => cubit.state.publishes[deviceId] ?? 0,
+    );
+    return GlowPulseRing(tick: tick, child: child);
   }
 }
 
