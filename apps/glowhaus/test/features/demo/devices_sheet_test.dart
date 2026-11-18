@@ -41,12 +41,16 @@ class _Browser implements DemoBrowser {
 }
 
 /// A demo whose devices are on the broker, so pressing one publishes.
-SimulatedTransport _demo() => SimulatedTransport(
+///
+/// [ambient] gives the devices their own rhythm — power and temperature
+/// readings, as the real demo has every two seconds; it starts paused, so
+/// a test turns it on when it wants it.
+SimulatedTransport _demo({Duration? ambient}) => SimulatedTransport(
   homeId: DemoHome.homeId,
   devices: DemoHome.devices(),
   connectDelay: Duration.zero,
-  ambientInterval: null,
-);
+  ambientInterval: ambient,
+)..home.ambientPaused = true;
 
 /// Only what is inside the sheet: the app behind it names its devices too.
 Finder inSheet(Finder finder) =>
@@ -59,8 +63,9 @@ extension on WidgetTester {
     AppLanguage language = AppLanguage.en,
     ThemeMode themeMode = ThemeMode.light,
     bool connected = true,
+    Duration? ambient,
   }) async {
-    final demo = _demo();
+    final demo = _demo(ambient: ambient);
     if (connected) await runAsync(demo.connect);
     await pumpApp(
       size: size,
@@ -239,6 +244,80 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Close the devices panel'));
     await tester.pumpAndSettle();
     expect(find.byType(GreetingHeader), findsOneWidget);
+  });
+
+  testWidgets('the devices reporting by themselves never move the app; a '
+      'press moves it once', (tester) async {
+    // Ten seconds of the demo's own two-second rhythm, in a tenth of the
+    // time: twenty rounds of readings from every device that sends them.
+    final demo = await tester.openSheet(
+      ambient: const Duration(milliseconds: 100),
+    );
+    addTearDown(() => tester.runAsync(demo.dispose));
+
+    double appOffset() => tester
+        .state<ScrollableState>(
+          find
+              .ancestor(
+                of: find.byType(RoomCard).first,
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        )
+        .position
+        .pixels;
+
+    Future<void> tick([int rounds = 20]) async {
+      for (var i = 0; i < rounds; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 100)),
+        );
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+    }
+
+    expect(appOffset(), 0);
+    demo.home.ambientPaused = false;
+    await tick();
+    expect(
+      appOffset(),
+      0,
+      reason: 'nobody touched anything; the app stays where it was',
+    );
+    // Nor does any chip ring for a reading that arrived by itself.
+    expect(
+      tester
+          .widgetList<GlowPulseRing>(find.byType(GlowPulseRing))
+          .every((ring) => ring.tick == 0),
+      isTrue,
+    );
+
+    // A press, on a device in a room below the fold: the app follows, once.
+    final list = find
+        .descendant(
+          of: find.byType(DevicesPanel),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    await tester.dragUntilVisible(
+      find.bySemanticsLabel('Coffee machine: Press its button'),
+      list,
+      const Offset(0, -120),
+    );
+    await tick(3);
+    await tester.runAsync(() async {
+      await tester.tap(
+        find.bySemanticsLabel('Coffee machine: Press its button'),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+    });
+    await tick(6);
+    final followed = appOffset();
+    expect(followed, greaterThan(0), reason: 'the kitchen came into sight');
+
+    // And it stays there while the devices keep reporting.
+    await tick();
+    expect(appOffset(), followed);
   });
 
   testWidgets('the app scrolls to the room of the device that was pressed', (

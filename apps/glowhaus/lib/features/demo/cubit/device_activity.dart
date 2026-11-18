@@ -33,14 +33,33 @@ enum DeviceActivityKind {
   reported,
 }
 
+/// Whether this is a change a person would notice — a lamp going on, a door
+/// opening — rather than a reading that keeps arriving by itself.
+extension DeviceActivityNoticed on DeviceActivityKind {
+  bool get isNotable => switch (this) {
+    DeviceActivityKind.reading || DeviceActivityKind.reported => false,
+    _ => true,
+  };
+}
+
 /// The latest thing a device did.
 @immutable
 class DeviceActivity {
-  const new({required this.deviceId, required this.kind, required this.at});
+  const new({
+    required this.deviceId,
+    required this.kind,
+    required this.at,
+    this.byHand = false,
+  });
 
   final String deviceId;
   final DeviceActivityKind kind;
   final DateTime at;
+
+  /// The device was pressed or unplugged in the panel just before this:
+  /// someone did it, and the app may follow it. False for everything a
+  /// device does by itself and for what the app's own commands bring about.
+  final bool byHand;
 }
 
 /// What changed between [before] and [after], as one thing to say.

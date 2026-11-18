@@ -41,17 +41,55 @@ class _DashboardView extends StatefulWidget {
 }
 
 class _DashboardViewState extends State<_DashboardView> {
-  /// One per room card, so the room of a device that just published can be
-  /// brought into the strip of app that shows above the devices sheet.
+  /// One per room card, so the room of a device that was just pressed can
+  /// be brought into the strip of app that shows above the devices sheet.
   final _roomKeys = <String, GlobalKey>{};
 
-  /// Scrolls the room [deviceId] is in into sight, if it is not already.
+  /// When the reader last touched the app themselves. Nothing scrolls out
+  /// from under a hand that is busy with it.
+  DateTime _touched = _never;
+
+  static final DateTime _never = DateTime.fromMillisecondsSinceEpoch(0);
+
+  /// Whether the devices sheet was up on the last build.
+  bool _sheetWasOpen = false;
+
+  /// How long the app is left alone after being touched.
+  static const Duration _settle = Duration(seconds: 3);
+
+  /// How much of the window the app still has to itself; the rest is the
+  /// devices sheet. Set while building.
+  double _strip = double.infinity;
+
+  void _noteTouch() => _touched = DateTime.now();
+
+  /// A touch on the app, rather than on the sheet over it: pointers reach
+  /// both, so where it landed is what tells them apart.
+  void _notePointer(PointerDownEvent event) {
+    if (event.position.dy <= _strip) _noteTouch();
+  }
+
+  /// A scroll the reader started, as opposed to one this follows with.
+  bool _isDrag(ScrollNotification notification) => switch (notification) {
+    ScrollStartNotification(:final dragDetails) => dragDetails != null,
+    ScrollUpdateNotification(:final dragDetails) => dragDetails != null,
+    _ => false,
+  };
+
+  /// Scrolls the room [deviceId] is in into the strip of app the sheet
+  /// leaves free — unless it is in sight already, or the reader has just
+  /// been scrolling the app themselves.
   void _follow(String deviceId, List<RoomOverview> rooms) {
+    if (DateTime.now().difference(_touched) < _settle) return;
     final room = rooms
         .where((room) => room.devices.any((v) => v.device.id == deviceId))
         .firstOrNull;
     final anchor = _roomKeys[room?.room.id]?.currentContext;
     if (anchor == null) return;
+    final box = anchor.findRenderObject() as RenderBox?;
+    if (box == null || !box.hasSize) return;
+    final top = box.localToGlobal(Offset.zero).dy;
+    if (top >= 0 && top + box.size.height <= _strip) return;
     // alignment 0: the top of the window, the part the sheet leaves free.
     Scrollable.ensureVisible(
       anchor,
@@ -67,129 +105,148 @@ class _DashboardViewState extends State<_DashboardView> {
     // While the devices sheet is up over the app, the greeting gives the
     // room away: one line, so the room cards and their device chips are
     // in sight when a device in the sheet is pressed.
-    final sheetOpen = context.watch<DemoSheetCubit>().state;
+    final sheet = context.watch<DemoSheetCubit>().state;
+    final sheetOpen = sheet != null;
+    _strip = MediaQuery.sizeOf(context).height * (1 - (sheet ?? 0));
+    if (sheetOpen != _sheetWasOpen) {
+      _sheetWasOpen = sheetOpen;
+      // Opening the sheet is a tap on the app, but it is also what the
+      // reader opened it for: the app may follow what they press next.
+      _touched = _never;
+    }
 
     return SafeArea(
       bottom: false,
       child: BlocBuilder<DashboardCubit, DashboardState>(
         builder: (context, state) => _FollowDevices(
           enabled: sheetOpen,
-          onPublish: (deviceId) => _follow(deviceId, state.rooms),
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1100),
-              child: ListView(
-                padding: EdgeInsets.fromLTRB(
-                  GlowSpace.x5,
-                  GlowSpace.x5,
-                  GlowSpace.x5,
-                  scrollBottomPadding(context),
-                ),
-                children: [
-                  if (sheetOpen)
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Semantics(
-                            header: true,
-                            child: Text(
-                              state.homeName,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: context.type.title,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: GlowSpace.x3),
-                        _ActivePill(count: state.activeCount),
-                      ],
-                    )
-                  else ...[
-                    GreetingHeader(
-                      line1: l10n.greetingHi(state.userName),
-                      line2: l10n.greetingWelcomeHome,
+          onPressed: (deviceId) => _follow(deviceId, state.rooms),
+          child: Listener(
+            onPointerDown: _notePointer,
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (_isDrag(notification)) _noteTouch();
+                return false;
+              },
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1100),
+                  child: ListView(
+                    padding: EdgeInsets.fromLTRB(
+                      GlowSpace.x5,
+                      GlowSpace.x5,
+                      GlowSpace.x5,
+                      scrollBottomPadding(context),
                     ),
-                    const SizedBox(height: GlowSpace.x4),
-                    Wrap(
-                      spacing: GlowSpace.x2,
-                      runSpacing: GlowSpace.x2,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        _ActivePill(count: state.activeCount),
-                        const _ConnectionStatus(),
-                        const DemoPanelChip(),
-                      ],
-                    ),
-                  ],
-                  SizedBox(height: sheetOpen ? GlowSpace.x4 : GlowSpace.x5),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    clipBehavior: Clip.none,
-                    child: Row(
-                      children: [
-                        GlowChip(
-                          label: l10n.filterAll,
-                          selected: state.selectedRoomId == null,
-                          onTap: () => cubit.selectRoom(null),
-                        ),
-                        for (final overview in state.rooms) ...[
-                          const SizedBox(width: GlowSpace.x2),
-                          GlowChip(
-                            label: overview.room.displayName(l10n),
-                            selected: state.selectedRoomId == overview.room.id,
-                            onTap: () => cubit.selectRoom(overview.room.id),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: GlowSpace.x4),
-                  if (!state.loaded)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: GlowSpace.x10,
-                      ),
-                      child: Column(
-                        children: [
-                          const GlowSpinner(size: 28, strokeWidth: 3),
-                          const SizedBox(height: GlowSpace.x3),
-                          Text(
-                            l10n.loading,
-                            style: context.type.body.copyWith(
-                              color: context.colors.textMuted,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  else
-                    LayoutBuilder(
-                      builder: (context, constraints) => EqualColumns(
-                        columns: constraints.maxWidth >= 900
-                            ? 3
-                            : constraints.maxWidth >= 560
-                            ? 2
-                            : 1,
-                        children: [
-                          for (final overview in state.visibleRooms)
-                            _RoomOverviewCard(
-                              key: _roomKeys.putIfAbsent(
-                                overview.room.id,
-                                GlobalKey.new,
+                    children: [
+                      if (sheetOpen)
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Semantics(
+                                header: true,
+                                child: Text(
+                                  state.homeName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: context.type.title,
+                                ),
                               ),
-                              overview: overview,
                             ),
+                            const SizedBox(width: GlowSpace.x3),
+                            _ActivePill(count: state.activeCount),
+                          ],
+                        )
+                      else ...[
+                        GreetingHeader(
+                          line1: l10n.greetingHi(state.userName),
+                          line2: l10n.greetingWelcomeHome,
+                        ),
+                        const SizedBox(height: GlowSpace.x4),
+                        Wrap(
+                          spacing: GlowSpace.x2,
+                          runSpacing: GlowSpace.x2,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            _ActivePill(count: state.activeCount),
+                            const _ConnectionStatus(),
+                            const DemoPanelChip(),
+                          ],
+                        ),
+                      ],
+                      SizedBox(height: sheetOpen ? GlowSpace.x4 : GlowSpace.x5),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        clipBehavior: Clip.none,
+                        child: Row(
+                          children: [
+                            GlowChip(
+                              label: l10n.filterAll,
+                              selected: state.selectedRoomId == null,
+                              onTap: () => cubit.selectRoom(null),
+                            ),
+                            for (final overview in state.rooms) ...[
+                              const SizedBox(width: GlowSpace.x2),
+                              GlowChip(
+                                label: overview.room.displayName(l10n),
+                                selected:
+                                    state.selectedRoomId == overview.room.id,
+                                onTap: () => cubit.selectRoom(overview.room.id),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: GlowSpace.x4),
+                      if (!state.loaded)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: GlowSpace.x10,
+                          ),
+                          child: Column(
+                            children: [
+                              const GlowSpinner(size: 28, strokeWidth: 3),
+                              const SizedBox(height: GlowSpace.x3),
+                              Text(
+                                l10n.loading,
+                                style: context.type.body.copyWith(
+                                  color: context.colors.textMuted,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        LayoutBuilder(
+                          builder: (context, constraints) => EqualColumns(
+                            columns: constraints.maxWidth >= 900
+                                ? 3
+                                : constraints.maxWidth >= 560
+                                ? 2
+                                : 1,
+                            children: [
+                              for (final overview in state.visibleRooms)
+                                _RoomOverviewCard(
+                                  key: _roomKeys.putIfAbsent(
+                                    overview.room.id,
+                                    GlobalKey.new,
+                                  ),
+                                  overview: overview,
+                                ),
+                            ],
+                          ),
+                        ),
+                      const SizedBox(height: GlowSpace.x4),
+                      _ScenesTeaser(
+                        names: [
+                          for (final scene in state.scenes)
+                            scene.displayName(l10n),
                         ],
                       ),
-                    ),
-                  const SizedBox(height: GlowSpace.x4),
-                  _ScenesTeaser(
-                    names: [
-                      for (final scene in state.scenes) scene.displayName(l10n),
                     ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -199,28 +256,29 @@ class _DashboardViewState extends State<_DashboardView> {
   }
 }
 
-/// Tells the app which device has just published, while the devices sheet
-/// is up over it. Outside the demo there is nothing to listen to.
+/// Tells the app which device someone has just pressed or unplugged in the
+/// devices sheet. Only that: a device reporting the room temperature every
+/// two seconds, or answering a command the app itself sent, leaves the app
+/// where the reader left it. Outside the demo there is nothing to listen to.
 class _FollowDevices extends StatelessWidget {
   const new({
     required this.enabled,
-    required this.onPublish,
+    required this.onPressed,
     required this.child,
   });
 
   final bool enabled;
-  final ValueChanged<String> onPublish;
+  final ValueChanged<String> onPressed;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     if (!enabled || context.read<DemoSetup?>() == null) return child;
     return BlocListener<DevicesPanelCubit, DevicesPanelState>(
-      listenWhen: (before, after) => after.activity != before.activity,
-      listener: (context, state) {
-        final activity = state.activity;
-        if (activity != null) onPublish(activity.deviceId);
-      },
+      listenWhen: (before, after) =>
+          after.activity != before.activity &&
+          (after.activity?.byHand ?? false),
+      listener: (context, state) => onPressed(state.activity!.deviceId),
       child: child,
     );
   }
@@ -344,9 +402,10 @@ class _RoomOverviewCard extends StatelessWidget {
   }
 }
 
-/// Rings the chip of a device that has just published, so a press in the
-/// demo's devices sheet can be followed in the app above it. Outside the
-/// demo there is nothing to listen to and the chip is left alone.
+/// Rings the chip of a device someone has just pressed or unplugged in the
+/// demo's devices sheet, so the app can be seen following it. A reading
+/// that arrives by itself does not ring, or every chip would blink every
+/// two seconds. Outside the demo there is nothing to listen to.
 class _PublishPulse extends StatelessWidget {
   const new({required this.deviceId, required this.child});
 
@@ -357,7 +416,7 @@ class _PublishPulse extends StatelessWidget {
   Widget build(BuildContext context) {
     if (context.read<DemoSetup?>() == null) return child;
     final tick = context.select<DevicesPanelCubit, int>(
-      (cubit) => cubit.state.publishes[deviceId] ?? 0,
+      (cubit) => cubit.state.handChanges[deviceId] ?? 0,
     );
     return GlowPulseRing(tick: tick, child: child);
   }

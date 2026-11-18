@@ -123,7 +123,7 @@ void openDevicesPanel(BuildContext context) {
   // The address says what is showing, so it can be shared: `#/demo` while
   // the sheet is open over the dashboard.
   if (router != null && _path(router) == Routes.home) router.go(Routes.demo);
-  open.opened();
+  open.opened(DevicesSheet.open);
   unawaited(
     showModalBottomSheet<void>(
       context: context,
@@ -139,37 +139,45 @@ void openDevicesPanel(BuildContext context) {
         value: setup,
         child: BlocProvider<DevicesPanelCubit>.value(
           value: panel,
-          child: DraggableScrollableSheet(
-            controller: drag,
-            // Inside a modal route the sheet sizes itself to the extent it
-            // is dragged to, rather than filling the window.
-            expand: false,
-            snap: true,
-            // The peek is a rest, not a dismissal: only the close button
-            // or a tap above the sheet puts the devices away.
-            shouldCloseOnMinExtent: false,
-            initialChildSize: DevicesSheet.open,
-            minChildSize: snaps.first,
-            maxChildSize: DevicesSheet.full,
-            snapSizes: snaps,
-            builder: (context, scrollController) => DecoratedBox(
-              decoration: BoxDecoration(
-                color: colors.surface,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(GlowRadius.card),
+          // The app behind keeps out of the sheet's way, so it follows
+          // where its top is.
+          child: NotificationListener<DraggableScrollableNotification>(
+            onNotification: (notification) {
+              open.moved(notification.extent);
+              return false;
+            },
+            child: DraggableScrollableSheet(
+              controller: drag,
+              // Inside a modal route the sheet sizes itself to the extent it
+              // is dragged to, rather than filling the window.
+              expand: false,
+              snap: true,
+              // The peek is a rest, not a dismissal: only the close button
+              // or a tap above the sheet puts the devices away.
+              shouldCloseOnMinExtent: false,
+              initialChildSize: DevicesSheet.open,
+              minChildSize: snaps.first,
+              maxChildSize: DevicesSheet.full,
+              snapSizes: snaps,
+              builder: (context, scrollController) => DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colors.surface,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(GlowRadius.card),
+                  ),
+                  boxShadow: glowFloatingShadow(context),
                 ),
-                boxShadow: glowFloatingShadow(context),
-              ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(GlowRadius.card),
-                ),
-                child: DemoDevicesPanel(
-                  compact: true,
-                  scrollController: scrollController,
-                  dragController: drag,
-                  snapSizes: snaps,
-                  onClose: () => Navigator.of(sheet).pop(),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(GlowRadius.card),
+                  ),
+                  child: DemoDevicesPanel(
+                    compact: true,
+                    scrollController: scrollController,
+                    dragController: drag,
+                    snapSizes: snaps,
+                    onClose: () => Navigator.of(sheet).pop(),
+                  ),
                 ),
               ),
             ),

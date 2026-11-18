@@ -77,6 +77,7 @@ class DevicesPanelState {
     this.devices = const [],
     this.traffic = const [],
     this.publishes = const {},
+    this.handChanges = const {},
     this.activity,
     this.away = false,
   });
@@ -92,6 +93,12 @@ class DevicesPanelState {
   /// The cards only watch for a change: one more dot leaves the card.
   final Map<String, int> publishes;
 
+  /// How often each device was made to change by hand here: pressed or
+  /// unplugged, and something a person would notice came of it. The app
+  /// follows these and nothing else, so a room it is reading does not
+  /// move under it every two seconds.
+  final Map<String, int> handChanges;
+
   /// The last thing a device did, in plain words; null until one does
   /// something.
   final DeviceActivity? activity;
@@ -103,12 +110,14 @@ class DevicesPanelState {
     List<Device>? devices,
     List<MqttTraffic>? traffic,
     Map<String, int>? publishes,
+    Map<String, int>? handChanges,
     DeviceActivity? activity,
     bool? away,
   }) => DevicesPanelState(
     devices: devices ?? this.devices,
     traffic: traffic ?? this.traffic,
     publishes: publishes ?? this.publishes,
+    handChanges: handChanges ?? this.handChanges,
     activity: activity ?? this.activity,
     away: away ?? this.away,
   );
@@ -152,8 +161,20 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
   late final List<StreamSubscription<Object?>> _subscriptions;
 
   /// Plugs a device in or pulls the plug, as a power cut would.
-  Future<void> setPlugged(String deviceId, {required bool plugged}) =>
-      _home.setOnline(deviceId, online: plugged);
+  Future<void> setPlugged(String deviceId, {required bool plugged}) {
+    _byHand(deviceId);
+    return _home.setOnline(deviceId, online: plugged);
+  }
+
+  /// How long after a press or a plug the device's next change still
+  /// counts as this person's doing: long enough for the command to travel
+  /// and the device to answer, short enough that the ambient reading
+  /// arriving two seconds later is the device's own again.
+  static const Duration handWindow = Duration(seconds: 3);
+  final Map<String, DateTime> _hands = {};
+  final Map<String, int> _handChanges = {};
+
+  void _byHand(String deviceId) => _hands[deviceId] = _clock().add(handWindow);
 
   /// Uses the device's own hardware ([HandAction]): a lamp's button flips
   /// its main switch, a keypad locks or unlocks, a door opens or closes, a
@@ -162,6 +183,7 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
   Future<void> press(String deviceId) async {
     final device = _home.device(deviceId);
     if (device == null) return;
+    _byHand(deviceId);
     final view = _view(device);
     final action = handAction(view);
     switch (action) {
@@ -223,10 +245,21 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
       final device = _home.device(entry.who);
       if (device != null) {
         final view = _view(device);
+        final kind = activityKind(_before[entry.who], view);
+        // The press that brought this about, if there was one: the first
+        // change a person would notice spends it.
+        final until = _hands[entry.who];
+        final byHand =
+            kind.isNotable && until != null && !entry.at.isAfter(until);
+        if (byHand) {
+          _hands.remove(entry.who);
+          _handChanges[entry.who] = (_handChanges[entry.who] ?? 0) + 1;
+        }
         _activity = DeviceActivity(
           deviceId: entry.who,
-          kind: activityKind(_before[entry.who], view),
+          kind: kind,
           at: entry.at,
+          byHand: byHand,
         );
         _before[entry.who] = view;
       }
@@ -244,6 +277,7 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
   Future<void> pressChannel(String deviceId, String capabilityId) async {
     final device = _home.device(deviceId);
     if (device == null) return;
+    _byHand(deviceId);
     final view = _view(device);
     final on = view.stateOf<OnOffState>(capabilityId)?.on ?? false;
     await device.pressLocal({capabilityId: CapabilityPatch.onOff(on: !on)});
@@ -267,6 +301,7 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
       state.copyWith(
         devices: [for (final device in _home.devices.values) _view(device)],
         activity: _activity,
+        handChanges: Map.unmodifiable(_handChanges),
         publishes: Map.unmodifiable(_published),
         traffic: [
           for (
@@ -289,17 +324,24 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
   }
 }
 
-/// Whether the devices sheet is up over the app on a phone.
+/// How much of the window the devices sheet covers on a phone, as a
+/// fraction, or null while it is not up.
 ///
 /// Separate from [DemoPanelCubit], which is the side panel on wide windows:
-/// the app behind the sheet makes room for it (a one-line greeting), which
-/// a side panel never asks for.
-class DemoSheetCubit extends Cubit<bool> {
-  new() : super(false);
+/// the app behind the sheet makes room for it — a one-line greeting, and
+/// room cards kept inside the strip the sheet leaves — which a side panel
+/// never asks for.
+class DemoSheetCubit extends Cubit<double?> {
+  new() : super(null);
 
-  void opened() => emit(true);
+  void opened(double extent) => emit(extent);
 
-  void closed() => emit(false);
+  /// Dragged to a new rest, or on its way to one.
+  void moved(double extent) {
+    if (state != null) emit(extent);
+  }
+
+  void closed() => emit(null);
 }
 
 /// Whether the devices panel is open next to the app.
