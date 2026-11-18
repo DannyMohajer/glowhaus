@@ -85,11 +85,12 @@ abstract final class DevicesSheet {
   /// Height of the header plus the line at the bottom.
   static const double peekHeight = 132;
 
-  /// Where it opens: high enough for two rows of devices, with the app's
-  /// first room card still in sight above it.
-  static const double open = 0.8;
+  /// Where it opens: a little over half the window, so the room of the
+  /// device being pressed still fits above it and can be seen reacting.
+  static const double open = 0.55;
 
-  static const double full = 0.94;
+  /// Dragged all the way up: four fifths of the window.
+  static const double full = 0.8;
 
   /// [peekHeight] as a fraction of the room the sheet has.
   static double peekOf(BuildContext context) {

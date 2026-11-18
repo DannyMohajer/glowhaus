@@ -105,12 +105,11 @@ void main() {
 
     expect(find.byType(DevicesPanel), findsOneWidget);
     final top = tester.getTopLeft(find.byType(DevicesPanel)).dy;
-    // Most of the window, with the app's first card still above it.
-    expect(top, greaterThan(0));
-    expect(top, lessThan(852 * 0.3));
+    // A little over half the window, so a room card fits above it.
+    expect(top, closeTo(852 * 0.45, 2));
     expect(
       tester.getSize(find.byType(DevicesPanel)).height,
-      greaterThan(852 * 0.7),
+      greaterThan(852 * 0.5),
     );
   });
 
@@ -242,6 +241,41 @@ void main() {
     expect(find.byType(GreetingHeader), findsOneWidget);
   });
 
+  testWidgets('the app scrolls to the room of the device that was pressed', (
+    tester,
+  ) async {
+    final demo = await tester.openSheet();
+    addTearDown(() => tester.runAsync(demo.dispose));
+
+    double sheetTop() => tester.getTopLeft(find.byType(DevicesPanel)).dy;
+    Finder kitchen() => find.ancestor(
+      of: find.text('Kitchen'),
+      matching: find.byType(RoomCard),
+    );
+    // The kitchen card starts below the sheet: out of sight.
+    expect(tester.getTopLeft(kitchen()).dy, greaterThan(sheetTop()));
+
+    // Press the coffee machine, which is in it.
+    final list = find
+        .descendant(
+          of: find.byType(DevicesPanel),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    await tester.dragUntilVisible(
+      find.bySemanticsLabel('Coffee machine: Press its button'),
+      list,
+      const Offset(0, -120),
+    );
+    await tester.pumpAndSettle();
+    await tester.pressFace('Coffee machine: Press its button');
+
+    // The app above has brought the kitchen into the strip it still shows.
+    final top = tester.getTopLeft(kitchen()).dy;
+    expect(top, greaterThanOrEqualTo(0));
+    expect(top, lessThan(sheetTop()));
+  });
+
   for (final MapEntry(key: name, value: size) in _phones.entries) {
     for (final (theme, mode) in [
       ('light', ThemeMode.light),
@@ -256,10 +290,10 @@ void main() {
         expect(tester.takeException(), isNull);
         expect(find.byType(DevicesPanel), findsOneWidget);
         expect(find.byType(GlowDeviceCard), findsWidgets);
-        // The sheet leaves the app above it something to show.
+        // The sheet leaves the app above it a room card's worth of room.
         final top = tester.getTopLeft(find.byType(DevicesPanel)).dy;
-        expect(top, greaterThan(0));
-        expect(top, lessThan(size.height * 0.3));
+        expect(top, closeTo(size.height * 0.45, 2));
+        expect(find.byType(RoomCard), findsWidgets);
         expect(find.text('Glowhaus Demo'), findsOneWidget);
       });
     }
