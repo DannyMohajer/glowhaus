@@ -67,6 +67,12 @@ class DeviceModel {
   static const int _rememberedCommands = 8;
   static const int _positionStep = 5;
 
+  /// How far the room has to drift from the setpoint before a resting
+  /// thermostat starts again. Without it a thermostat that has just
+  /// reached its setpoint starts and stops on every tick, two seconds
+  /// apart, and says so on the broker every time.
+  static const double _thermostatBand = 0.3;
+
   final DeviceSpec spec;
   final Map<String, CapabilityState> state;
   final double? _restingCelsius;
@@ -239,7 +245,7 @@ class DeviceModel {
         case TemperatureSensorState(:final celsius):
           final next = thermostat == null
               ? _wander(celsius, random)
-              : _climate(celsius, thermostat.action);
+              : _climate(celsius, thermostat);
           if (next != celsius) {
             state[key] = TemperatureSensorState(celsius: next);
             changed = true;
@@ -280,9 +286,16 @@ class DeviceModel {
           } else if (watts == 0) {
             state[key] = value.copyWith(watts: spec.onWatts);
           }
-        case ThermostatState(:final mode, :final setpoint) when celsius != null:
-          final heating = setpoint > celsius;
-          final cooling = setpoint < celsius;
+        case ThermostatState(:final mode, :final setpoint, :final action)
+            when celsius != null:
+          // It runs until it reaches the setpoint, and starts again only
+          // once the room has drifted a band away from it.
+          final heating = action == ThermostatAction.heating
+              ? celsius < setpoint
+              : celsius < setpoint - _thermostatBand;
+          final cooling = action == ThermostatAction.cooling
+              ? celsius > setpoint
+              : celsius > setpoint + _thermostatBand;
           state[key] = value.copyWith(
             action: switch (mode) {
               ThermostatMode.heat when heating => ThermostatAction.heating,
@@ -297,11 +310,19 @@ class DeviceModel {
     }
   }
 
-  double _climate(double celsius, ThermostatAction action) {
+  /// The room a thermostat is in: it moves while the thermostat runs, is
+  /// held where the thermostat got it while the thermostat is on and
+  /// resting, and drifts back to the temperature the room rests at once
+  /// the thermostat is off.
+  double _climate(double celsius, ThermostatState thermostat) {
     final resting = _restingCelsius ?? celsius;
-    return _round(switch (action) {
+    final holding =
+        thermostat.mode != ThermostatMode.off &&
+        (celsius - thermostat.setpoint).abs() <= _thermostatBand;
+    return _round(switch (thermostat.action) {
       ThermostatAction.heating => celsius + 0.1,
       ThermostatAction.cooling => celsius - 0.1,
+      ThermostatAction.idle when holding => celsius,
       ThermostatAction.idle when celsius < resting - 0.05 => celsius + 0.1,
       ThermostatAction.idle when celsius > resting + 0.05 => celsius - 0.1,
       ThermostatAction.idle => celsius,

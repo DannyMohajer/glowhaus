@@ -684,6 +684,75 @@ void main() {
     });
   });
 
+  group('a thermostat with the room to itself', () {
+    /// The demo's thermostat, with the room it is in, off the wire.
+    DeviceModel thermostat() => DeviceModel(
+      DemoHome.devices().firstWhere((s) => s.descriptor.id == 'lr-thermostat'),
+    );
+
+    ThermostatState modeOf(DeviceModel model) =>
+        model.state.values.whereType<ThermostatState>().single;
+
+    double roomOf(DeviceModel model) =>
+        model.state.values.whereType<TemperatureSensorState>().single.celsius;
+
+    /// Two seconds of the demo's own rhythm, [times] over.
+    List<ThermostatAction> run(DeviceModel model, int times) {
+      final random = Random(7);
+      return [
+        for (var i = 0; i < times; i++)
+          () {
+            model.ambientTick(random, elapsed: const Duration(seconds: 2));
+            return modeOf(model).action;
+          }(),
+      ];
+    }
+
+    test('heats to the setpoint and then rests there, instead of starting '
+        'and stopping every two seconds', () {
+      final model = thermostat();
+      final setpoint = modeOf(model).setpoint;
+      expect(roomOf(model), lessThan(setpoint), reason: 'a cold room');
+
+      final actions = run(model, 60);
+      expect(roomOf(model), setpoint);
+      expect(modeOf(model).action, ThermostatAction.idle);
+      // It heats, reaches the setpoint once, and is not heard from again.
+      final settled = actions.indexOf(ThermostatAction.idle);
+      expect(settled, greaterThan(0));
+      expect(
+        actions.skip(settled),
+        everyElement(ThermostatAction.idle),
+        reason: 'no flicking on and off at the setpoint',
+      );
+    });
+
+    test('the room holds while it is on, and drifts back once it is off', () {
+      final model = thermostat();
+      run(model, 60);
+      final setpoint = modeOf(model).setpoint;
+      expect(roomOf(model), setpoint);
+
+      model.applyLocal({
+        'thermostat': const CapabilityPatch.thermostat(
+          mode: ThermostatMode.off,
+        ),
+      });
+      run(model, 20);
+      expect(roomOf(model), lessThan(setpoint), reason: 'left to itself');
+      expect(modeOf(model).action, ThermostatAction.idle);
+
+      // Switched back on, it has something to do again.
+      model.applyLocal({
+        'thermostat': const CapabilityPatch.thermostat(
+          mode: ThermostatMode.heat,
+        ),
+      });
+      run(model, 1);
+      expect(modeOf(model).action, ThermostatAction.heating);
+    });
+  });
+
   test('ambient drift publishes state without a command', () {
     _run(ambientInterval: const Duration(seconds: 1), (wire, home) {
       wire.received.clear();
