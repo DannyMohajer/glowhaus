@@ -255,36 +255,40 @@ class _SheetHeader extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final colors = context.colors;
     final header = Container(
-      padding: const EdgeInsets.fromLTRB(
-        GlowSpace.x3,
-        GlowSpace.x2,
-        GlowSpace.x3,
-        GlowSpace.x2,
+      padding: const EdgeInsetsDirectional.only(
+        start: GlowSpace.x4,
+        end: GlowSpace.x2,
+        top: GlowSpace.x2,
+        bottom: GlowSpace.x2,
       ),
       decoration: BoxDecoration(
         color: colors.surface,
         border: Border(bottom: BorderSide(color: colors.border)),
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const GlowDragHandle(),
-          const SizedBox(width: GlowSpace.x3),
-          Expanded(
-            child: Semantics(
-              header: true,
-              child: Text(l10n.panelTitle, style: context.type.title),
-            ),
+          const Center(child: GlowDragHandle()),
+          const SizedBox(height: GlowSpace.x1),
+          Row(
+            children: [
+              Expanded(
+                child: Semantics(
+                  header: true,
+                  child: Text(l10n.panelTitle, style: context.type.title),
+                ),
+              ),
+              const _InfoButton(),
+              if (onClose != null)
+                IconButtonRound(
+                  icon: GlowIcons.x,
+                  semanticLabel: l10n.panelClose,
+                  tone: GlowTone.ghost,
+                  onTap: onClose,
+                  size: 40,
+                ),
+            ],
           ),
-          const _InfoButton(),
-          if (onClose != null) ...[
-            const SizedBox(width: GlowSpace.x1),
-            IconButtonRound(
-              icon: GlowIcons.x,
-              semanticLabel: l10n.panelClose,
-              onTap: onClose,
-              size: 36,
-            ),
-          ],
         ],
       ),
     );
@@ -331,7 +335,8 @@ class _InfoButtonState extends State<_InfoButton> {
       child: IconButtonRound(
         icon: GlowIcons.info,
         semanticLabel: l10n.panelInfo,
-        size: 36,
+        tone: GlowTone.ghost,
+        size: 40,
         onTap: () => _tooltip.currentState?.ensureTooltipVisible(),
       ),
     );
