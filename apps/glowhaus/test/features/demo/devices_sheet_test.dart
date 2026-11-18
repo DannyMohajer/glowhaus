@@ -248,12 +248,13 @@ void main() {
 
   testWidgets('the devices reporting by themselves never move the app; a '
       'press moves it once', (tester) async {
-    // Ten seconds of the demo's own two-second rhythm, in a tenth of the
-    // time: twenty rounds of readings from every device that sends them.
+    // Ten seconds with the devices talking the whole time: the demo's own
+    // rhythm, twenty times over, so a hundred rounds of readings go by.
     final demo = await tester.openSheet(
       ambient: const Duration(milliseconds: 100),
     );
     addTearDown(() => tester.runAsync(demo.dispose));
+    final panel = demo.traffic;
 
     double appOffset() => tester
         .state<ScrollableState>(
@@ -277,8 +278,22 @@ void main() {
     }
 
     expect(appOffset(), 0);
+    final before = panel.entries.length;
     demo.home.ambientPaused = false;
-    await tick();
+    await tick(100);
+
+    // The devices really did talk for those ten seconds: the climate
+    // sensor, the coffee machine and the rest, over and over.
+    final said = panel.entries.skip(before).toList();
+    expect(
+      said.length,
+      greaterThan(20),
+      reason: 'the periodic publishers were running',
+    );
+    expect(
+      said.map((entry) => entry.who).toSet(),
+      containsAll(<String>['br-climate', 'kt-outlet']),
+    );
     expect(
       appOffset(),
       0,

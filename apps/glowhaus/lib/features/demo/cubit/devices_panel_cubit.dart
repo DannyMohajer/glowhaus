@@ -183,7 +183,9 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
   Future<void> press(String deviceId) async {
     final device = _home.device(deviceId);
     if (device == null) return;
-    _byHand(deviceId);
+    // A device with no power ignores its own buttons, so a press on one is
+    // not something the app should go looking for either.
+    if (device.online) _byHand(deviceId);
     final view = _view(device);
     final action = handAction(view);
     switch (action) {
@@ -277,7 +279,7 @@ class DevicesPanelCubit extends Cubit<DevicesPanelState> {
   Future<void> pressChannel(String deviceId, String capabilityId) async {
     final device = _home.device(deviceId);
     if (device == null) return;
-    _byHand(deviceId);
+    if (device.online) _byHand(deviceId);
     final view = _view(device);
     final on = view.stateOf<OnOffState>(capabilityId)?.on ?? false;
     await device.pressLocal({capabilityId: CapabilityPatch.onOff(on: !on)});
