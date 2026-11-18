@@ -7,8 +7,9 @@ import 'package:glowhaus_transport/glowhaus_transport.dart';
 /// other tabs of this site, opening a tab, and noticing that this page is
 /// going away. Off the web there is none of it.
 abstract interface class DemoBrowser {
-  /// The current route in the URL fragment, e.g. `/devices`; null off the
-  /// web or when there is none.
+  /// The location in the URL fragment the page was opened at, with its
+  /// query: `/devices`, `/demo?quiet`. Null off the web, or when the
+  /// address carries no fragment.
   String? get initialRoute;
 
   /// Whether [openTab] and [channel] do anything here.

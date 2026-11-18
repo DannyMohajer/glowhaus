@@ -23,9 +23,14 @@ void main() {
     expect(find.byType(GlowBottomNav), findsOneWidget);
   });
 
-  testWidgets('the root path redirects to the intro', (tester) async {
+  testWidgets('the root path is the home, and a first visit sees the intro '
+      'on the way there', (tester) async {
     await tester.pumpApp(location: '/');
+    expect(find.byType(DashboardScreen), findsOneWidget);
+
+    final router = await tester.pumpApp(location: '/', firstVisit: () => true);
     expect(find.byType(IntroScreen), findsOneWidget);
+    expect(router.state.uri.path, Routes.intro);
   });
 
   testWidgets('phone: bottom navigation switches destinations', (tester) async {

@@ -23,10 +23,22 @@ import 'package:go_router/go_router.dart';
 ///
 /// The three room routes render the same [RoomsPanes]; how many panes are
 /// visible depends on the window width, not on the route.
-GoRouter createRouter({String initialLocation = Routes.intro}) => GoRouter(
+GoRouter createRouter({
+  String initialLocation = Routes.intro,
+  bool Function()? firstVisit,
+}) => GoRouter(
   initialLocation: initialLocation,
+  // On the web the address the page was opened at wins over
+  // [initialLocation], so the intro cannot be a starting point: it is a
+  // redirect. A first visit sees it whatever address it came in at, and
+  // goes on to that address when it starts.
+  redirect: (context, state) {
+    if (firstVisit == null || !firstVisit()) return null;
+    if (state.uri.path == Routes.intro) return null;
+    return Routes.introTo(state.uri.toString());
+  },
   routes: [
-    GoRoute(path: '/', redirect: (_, _) => Routes.intro),
+    GoRoute(path: '/', redirect: (_, _) => Routes.home),
     GoRoute(path: Routes.intro, builder: (_, _) => const IntroScreen()),
     StatefulShellRoute.indexedStack(
       builder: (_, _, navigationShell) =>

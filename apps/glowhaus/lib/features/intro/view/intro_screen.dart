@@ -9,8 +9,10 @@ import 'package:go_router/go_router.dart';
 
 /// First screen: one photo, one button, straight into the demo home.
 ///
-/// Shown once; "Show intro again" in settings brings it back, and `#/demo`
-/// skips it (the app opens with the devices panel instead).
+/// Every first visit sees it, whatever address it came in at; "Let's start"
+/// then goes on to that address ([Routes.nextAfterIntro]). It is shown once
+/// — "Show intro again" in settings brings it back — and `#/demo?quiet`,
+/// which records the demo, never sees it.
 class IntroScreen extends StatelessWidget {
   const new({super.key});
 
@@ -41,8 +43,11 @@ class IntroScreen extends StatelessWidget {
                 titleRest: l10n.introTitleRest,
                 startLabel: l10n.introStart,
                 onStart: () {
+                  final next = Routes.nextAfterIntro(
+                    GoRouterState.of(context).uri,
+                  );
                   context.read<SettingsCubit>().introSeen();
-                  context.go(Routes.home);
+                  context.go(next);
                 },
                 footerText: l10n.introCurious,
                 linkLabel: l10n.introGitHub,

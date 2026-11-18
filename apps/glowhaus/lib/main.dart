@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:glowhaus/app/app.dart';
 import 'package:glowhaus/app/di/injection.dart';
 import 'package:glowhaus/app/router/app_router.dart';
-import 'package:glowhaus/app/router/routes.dart';
+import 'package:glowhaus/app/start_location.dart';
 import 'package:glowhaus/data/device_repository.dart';
 import 'package:glowhaus/data/home_repository.dart';
 import 'package:glowhaus/features/connection/cubit/connection_settings_cubit.dart';
@@ -26,7 +26,9 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await configureDependencies();
   final browser = createDemoBrowser();
-  final route = browser.initialRoute;
+  // Where the page was opened: `/demo?quiet` and all.
+  final entry = browser.initialRoute;
+  final route = entry == null ? null : Uri.parse(entry).path;
   final atDemo = route == DemoSetup.demoRoute;
 
   if (route == DemoSetup.devicesRoute) {
@@ -46,9 +48,10 @@ Future<void> main() async {
   final settings = getIt<SettingsCubit>();
   await settings.init();
 
-  if (atDemo && _quiet(Uri.base)) {
-    getIt<SimulatedTransport>().home.ambientPaused = true;
-  }
+  // A recording of the demo: the devices stay still, and the intro — which
+  // a first visit otherwise always sees — stays out of the way.
+  final quiet = atDemo && quietDemo(Uri.base);
+  if (quiet) getIt<SimulatedTransport>().home.ambientPaused = true;
 
   final devices = getIt<DeviceRepository>();
   // In broker mode this shows the broker's last-known devices until the
@@ -79,20 +82,10 @@ Future<void> main() async {
       ),
       panelOpen: atDemo,
       router: createRouter(
-        initialLocation: atDemo
-            ? Routes.demo
-            : settings.shouldShowIntro
-            ? Routes.intro
-            : Routes.home,
+        initialLocation: startLocation(entry),
+        // A recording of the demo never stops at the intro.
+        firstVisit: () => !quiet && settings.shouldShowIntro,
       ),
     ),
   );
 }
-
-/// `#/demo?quiet`: the demo's devices do not change by themselves (no power
-/// or temperature updates every 2 s), so a screen recording shows only what
-/// is pressed. Presses and commands work as ever. For recording only; nothing
-/// in the app mentions it.
-bool _quiet(Uri page) =>
-    page.queryParameters.containsKey('quiet') ||
-    Uri.parse(page.fragment).queryParameters.containsKey('quiet');

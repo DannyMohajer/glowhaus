@@ -15,7 +15,10 @@ class _WebBrowser implements DemoBrowser {
   @override
   String? get initialRoute {
     final fragment = Uri.base.fragment;
-    return fragment.isEmpty ? null : Uri.parse(fragment).path;
+    if (fragment.isEmpty) return null;
+    // Path and query, so `#/demo?quiet` survives the intro.
+    final uri = Uri.parse(fragment);
+    return uri.path.isEmpty ? null : uri.toString();
   }
 
   @override

@@ -48,6 +48,19 @@ class FakeSettingsStore implements SettingsStore {
   }
 }
 
+/// A browser that blocks site data: nothing can be written, and nothing
+/// was there to read.
+class FailingSettingsStore implements SettingsStore {
+  SettingsState? saved;
+
+  @override
+  SettingsState? load() => null;
+
+  @override
+  Future<void> save(SettingsState settings) async =>
+      throw StateError('storage is blocked');
+}
+
 class FakeSimulationControl implements SimulationControl {
   new({this.available = true});
 
@@ -75,7 +88,7 @@ class FakeLanguagePreparer implements LanguagePreparer {
 
 SettingsCubit buildSettings({
   SettingsState? saved,
-  FakeSettingsStore? store,
+  SettingsStore? store,
   FakeSimulationControl? simulation,
   FakeLanguagePreparer? languages,
 }) => SettingsCubit(
@@ -248,6 +261,7 @@ extension AppTester on WidgetTester {
     TestHome? home,
     DemoSetup? demo,
     bool panelOpen = false,
+    bool Function()? firstVisit,
   }) async {
     view
       ..physicalSize = size
@@ -256,7 +270,10 @@ extension AppTester on WidgetTester {
 
     final data = home ?? TestHome();
     if (home == null) await data.start();
-    final router = createRouter(initialLocation: location);
+    final router = createRouter(
+      initialLocation: location,
+      firstVisit: firstVisit,
+    );
     addTearDown(router.dispose);
     await pumpWidget(
       GlowhausApp(

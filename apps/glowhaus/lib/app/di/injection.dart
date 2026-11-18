@@ -13,6 +13,7 @@ import 'package:glowhaus/features/settings/data/simulation_control.dart';
 import 'package:glowhaus_transport/glowhaus_transport.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 
 /// The composition root. Only `main`, the router and tests touch this;
 /// everything else receives its dependencies through constructors.
@@ -24,7 +25,19 @@ Future<void> configureDependencies() => getIt.init();
 @module
 abstract class AppModule {
   @preResolve
-  Future<SharedPreferences> get preferences => SharedPreferences.getInstance();
+  Future<SharedPreferences> get preferences async {
+    try {
+      return await SharedPreferences.getInstance();
+    } on Object {
+      // A browser that blocks site data (a private window, "block all
+      // cookies") throws when the store is read. The app runs all the
+      // same; what it saves then lasts for this visit only, which also
+      // means every such visit is a first visit and sees the intro.
+      SharedPreferencesStorePlatform.instance =
+          InMemorySharedPreferencesStore.empty();
+      return await SharedPreferences.getInstance();
+    }
+  }
 
   /// The demo home. The repository starts on it; the connection settings
   /// can switch the repository to a real broker and back.

@@ -68,7 +68,9 @@ class SettingsCubit extends Cubit<SettingsState> {
     if (next == state) return;
     emit(next);
     _applySimulation(next);
-    unawaited(_store.save(next));
+    // A window that blocks site data cannot keep settings; the app runs on
+    // them all the same, for as long as it is open.
+    unawaited(_store.save(next).catchError((Object _) {}));
   }
 
   void _applySimulation(SettingsState settings) => _simulation.apply(
