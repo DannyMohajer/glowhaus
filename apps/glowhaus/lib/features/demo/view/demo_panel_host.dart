@@ -79,13 +79,16 @@ class DemoDevicesPanel extends StatelessWidget {
   }
 }
 
-/// Where the phone sheet rests: the header and the last line (peek), half
-/// the window, and nearly all of it.
+/// Where the phone sheet rests: the header and the last line (peek), most
+/// of the window (where it opens), and nearly all of it.
 abstract final class DevicesSheet {
   /// Height of the header plus the line at the bottom.
   static const double peekHeight = 132;
 
-  static const double half = 0.5;
+  /// Where it opens: high enough for two rows of devices, with the app's
+  /// first room card still in sight above it.
+  static const double open = 0.8;
+
   static const double full = 0.94;
 
   /// [peekHeight] as a fraction of the room the sheet has.
@@ -97,7 +100,7 @@ abstract final class DevicesSheet {
 
   static List<double> snapsOf(BuildContext context) => [
     peekOf(context),
-    half,
+    open,
     full,
   ];
 }
@@ -137,12 +140,14 @@ void openDevicesPanel(BuildContext context) {
           value: panel,
           child: DraggableScrollableSheet(
             controller: drag,
+            // Inside a modal route the sheet sizes itself to the extent it
+            // is dragged to, rather than filling the window.
+            expand: false,
             snap: true,
             // The peek is a rest, not a dismissal: only the close button
             // or a tap above the sheet puts the devices away.
             shouldCloseOnMinExtent: false,
-            // It opens at half the window, which is this sheet's default
-            // size as well as its middle snap.
+            initialChildSize: DevicesSheet.open,
             minChildSize: snaps.first,
             maxChildSize: DevicesSheet.full,
             snapSizes: snaps,

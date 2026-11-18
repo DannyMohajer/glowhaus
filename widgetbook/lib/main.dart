@@ -544,16 +544,12 @@ final List<_Face> _faces = [
 
 Widget _faceStates(BuildContext context, _Face face) {
   final s = Samples.of(context);
-  // The phone's devices sheet: three columns of smaller cards, the same
-  // drawings scaled down, the plug an icon button in the corner.
-  final compact = context.knobs.boolean(label: 'Compact (phone sheet)');
   Widget card({required bool on, required bool online}) => GlowDeviceCard(
     name: face.label(s),
     status: online ? face.status(s, on: on) : s.offline,
     face: face.build(s, on: on, online: online),
     online: online,
     active: on && online,
-    compact: compact,
     plugLabel: online ? s.plugged : s.unplugged,
     plugSemanticLabel: '${face.label(s)}: ${online ? s.plugged : s.unplugged}',
     onPlug: () {},

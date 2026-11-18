@@ -90,6 +90,30 @@ extension on WidgetTester {
 }
 
 void main() {
+  testWidgets('opened at /demo, the sheet comes up high', (tester) async {
+    final demo = _demo();
+    await tester.runAsync(demo.connect);
+    addTearDown(() => tester.runAsync(demo.dispose));
+    await tester.pumpApp(
+      size: const Size(393, 852),
+      location: Routes.demo,
+      settings: buildSettings(saved: const SettingsState(reduceMotion: true)),
+      demo: DemoSetup(demo: demo, browser: _Browser()),
+      panelOpen: true,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(DevicesPanel), findsOneWidget);
+    final top = tester.getTopLeft(find.byType(DevicesPanel)).dy;
+    // Most of the window, with the app's first card still above it.
+    expect(top, greaterThan(0));
+    expect(top, lessThan(852 * 0.3));
+    expect(
+      tester.getSize(find.byType(DevicesPanel)).height,
+      greaterThan(852 * 0.7),
+    );
+  });
+
   testWidgets('the header is one row: handle, title, info and close', (
     tester,
   ) async {
@@ -110,33 +134,30 @@ void main() {
     expect(find.textContaining('Press a device like someone'), findsOneWidget);
   });
 
-  testWidgets('three columns of compact cards, under their room names', (
-    tester,
-  ) async {
+  testWidgets('two columns of cards, under their room names', (tester) async {
     final demo = await tester.openSheet();
     addTearDown(() => tester.runAsync(demo.dispose));
 
-    expect(find.byType(GlowDeviceCard), findsWidgets);
-    final card = tester.widget<GlowDeviceCard>(
-      find.byType(GlowDeviceCard).first,
-    );
-    expect(card.compact, isTrue);
-    // The faces are the same drawings, at the compact height.
+    expect(inSheet(find.byType(GlowDeviceCard)), findsWidgets);
+    expect(inSheet(find.byType(GlowFaceFrame)), findsNWidgets(13));
+    // The cards are the ones the side panel has: a full-size face and the
+    // plug as a bar along the bottom.
     expect(
       tester.getSize(inSheet(find.byType(GlowFaceFrame)).first).height,
-      glowFaceHeightCompact,
+      96,
     );
-    // The living room's four devices: three in a row, the fourth below.
-    final living = ['Ceiling light', 'Floor lamp', 'Curtain'];
-    final row = [
+    expect(find.text('Plugged in'), findsWidgets);
+    expect(find.bySemanticsLabel('Unplug Ceiling light'), findsOneWidget);
+
+    // The living room's four devices: two to a row.
+    final living = ['Ceiling light', 'Floor lamp', 'Curtain', 'Thermostat'];
+    final rows = [
       for (final name in living) tester.getCenter(inSheet(find.text(name))).dy,
     ];
-    expect(row.toSet(), hasLength(1), reason: 'one row of three');
+    expect(rows[0], rows[1], reason: 'first row');
+    expect(rows[2], rows[3], reason: 'second row');
+    expect(rows[2], greaterThan(rows[0]));
     expect(inSheet(find.text('Living Room')), findsOneWidget);
-    // The plug is a button in the corner, not a bar with a label.
-    expect(find.text('Plugged in'), findsNothing);
-    expect(inSheet(find.byType(GlowFaceFrame)), findsNWidgets(13));
-    expect(find.bySemanticsLabel('Unplug Ceiling light'), findsOneWidget);
   });
 
   testWidgets('the bottom line says what happened, and opens the log', (
@@ -169,20 +190,24 @@ void main() {
     addTearDown(() => tester.runAsync(demo.dispose));
 
     double top() => tester.getTopLeft(find.byType(DevicesPanel)).dy;
-    final half = top();
+    final open = top();
 
-    // Down to the peek: the header and the line at the bottom.
-    await tester.drag(find.byType(GlowDragHandle), const Offset(0, 300));
+    // Down to the peek: the header and the line at the bottom are left.
+    await tester.drag(find.byType(GlowDragHandle), const Offset(0, 400));
     await tester.pumpAndSettle();
-    expect(top(), greaterThan(half));
     final peek = top();
-    expect(find.text('Devices'), findsOneWidget);
+    expect(peek, greaterThan(open));
+    expect(find.text('Devices'), findsWidgets);
 
-    // Up to full.
-    await tester.drag(find.byType(GlowDragHandle), const Offset(0, -600));
+    // Back up: a flick takes it to the next rest, where it opened.
+    await tester.drag(find.byType(GlowDragHandle), const Offset(0, -400));
     await tester.pumpAndSettle();
-    expect(top(), lessThan(half));
-    expect(top(), lessThan(peek));
+    expect(top(), closeTo(open, 1));
+
+    // And once more, to full.
+    await tester.drag(find.byType(GlowDragHandle), const Offset(0, -400));
+    await tester.pumpAndSettle();
+    expect(top(), lessThan(open));
   });
 
   testWidgets('the app above makes room and follows what the devices do', (
@@ -232,10 +257,9 @@ void main() {
         expect(find.byType(DevicesPanel), findsOneWidget);
         expect(find.byType(GlowDeviceCard), findsWidgets);
         // The sheet leaves the app above it something to show.
-        expect(
-          tester.getTopLeft(find.byType(DevicesPanel)).dy,
-          greaterThan(size.height * 0.4),
-        );
+        final top = tester.getTopLeft(find.byType(DevicesPanel)).dy;
+        expect(top, greaterThan(0));
+        expect(top, lessThan(size.height * 0.3));
         expect(find.text('Glowhaus Demo'), findsOneWidget);
       });
     }

@@ -34,8 +34,8 @@ class DevicesPanel extends StatelessWidget {
   final String? footer;
 
   /// The phone sheet: a one-row sticky header with the description behind
-  /// an info button, three columns of small cards, and the last message in
-  /// plain words at the bottom.
+  /// an info button, two columns of cards, and the last message in plain
+  /// words at the bottom.
   final bool compact;
 
   /// The sheet's scroll controller, so dragging the devices drags the
@@ -177,14 +177,12 @@ class DevicesPanel extends StatelessWidget {
                 else
                   SliverPadding(
                     padding: const EdgeInsets.fromLTRB(
-                      GlowSpace.x3,
-                      GlowSpace.x2,
-                      GlowSpace.x3,
+                      GlowSpace.x4,
+                      0,
+                      GlowSpace.x4,
                       GlowSpace.x4,
                     ),
-                    sliver: SliverToBoxAdapter(
-                      child: _Rooms(state: state, compact: true),
-                    ),
+                    sliver: SliverToBoxAdapter(child: _Rooms(state: state)),
                   ),
               ],
             ),
@@ -506,12 +504,9 @@ class _Hint extends StatelessWidget {
 /// The devices, grouped by the room they are in: two columns in the side
 /// panel and on phones, three or four on a wide page.
 class _Rooms extends StatelessWidget {
-  const new({required this.state, this.compact = false});
+  const new({required this.state});
 
   final DevicesPanelState state;
-
-  /// The phone sheet: three columns of small cards whatever the width.
-  final bool compact;
 
   /// The demo's rooms, in the order the home lists them; devices with an
   /// unknown room come last, under no heading.
@@ -534,23 +529,21 @@ class _Rooms extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final columns = compact
-            ? 3
-            : width >= 1000
+        final columns = width >= 1000
             ? 4
             : width >= 720
             ? 3
             : 2;
-        final gap = compact ? GlowSpace.x2 : GlowSpace.x3;
+        const gap = GlowSpace.x3;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             for (final (room, devices) in _groups()) ...[
               if (room != null)
                 Padding(
-                  padding: EdgeInsets.fromLTRB(
+                  padding: const EdgeInsets.fromLTRB(
                     GlowSpace.x1,
-                    compact ? GlowSpace.x2 : GlowSpace.x3,
+                    GlowSpace.x3,
                     GlowSpace.x1,
                     GlowSpace.x2,
                   ),
@@ -566,18 +559,17 @@ class _Rooms extends StatelessWidget {
                 ),
               for (var start = 0; start < devices.length; start += columns)
                 Padding(
-                  padding: EdgeInsets.only(bottom: gap),
+                  padding: const EdgeInsets.only(bottom: gap),
                   child: IntrinsicHeight(
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         for (var column = 0; column < columns; column++) ...[
-                          if (column > 0) SizedBox(width: gap),
+                          if (column > 0) const SizedBox(width: gap),
                           Expanded(
                             child: start + column < devices.length
                                 ? _DeviceCard(
                                     device: devices[start + column],
-                                    compact: compact,
                                     publishes:
                                         state.publishes[devices[start + column]
                                             .id] ??
@@ -601,17 +593,10 @@ class _Rooms extends StatelessWidget {
 /// One device: its face, which presses the device's own hardware, and its
 /// plug, which takes it off the network and back.
 class _DeviceCard extends StatelessWidget {
-  const new({
-    required this.device,
-    required this.publishes,
-    this.compact = false,
-  });
+  const new({required this.device, required this.publishes});
 
   final Device device;
   final int publishes;
-
-  /// The small card of the phone sheet.
-  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -625,7 +610,6 @@ class _DeviceCard extends StatelessWidget {
       face: _face(context, device: device, name: name, online: online),
       online: online,
       active: device.isActive,
-      compact: compact,
       publishTick: publishes,
       plugLabel: online ? l10n.panelPlugged : l10n.panelUnplugged,
       plugSemanticLabel: online
